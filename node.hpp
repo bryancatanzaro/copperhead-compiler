@@ -6,7 +6,6 @@
 namespace backend
 {
 
-class literal;
 class number;
 class name;
 class apply;
@@ -23,7 +22,6 @@ namespace detail
 {
 
 typedef boost::variant<
-    literal &,
     number &,
     name &,
     apply &,
