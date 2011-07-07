@@ -1,6 +1,7 @@
 #include <iostream>
 #include "../backend.hpp"
 #include "repr_printer.hpp"
+#include "type_printer.hpp"
 #include <boost/variant.hpp>
 
 using namespace backend;
@@ -38,5 +39,9 @@ int main() {
     shared_ptr<procedure> xpy(new procedure(xpy_id, xy, vector<shared_ptr<statement>>{map_ret}));
     repr_printer rp(std::cout);
     rp(*xpy);
+    std::cout << std::endl;
+    shared_ptr<type_t> seq_int32(new sequence_t(int32_mt));
+    repr_type_printer tp(std::cout);
+    boost::apply_visitor(tp, *seq_int32);
     std::cout << std::endl;
 }

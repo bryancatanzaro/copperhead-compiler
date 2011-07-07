@@ -8,18 +8,11 @@ namespace backend {
 class monotype_t;
 class polytype_t;
 
-class sequence_t;
-class tuple_t;
-class fn_t;
-
 
 namespace detail {
 typedef boost::variant<
     monotype_t &,
-    polytype_t &,
-    sequence_t &,
-    tuple_t &,
-    fn_t &
+    polytype_t &
     > type_base;
 
 struct make_type_base_visitor
@@ -45,7 +38,7 @@ type_base make_type_base(void *ptr, const type_base &other) {
 class type_t
     : public detail::type_base
 {
-protected:
+public:
     typedef detail::type_base super_t;
     template<typename Derived>
     type_t(Derived &self)

@@ -16,13 +16,19 @@ class expression
     : public node
 {
 protected:
-    monotype_t m_type;
+    std::shared_ptr<type_t> m_type;
 
     template<typename Derived>
     expression(Derived &self)
-        : node(self), m_type(monotype_t("void"))
+        : node(self), m_type(void_mt)
         {}
-  
+public:
+    const type_t& type(void) const {
+        return *m_type;
+    }
+    void set_type(const std::shared_ptr<type_t>& in) {
+        m_type = in;
+    }
 };
 
 class literal
