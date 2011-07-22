@@ -2,6 +2,9 @@
 
 #include <boost/variant.hpp>
 #include <functional>
+#include <vector>
+#include <memory>
+#include <boost/iterator/indirect_iterator.hpp>
 
 namespace backend
 {
@@ -16,7 +19,8 @@ class tuple;
 class ret;
 class bind;
 class procedure;
-
+class suite;
+class statement;
 
 namespace detail
 {
@@ -31,7 +35,8 @@ typedef boost::variant<
     tuple &,
     ret &,
     bind &,
-    procedure &
+    procedure &,
+    suite &
     > node_base;
 
 struct make_node_base_visitor
@@ -74,4 +79,23 @@ protected:
 
 };
 
+template<typename ResultType = void>
+struct no_op_visitor
+    : boost::static_visitor<ResultType>
+{
+    inline ResultType operator()(const node &) const {
+        return ResultType();
+    }
+};
+
+template<>
+struct no_op_visitor<void>
+    : boost::static_visitor<>
+{
+    inline void operator()(const node &) const {}
+};
+
 }
+
+
+    

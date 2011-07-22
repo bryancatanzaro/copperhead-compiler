@@ -4,12 +4,15 @@ namespace backend
 {
 
 class repr_printer
-    : public boost::static_visitor<>
+    : public no_op_visitor<>
 {
 public:
     inline repr_printer(std::ostream &os)
         : m_os(os)
         {}
+
+    // XXX why do we have to use 'using' to make the base class's overloads visible?
+    using backend::no_op_visitor<>::operator();
 
     inline void operator()(const name &n) {
         name("Name", n.id());
@@ -41,16 +44,11 @@ public:
         boost::apply_visitor(*this, n.body());
         m_os << ")";
     }
-    inline void operator()(const closure &n) {
-    }
-    inline void operator()(const conditional &n) {
-    }
+   
     inline void operator()(const ret &n) {
         m_os << "Return(";
         boost::apply_visitor(*this, n.val());
         m_os << ")";
-    }
-    inline void operator()(const bind &n) {
     }
     inline void operator()(const procedure &n) {
         m_os << "Procedure(";
@@ -58,9 +56,14 @@ public:
         sep();
         (*this)(n.args());
         sep();
-        list(n);
+        (*this)(n.stmts());
         m_os << ")";
         
+    }
+    inline void operator()(const suite &n) {
+        m_os << "Suite(";
+        list(n);
+        m_os << ")";
     }
     inline void operator()(const std::string &s) {
         m_os << s;

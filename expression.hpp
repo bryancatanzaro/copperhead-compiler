@@ -133,6 +133,24 @@ public:
     }
 };
 
+class closure
+    : public expression
+{
+public:
+    closure()
+        : expression(*this)
+        {}
+};
+
+class conditional
+    : public expression
+{
+public:
+    conditional()
+        : expression(*this)
+        {}
+};
+
 }
     
 

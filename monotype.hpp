@@ -7,8 +7,9 @@ class monotype_t :
     public type_t
 {
 private:
-    std::vector<std::shared_ptr<type_t> > m_params;
     const std::string m_name;
+    std::vector<std::shared_ptr<type_t> > m_params;
+   
 public:
     monotype_t(const std::string &name)
         : type_t(*this),

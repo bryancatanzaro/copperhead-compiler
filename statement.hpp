@@ -60,17 +60,16 @@ class procedure
 public:
     procedure(const std::shared_ptr<name> &id,
               const std::shared_ptr<tuple> &args,
-         std::vector<std::shared_ptr<statement> > &&stmts)
+              const std::shared_ptr<suite> &stmts)
         : statement(*this),
-          m_id(id), m_args(args), m_stmts(std::move(stmts))
+          m_id(id), m_args(args), m_stmts(stmts)
         {}
 private:
     const std::shared_ptr<name> m_id;
     const std::shared_ptr<tuple> m_args;
-    std::vector<std::shared_ptr<statement> > m_stmts;
+    const std::shared_ptr<suite> m_stmts;
 
 public:
-    typedef decltype(boost::make_indirect_iterator(m_stmts.cbegin())) const_iterator;
     inline const name& id(void) const {
         return *m_id;
     }
@@ -78,14 +77,34 @@ public:
     inline const tuple& args(void) const {
         return *m_args;
     }
+
+    inline const suite& stmts(void) const {
+        return *m_stmts;
+    }
     
+};
+
+class suite 
+    : public node
+{
+public:
+    suite(std::vector<std::shared_ptr<statement> > &&stmts)
+        : node(*this),
+          m_stmts(std::move(stmts))
+        {}
+private:
+    std::vector<std::shared_ptr<statement> > m_stmts;
+public:
+    typedef decltype(boost::make_indirect_iterator(m_stmts.cbegin())) const_iterator;
     const_iterator begin() const {
         return boost::make_indirect_iterator(m_stmts.cbegin());
     }
+
     const_iterator end() const {
         return boost::make_indirect_iterator(m_stmts.cend());
     }
-
 };
 
+
 }
+
