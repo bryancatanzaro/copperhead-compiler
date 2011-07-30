@@ -1,0 +1,7 @@
+import os
+
+env = Environment(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I..")
+
+for x in Glob("*.cpp"):
+    basename, extension = os.path.splitext(str(x))
+    env.SharedLibrary(target=basename, source=x, LIBS=['boost_python'], SHLIBPREFIX='')

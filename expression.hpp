@@ -50,7 +50,7 @@ public:
         : literal(*this),
           m_val(val)
         {}
-    inline const std::string value() const {
+    inline const std::string val() const {
         return m_val;
     }
 private:

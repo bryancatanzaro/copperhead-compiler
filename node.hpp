@@ -21,6 +21,13 @@ class bind;
 class procedure;
 class suite;
 class statement;
+class structure;
+
+class node;
+class statement;
+class expression;
+class literal;
+class cppnode;
 
 namespace detail
 {
@@ -36,7 +43,8 @@ typedef boost::variant<
     ret &,
     bind &,
     procedure &,
-    suite &
+    suite &,
+    structure &
     > node_base;
 
 struct make_node_base_visitor

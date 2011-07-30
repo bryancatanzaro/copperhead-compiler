@@ -3,11 +3,14 @@
 #include "repr_printer.hpp"
 #include "type_printer.hpp"
 #include "py_printer.hpp"
+#include "functorize.hpp"
 #include <boost/variant.hpp>
 
 using namespace backend;
 using std::shared_ptr;
 using std::vector;
+
+
 int main() {
    
     shared_ptr<name> xpy_id(new name("xpy"));
@@ -40,4 +43,8 @@ int main() {
     //std::cout << std::endl;
     py_printer pp(std::cout);
     pp(*source);
+
+    functorize functorizer;
+    shared_ptr<suite> functorized = std::static_pointer_cast<suite>(functorizer(*source));
+    pp(*functorized);
 }
