@@ -80,6 +80,9 @@ public:
         : expression(*this),
           m_values(std::move(values))
         {}
+    tuple()
+        : expression(*this)
+    {}
 private:
     std::vector<std::shared_ptr<expression> > m_values;
 public:
