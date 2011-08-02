@@ -1,7 +1,17 @@
 import os
 
-env = Environment(CCFLAGS = "-g -std=c++0x -Wall -I/usr/include/python2.7 -I.. -I/Users/catanzar/boost_1_47_0")
+env = Environment()
+platform = env['PLATFORM']
+
+if platform == 'darwin':
+    env.Append(CCFLAGS = "-g -std=c++0x -Wall -I/usr/include/python2.7 -I.. -I/Users/catanzar/boost_1_47_0")
+else:
+    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I..")
 
 for x in Glob("*.cpp"):
     basename, extension = os.path.splitext(str(x))
-    env.SharedLibrary(target=basename, source=x, LIBPATH=['/Users/catanzar/boost_1_47_0/stage/lib'], LIBS=['boost_python'], SHLIBPREFIX='', SHLIBSUFFIX='.so', LINKFLAGS='-F/System/Library/Frameworks/ -framework Python')
+    if platform == 'darwin':
+        env.SharedLibrary(target=basename, source=x, LIBPATH=['/Users/catanzar/boost_1_47_0/stage/lib'], LIBS=['boost_python'], SHLIBPREFIX='', SHLIBSUFFIX='.so', LINKFLAGS='-F/System/Library/Frameworks/ -framework Python')
+    else:
+        env.SharedLibrary(target=basename, source=x, LIBS=['boost_python'], SHLIBPREFIX='')
+    

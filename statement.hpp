@@ -92,6 +92,9 @@ public:
         : node(*this),
           m_stmts(std::move(stmts))
         {}
+    suite()
+        : node(*this)
+    {}
 private:
     std::vector<std::shared_ptr<statement> > m_stmts;
 public:
