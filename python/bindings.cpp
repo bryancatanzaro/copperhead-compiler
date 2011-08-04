@@ -121,8 +121,12 @@ BOOST_PYTHON_MODULE(bindings) {
         .def("__iter__", range(&suite_wrap::p_begin, &suite_wrap::p_end))
         .def("__str__", &backend::str<backend::suite_wrap>)
         .def("__repr__", &backend::repr<backend::suite_wrap>);
-        
-
+    class_<structure_wrap, std::shared_ptr<structure_wrap>, bases<statement, node> >("Structure", init<std::shared_ptr<name>, std::shared_ptr<suite> >())
+        .def("id", &structure_wrap::p_id)
+        .def("stmts", &structure_wrap::p_stmts)
+        .def("__str__", &backend::str<structure_wrap>)
+        .def("__repr__", &backend::repr<structure_wrap>);
+    
     implicitly_convertible<std::shared_ptr<backend::expression>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::literal>, std::shared_ptr<backend::expression> >();
     implicitly_convertible<std::shared_ptr<backend::name>, std::shared_ptr<backend::node> >();
@@ -165,4 +169,9 @@ BOOST_PYTHON_MODULE(bindings) {
     implicitly_convertible<std::shared_ptr<backend::suite>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::suite_wrap>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::suite_wrap>, std::shared_ptr<backend::suite> >();
+    implicitly_convertible<std::shared_ptr<backend::structure>, std::shared_ptr<backend::node> >();
+    implicitly_convertible<std::shared_ptr<backend::structure>, std::shared_ptr<backend::statement> >();
+    implicitly_convertible<std::shared_ptr<backend::structure_wrap>, std::shared_ptr<backend::node> >();
+    implicitly_convertible<std::shared_ptr<backend::structure_wrap>, std::shared_ptr<backend::statement> >();
+    implicitly_convertible<std::shared_ptr<backend::structure_wrap>, std::shared_ptr<backend::structure> >();
 }

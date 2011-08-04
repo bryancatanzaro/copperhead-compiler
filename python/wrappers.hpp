@@ -1,6 +1,7 @@
 #pragma once
 #include "expression.hpp"
 #include "statement.hpp"
+#include "cppnode.hpp"
 
 namespace backend {
 class apply_wrap
@@ -40,7 +41,7 @@ class tuple_wrap
 {
 public:
     tuple_wrap(std::vector<std::shared_ptr<expression> > &&values)
-        : backend::tuple(std::forward<std::vector<std::shared_ptr<expression> > >(values))
+        : backend::tuple(values)
     {}
     tuple_wrap()
         : tuple({})
@@ -107,7 +108,7 @@ class suite_wrap
 {
 public:
     suite_wrap(std::vector<std::shared_ptr<statement> > &&stmts)
-        : suite(std::forward<std::vector<std::shared_ptr<statement> > >(stmts))
+        : suite(stmts)
     {}
     suite_wrap()
         : suite({})
@@ -120,6 +121,25 @@ public:
     const_ptr_iterator p_end() const {
         return m_stmts.cend();
     }
+};
+
+class structure_wrap
+    : public structure
+{
+public:
+    structure_wrap(const std::shared_ptr<name> &name,
+                   const std::shared_ptr<suite> &stmts)
+        : structure(name, stmts)
+    {}
+
+    inline const std::shared_ptr<name> p_id(void) const {
+        return m_id;
+    }
+
+    inline const std::shared_ptr<suite> p_stmts(void) const {
+        return m_stmts;
+    }
+
 };
 
 }
