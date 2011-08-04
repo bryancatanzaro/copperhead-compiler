@@ -159,6 +159,9 @@ BOOST_PYTHON_MODULE(bindings) {
     implicitly_convertible<std::shared_ptr<backend::bind_wrap>, std::shared_ptr<backend::bind> >();
     implicitly_convertible<std::shared_ptr<backend::procedure>, std::shared_ptr<backend::statement> >();
     implicitly_convertible<std::shared_ptr<backend::procedure>, std::shared_ptr<backend::node> >();
+    implicitly_convertible<std::shared_ptr<backend::procedure_wrap>, std::shared_ptr<backend::statement> >();
+    implicitly_convertible<std::shared_ptr<backend::procedure_wrap>, std::shared_ptr<backend::node> >();
+    implicitly_convertible<std::shared_ptr<backend::procedure_wrap>, std::shared_ptr<backend::procedure> >();
     implicitly_convertible<std::shared_ptr<backend::suite>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::suite_wrap>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::suite_wrap>, std::shared_ptr<backend::suite> >();

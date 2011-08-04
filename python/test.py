@@ -18,3 +18,13 @@ print(str(e))
 print("Iterating")
 for x in e:
     print x
+
+args = Tuple([Name('xi'), Name('yi')])
+body = Suite([Return(Apply(Name('op_add'), Tuple([Name('xi'), Name('yi')])))])
+inner = Procedure(Name('inner'), args, body)
+
+args = Tuple([Name('x'), Name('y')])
+body = Suite([inner, Return(Apply(Name('map'), Tuple([Name('inner'), Name('x'), Name('y')])))])
+outer = Procedure(Name('outer'), args, body)
+
+print(outer)
