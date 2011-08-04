@@ -53,7 +53,7 @@ public:
     inline const std::string val() const {
         return m_val;
     }
-private:
+protected:
     std::string m_val;
 };
 
@@ -68,7 +68,7 @@ public:
     inline const std::string id() const {
         return m_val;
     }
-private:
+protected:
     std::string m_val;
 };
 
@@ -80,10 +80,7 @@ public:
         : expression(*this),
           m_values(std::move(values))
         {}
-    tuple()
-        : expression(*this)
-    {}
-private:
+protected:
     std::vector<std::shared_ptr<expression> > m_values;
 public:
     typedef decltype(boost::make_indirect_iterator(m_values.cbegin())) const_iterator;
@@ -99,7 +96,7 @@ public:
 class apply
     : public expression
 {
-private:
+protected:
     std::shared_ptr<name> m_fn;
     std::shared_ptr<tuple> m_args;
 public:
@@ -119,7 +116,7 @@ public:
 class lambda
     : public expression
 {
-private:
+protected:
     std::shared_ptr<tuple> m_args;
     std::shared_ptr<expression> m_body;
 public:

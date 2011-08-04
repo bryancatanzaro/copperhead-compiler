@@ -10,7 +10,7 @@ namespace backend {
 class structure
     : public statement
 {
-private:
+protected:
     std::shared_ptr<name> m_id;
     std::shared_ptr<suite> m_stmts;
 public:

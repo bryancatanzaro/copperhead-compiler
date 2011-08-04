@@ -20,16 +20,19 @@ class ret
     : public statement
 {
 public:
-    ret(const std::shared_ptr<expression> & val)
+    ret(const std::shared_ptr<expression> &val)
         : statement(*this),
           m_val(val)
-        {}
-private:
+    {}
+protected:
     const std::shared_ptr<expression> m_val;
 public:
     inline const expression& val(void) const {
         return *m_val;
     }
+    // inline std::shared_ptr<expression> p_val(void) const {
+    //     return m_val;
+    // }
 };
 
 class bind
@@ -41,7 +44,7 @@ public:
         : statement(*this),
           m_lhs(lhs), m_rhs(rhs)
         {}
-private:
+protected:
     const std::shared_ptr<expression> m_lhs;
     const std::shared_ptr<expression> m_rhs;
 
@@ -64,7 +67,7 @@ public:
         : statement(*this),
           m_id(id), m_args(args), m_stmts(stmts)
         {}
-private:
+protected:
     const std::shared_ptr<name> m_id;
     const std::shared_ptr<tuple> m_args;
     const std::shared_ptr<suite> m_stmts;
@@ -92,10 +95,7 @@ public:
         : node(*this),
           m_stmts(std::move(stmts))
         {}
-    suite()
-        : node(*this)
-    {}
-private:
+protected:
     std::vector<std::shared_ptr<statement> > m_stmts;
 public:
     typedef decltype(boost::make_indirect_iterator(m_stmts.cbegin())) const_iterator;
