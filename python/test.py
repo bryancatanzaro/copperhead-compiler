@@ -28,3 +28,7 @@ body = Suite([inner, Return(Apply(Name('map'), Tuple([Name('inner'), Name('x'), 
 outer = Procedure(Name('outer'), args, body)
 
 print(outer)
+
+functorized = functorize_pass(Suite([inner]))
+print(functorized)
+print(dir(functorized.__class__))

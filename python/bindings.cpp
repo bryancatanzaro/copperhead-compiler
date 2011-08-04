@@ -10,6 +10,7 @@
 #include "expression.hpp"
 #include "py_printer.hpp"
 #include "repr_printer.hpp"
+#include "functorize.hpp"
 
 #include <sstream>
 #include <iostream>
@@ -44,11 +45,9 @@ const std::string repr(std::shared_ptr<T> &p) {
 using namespace boost::python;
 using namespace backend;
 
-void test(std::shared_ptr<backend::node> in) {
-    std::ostringstream os;
-    repr_printer rp(os);
-    boost::apply_visitor(rp, *in);
-    std::cout << os.str() << std::endl;
+const std::shared_ptr<suite_wrap> functorize_pass(std::shared_ptr<suite_wrap> in) {
+    functorize fnize;
+    return std::static_pointer_cast<suite_wrap>(fnize(*in));
 }
 
 template<typename S, typename T>
@@ -64,6 +63,10 @@ static std::shared_ptr<T> make_from_list(list vals) {
     return result;
 }
 
+
+const long use_count(std::shared_ptr<node> &in) {
+    return in.use_count;
+}
 
 BOOST_PYTHON_MODULE(bindings) {
     class_<node, std::shared_ptr<node>, boost::noncopyable>("Node", no_init)
@@ -126,7 +129,8 @@ BOOST_PYTHON_MODULE(bindings) {
         .def("stmts", &structure_wrap::p_stmts)
         .def("__str__", &backend::str<structure_wrap>)
         .def("__repr__", &backend::repr<structure_wrap>);
-    
+    def("functorize_pass", functorize_pass);
+    def("use_count", use_count);
     implicitly_convertible<std::shared_ptr<backend::expression>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::literal>, std::shared_ptr<backend::expression> >();
     implicitly_convertible<std::shared_ptr<backend::name>, std::shared_ptr<backend::node> >();
