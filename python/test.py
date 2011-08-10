@@ -31,4 +31,3 @@ print(outer)
 
 functorized = functorize_pass(Suite([inner]))
 print(functorized)
-print(dir(functorized.__class__))

@@ -64,8 +64,8 @@ static std::shared_ptr<T> make_from_list(list vals) {
 }
 
 
-const long use_count(std::shared_ptr<node> &in) {
-    return in.use_count;
+const long use_count(std::shared_ptr<node> in) {
+    return in.use_count();
 }
 
 BOOST_PYTHON_MODULE(bindings) {
