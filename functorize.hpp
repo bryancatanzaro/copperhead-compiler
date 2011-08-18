@@ -11,7 +11,6 @@ class functorize
     : public copier
 {
 private:
-    //typedef std::shared_ptr<node> result_type;
     std::vector<result_type> m_additionals;
     std::set<std::string> m_fns;
 public:

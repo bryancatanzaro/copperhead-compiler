@@ -1,101 +1,101 @@
 #pragma once
 template<typename a>
-__host__ __device__ a op_add(a l, a r) {
+__host__ __device__ a op_add(const a &l, const a &r) {
     return l + r;
 }
 
 template<typename a>
-__host__ __device__ a op_sub(a l, a r) {
+__host__ __device__ a op_sub(const a &l, const a &r) {
     return l - r;
 }
 
 template<typename a>
-__host__ __device__ a op_mul(a l, a r) {
+__host__ __device__ a op_mul(const a &l, const a &r) {
     return l * r;
 }
 
 template<typename a>
-__host__ __device__ a op_div(a l, a r) {
+__host__ __device__ a op_div(const a &l, const a &r) {
     return l / r;
 }
 
 template<typename a>
-__host__ __device__ a op_mod(a l, a r) {
+__host__ __device__ a op_mod(const a &l, const a &r) {
     return l % r;
 }
 
 
 template<typename a>
-__host__ __device__ a op_lshift(a l, a r) {
+__host__ __device__ a op_lshift(const a &l, const a &r) {
     return l << r;
 }
 
 template<typename a>
-__host__ __device__ a op_rshift(a l, a r) {
+__host__ __device__ a op_rshift(const a &l, const a &r) {
     return l >> r;
 }
 
 template<typename a>
-__host__ __device__ a op_or(a l, a r) {
+__host__ __device__ a op_or(const a &l, const a &r) {
     return l | r;
 }
 
 template<typename a>
-__host__ __device__ a op_xor(a l, a r) {
+__host__ __device__ a op_xor(const a &l, const a &r) {
     return l ^ r;
 }
 
 template<typename a>
-__host__ __device__ a op_and(a l, a r) {
+__host__ __device__ a op_and(const a &l, const a &r) {
     return l & r;
 }
 
 template<typename a>
-__host__ __device__ bool cmp_eq(a l, a r) {
+__host__ __device__ bool cmp_eq(const a &l, const a &r) {
     return l == r;
 }
 
 template<typename a>
-__host__ __device__ bool cmp_ne(a l, a r) {
+__host__ __device__ bool cmp_ne(const a &l, const a &r) {
     return l != r;
 }
 
 template<typename a>
-__host__ __device__ bool cmp_lt(a l, a r) {
+__host__ __device__ bool cmp_lt(const a &l, const a &r) {
     return l < r;
 }
 
 template<typename a>
-__host__ __device__ bool cmp_le(a l, a r) {
+__host__ __device__ bool cmp_le(const a &l, const a &r) {
     return l <= r;
 }
 
 template<typename a>
-__host__ __device__ bool cmp_gt(a l, a r) {
+__host__ __device__ bool cmp_gt(const a &l, const a &r) {
     return l > r;
 }
 
 template<typename a>
-__host__ __device__ bool cmp_ge(a l, a r) {
+__host__ __device__ bool cmp_ge(const a &l, const a &r) {
     return l >= r;
 }
 
 template<typename a>
-__host__ __device__ a op_invert(a i) {
+__host__ __device__ a op_invert(const a &i) {
     return ~i;
 }
 
 template<typename a>
-__host__ __device__ a op_pos(a i) {
+__host__ __device__ a op_pos(const a &i) {
     return +i;
 }
 
 template<typename a>
-__host__ __device__ a op_neg(a i) {
+__host__ __device__ a op_neg(const a &i) {
     return -i;
 }
 
 template<typename a>
-__host__ __device__ a op_not(a i) {
+__host__ __device__ a op_not(const a &i) {
     return !i;
 }
