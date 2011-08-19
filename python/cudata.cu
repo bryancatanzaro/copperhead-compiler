@@ -13,43 +13,68 @@
 #include <stdexcept>
 #include <string>
 #include <sstream>
-// template<typename T>
-// static boost::shared_ptr<stored_sequence<T> > make_stored_sequence_l(const list& vals) {
-//     boost::python::ssize_t n = len(vals);
-//     T* data_store = (T*)malloc(sizeof(T) * n);
-    
-//     for(boost::python::ssize_t i=0; i<n; i++) {
-//         object elem = vals[i];
-//         data_store[i] = extract<T>(elem);
-//     }
-//     T* cuda_store;
-//     cudaMalloc(&T, sizeof(T) * n);
-//     cudaMemcpy(cuda_store, data_store, sizeof(T) * n, cudaMemcpyDeviceToHost);
-//     return boost::shared_ptr<stored_sequence<T> >(new stored_sequence<T>(cuda_store, n));
-// }
 
 
 template<typename T>
-struct cuarray {
-    ssize_t m_n;
-    T* m_h;
+class cuarray {
+    stored_sequence<T> m_h;
     stored_sequence<T> m_d;
-    cuarray() : m_n(0), m_h(NULL), m_d(NULL, 0) {
+    bool clean_local;
+    bool clean_remote;
+public:
+    cuarray() : m_h(NULL, 0), m_d(NULL, 0),
+                clean_local(true), clean_remote(true) {
     }
-        
-    cuarray(ssize_t n, T* h) : m_n(n) {
-        m_h = new T[m_n];
-        memcpy(m_h, h, sizeof(T) * n);
+    cuarray(ssize_t n) : clean_local(true), clean_remote(true) {
+        T* h = new T[n];
+        m_h = stored_sequence<T>(h, n);
         T* d;
         cudaMalloc(&d, sizeof(T) * n);
-        cudaMemcpy(d, m_h, sizeof(T) * n, cudaMemcpyHostToDevice);
-        m_d=stored_sequence<T>(d, n);
+        m_d = stored_sequence<T>(d, n);
+    }
+    cuarray(ssize_t n, T* h_s) : clean_local(true), clean_remote(false) {
+        T* h = new T[n];
+        memcpy(h, h_s, sizeof(T) * n);
+        m_h = stored_sequence<T>(h, n);
+        T* d;
+        cudaMalloc(&d, sizeof(T) * n);
+        m_d = stored_sequence<T>(d, n);
     }
     ~cuarray() {
-        if (m_h != NULL)
-            delete[] m_h;
+        if (m_h.data != NULL)
+            delete[] m_h.data;
         if (m_d.data != NULL)
             cudaFree(m_d.data);
+    }
+    void retrieve() {
+        if (!clean_local) {
+            cudaMemcpy(m_h.data, m_d.data, sizeof(T) * m_h.size(), cudaMemcpyDeviceToHost);
+            clean_local = true;
+        }
+    }
+    void exile() {
+        if (!clean_remote) {
+            cudaMemcpy(m_d.data, m_h.data, sizeof(T) * m_h.size(), cudaMemcpyHostToDevice);
+            clean_remote = true;
+        }
+    }
+    const stored_sequence<T> get_remote_r() {
+        exile();
+        return m_d;
+    }
+    stored_sequence<T> get_remote_w() {
+        exile();
+        clean_local = false;
+        return m_d;
+    }
+    const stored_sequence<T> get_local_r() {
+        retrieve();
+        return m_h;
+    }
+    stored_sequence<T> get_local_w() {
+        retrieve();
+        clean_remote = false;
+        return m_d;
     }
 };
 
@@ -60,9 +85,15 @@ typedef boost::variant<boost::shared_ptr<cuarray<bool> >, boost::shared_ptr<cuar
 
 
 boost::shared_ptr<cuarray_var> make_cuarray(PyObject* in) {
+    if (!(PyArray_Check(in))) {
+        throw std::invalid_argument("Input was not a numpy array");
+    }
     NPY_TYPES dtype = NPY_TYPES(PyArray_TYPE(in));
     
     PyArrayObject *vecin = (PyArrayObject*)PyArray_ContiguousFromObject(in, dtype, 1, 1);
+    if (vecin == NULL) {
+        throw std::invalid_argument("Can't create CuArray from this object");
+    }
     ssize_t n = vecin->dimensions[0];
     void* d = vecin->data;
     switch (dtype) {
@@ -83,29 +114,17 @@ boost::shared_ptr<cuarray_var> make_cuarray(PyObject* in) {
 
 struct repr_cuarray_printer :
     public boost::static_visitor<std::string> {
-    std::string operator()(const boost::shared_ptr<cuarray<bool> >& in) {
+    template<typename T>
+    std::string operator()(const boost::shared_ptr<cuarray<T> >& in) {
         std::ostringstream os;
-        os << "cuarray<bool>, length: " << in->m_n << ", host: " << in->m_h << ", device: " << in->m_d.data;
-        return os.str();
-    }
-    std::string operator()(const boost::shared_ptr<cuarray<int> >& in) {
-        std::ostringstream os;
-        os << "cuarray<int>, length: " << in->m_n << ", host: " << in->m_h << ", device: " << in->m_d.data;
-        return os.str();
-    }
-    std::string operator()(const boost::shared_ptr<cuarray<long> >& in) {
-        std::ostringstream os;
-        os << "cuarray<long>, length: " << in->m_n << ", host: " << in->m_h << ", device: " << in->m_d.data;
-        return os.str();
-    }
-    std::string operator()(const boost::shared_ptr<cuarray<float> >& in) {
-        std::ostringstream os;
-        os << "cuarray<float>, length: " << in->m_n << ", host: " << in->m_h << ", device: " << in->m_d.data;
-        return os.str();
-    }
-    std::string operator()(const boost::shared_ptr<cuarray<double> >& in) {
-        std::ostringstream os;
-        os << "cuarray<double>, length: " << in->m_n << ", host: " << in->m_h << ", device: " << in->m_d.data;
+        os << "cuarray<" << np_type<T>::name << ">(";
+        stored_sequence<T> m_h = in->get_local_r();
+        for(int i = 0; i < m_h.size(); i++) {
+            os << m_h[i];
+            if (i != (m_h.size() - 1))
+                os << ", ";
+        }
+        os << ")";
         return os.str();
     }
 };
@@ -117,14 +136,14 @@ std::string repr_cuarray(const boost::shared_ptr<cuarray_var> &in) {
 
 __global__ void test_kernel(stored_sequence<float> a) {
     if (threadIdx.x == 0) {
-        a[1] = 2.78;
+        a[1] = a[1] + 2.78;
     } else if (threadIdx.x == 1) {
-        a[0] = 3.14;
+        a[0] = a[0] + 3.14;
     }
 }
 
 void test(const boost::shared_ptr<cuarray_var>& in) {
-    stored_sequence<float> seq = boost::get<boost::shared_ptr<cuarray<float> > >(*in)->m_d;
+    stored_sequence<float> seq = boost::get<boost::shared_ptr<cuarray<float> > >(*in)->get_remote_w();
     test_kernel<<<1, 2>>>(seq);
 }
 
