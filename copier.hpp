@@ -27,7 +27,7 @@ public:
             auto n_i = std::static_pointer_cast<expression>(boost::apply_visitor(*this, *i));
             n_values.push_back(n_i);
         }
-        return result_type(new tuple(n_values));
+        return result_type(new tuple(std::move(n_values)));
     }
     virtual result_type operator()(const apply &n) {
         auto n_fn = std::static_pointer_cast<name>((*this)(n.fn()));
@@ -66,7 +66,7 @@ public:
             auto n_stmt = std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i));
             n_stmts.push_back(n_stmt);
         }
-        return result_type(new suite(n_stmts));
+        return result_type(new suite(std::move(n_stmts)));
     }
     virtual result_type operator()(const structure &n) {
         auto n_id = std::static_pointer_cast<name>((*this)(n.id()));

@@ -19,7 +19,7 @@ public:
           current_indent("")
         {}
 // XXX why do we have to use 'using' to make the base class's overloads visible?
-    using backend::no_op_visitor<>::operator();
+    //using backend::no_op_visitor<>::operator();
 
     inline void operator()(const name &n) {
         m_os << n.id();

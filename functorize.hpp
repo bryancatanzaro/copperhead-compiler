@@ -39,7 +39,7 @@ public:
             }
         }
         auto n_fn = std::static_pointer_cast<name>(this->copier::operator()(n.fn()));
-        auto new_args = std::shared_ptr<tuple>(new tuple(n_arg_list));
+        auto new_args = std::shared_ptr<tuple>(new tuple(std::move(n_arg_list)));
         return std::shared_ptr<apply>(new apply(n_fn, new_args));
     }
     
@@ -63,7 +63,7 @@ public:
         std::shared_ptr<apply> op_call(new apply(forward_name, forward_args));
         std::shared_ptr<ret> op_ret(new ret(op_call));
         std::vector<std::shared_ptr<statement> > op_body_stmts{op_ret};
-        std::shared_ptr<suite> op_body(new suite(op_body_stmts));
+        std::shared_ptr<suite> op_body(new suite(std::move(op_body_stmts)));
         auto op_args = std::static_pointer_cast<tuple>(this->copier::operator()(n.args()));
         std::shared_ptr<name> op_id(new name(std::string("operator()")));
         std::shared_ptr<procedure> op(new procedure(op_id, op_args, op_body));
