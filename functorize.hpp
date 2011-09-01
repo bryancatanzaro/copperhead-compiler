@@ -7,16 +7,22 @@
 
 namespace backend {
 
+
+/*! \p A compiler pass to create function objects for all procedures
+ *  except the entry point.
+ */
 class functorize
     : public copier
 {
 private:
+    const std::string& m_entry_point;
     std::vector<result_type> m_additionals;
     std::set<std::string> m_fns;
 public:
-    functorize() : m_additionals({}) {}
+    /*! \param entry_point The name of the entry point procedure */
+    functorize(const std::string& entry_point)
+        : m_entry_point(entry_point), m_additionals({}) {}
 public:
-    // XXX why do we have to use 'using' to make the base class's overloads visible?
     using copier::operator();
 
     result_type operator()(const apply &n) {
@@ -58,20 +64,22 @@ public:
     }
     result_type operator()(const procedure &n) {
         auto n_proc = std::static_pointer_cast<procedure>(this->copier::operator()(n));
-        std::shared_ptr<tuple> forward_args = std::static_pointer_cast<tuple>(this->copier::operator()(n_proc->args()));
-        std::shared_ptr<name> forward_name = std::static_pointer_cast<name>(this->copier::operator()(n_proc->id()));
-        std::shared_ptr<apply> op_call(new apply(forward_name, forward_args));
-        std::shared_ptr<ret> op_ret(new ret(op_call));
-        std::vector<std::shared_ptr<statement> > op_body_stmts{op_ret};
-        std::shared_ptr<suite> op_body(new suite(std::move(op_body_stmts)));
-        auto op_args = std::static_pointer_cast<tuple>(this->copier::operator()(n.args()));
-        std::shared_ptr<name> op_id(new name(std::string("operator()")));
-        std::shared_ptr<procedure> op(new procedure(op_id, op_args, op_body));
-        std::shared_ptr<suite> st_body(new suite(std::vector<std::shared_ptr<statement> >{op}));
-        std::shared_ptr<name> st_id(new name(std::string(n_proc->id().id() + "_fn")));
-        std::shared_ptr<structure> st(new structure(st_id, st_body));
-        m_additionals.push_back(st);
-        m_fns.insert(n_proc->id().id());
+        if (n_proc->id().id() != m_entry_point) {
+            std::shared_ptr<tuple> forward_args = std::static_pointer_cast<tuple>(this->copier::operator()(n_proc->args()));
+            std::shared_ptr<name> forward_name = std::static_pointer_cast<name>(this->copier::operator()(n_proc->id()));
+            std::shared_ptr<apply> op_call(new apply(forward_name, forward_args));
+            std::shared_ptr<ret> op_ret(new ret(op_call));
+            std::vector<std::shared_ptr<statement> > op_body_stmts{op_ret};
+            std::shared_ptr<suite> op_body(new suite(std::move(op_body_stmts)));
+            auto op_args = std::static_pointer_cast<tuple>(this->copier::operator()(n.args()));
+            std::shared_ptr<name> op_id(new name(std::string("operator()")));
+            std::shared_ptr<procedure> op(new procedure(op_id, op_args, op_body));
+            std::shared_ptr<suite> st_body(new suite(std::vector<std::shared_ptr<statement> >{op}));
+            std::shared_ptr<name> st_id(new name(std::string(n_proc->id().id() + "_fn")));
+            std::shared_ptr<structure> st(new structure(st_id, st_body));
+            m_additionals.push_back(st);
+            m_fns.insert(n_proc->id().id());
+        }
         return n_proc;
 
     }
