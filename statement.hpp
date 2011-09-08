@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../backend.hpp"
+#include "node.hpp"
+#include "type.hpp"
+#include "monotype.hpp"
 #include <vector>
 #include <memory>
 

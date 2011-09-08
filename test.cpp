@@ -1,5 +1,9 @@
 #include <iostream>
-#include "../backend.hpp"
+#include "node.hpp"
+#include "expression.hpp"
+#include "statement.hpp"
+#include "type.hpp"
+#include "monotype.hpp"
 #include "repr_printer.hpp"
 #include "type_printer.hpp"
 #include "py_printer.hpp"
