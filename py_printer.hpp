@@ -92,7 +92,7 @@ public:
         inline void operator()(const std::vector<T> &v) {
         list(v);
     }
-private:
+protected:
     inline void sep(void) const {
         m_os << ", ";
     }

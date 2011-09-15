@@ -35,14 +35,30 @@ public:
 
 };
 
-std::shared_ptr<monotype_t> int32_mt(new monotype_t("Int32"));
-std::shared_ptr<monotype_t> int64_mt(new monotype_t("Int64"));
-std::shared_ptr<monotype_t> uint32_mt(new monotype_t("Uint32"));
-std::shared_ptr<monotype_t> uint64_mt(new monotype_t("Uint64"));
-std::shared_ptr<monotype_t> float32_mt(new monotype_t("Float32"));
-std::shared_ptr<monotype_t> float64_mt(new monotype_t("Float64"));
-std::shared_ptr<monotype_t> bool_mt(new monotype_t("Bool"));
-std::shared_ptr<monotype_t> void_mt(new monotype_t("Void"));
+template<const char *s>
+struct concrete_t :
+        public monotype_t
+{
+    concrete_t() : monotype_t(s) {}
+};
+
+char int32_s[]   =   "Int32";
+char int64_s[]   =   "Int64";
+char uint32_s[]  =  "Uint32";
+char uint64_s[]  =  "Uint64";
+char float32_s[] = "Float32";
+char float64_s[] = "Float64";
+char bool_s[]    =    "Bool";
+char void_s[]    =    "Void";
+
+typedef concrete_t<int32_s>     int32_mt;
+typedef concrete_t<int64_s>     int64_mt;
+typedef concrete_t<uint32_s>   uint32_mt;
+typedef concrete_t<uint64_s>   uint64_mt;
+typedef concrete_t<float32_s> float32_mt;
+typedef concrete_t<float64_s> float64_mt;
+typedef concrete_t<bool_s>       bool_mt;
+typedef concrete_t<void_s>       void_mt;
 
 class sequence_t :
         public monotype_t
@@ -52,5 +68,7 @@ public:
         : monotype_t("Seq", std::vector<std::shared_ptr<type_t>>{sub})
         {}
 };
+
+
 
 }

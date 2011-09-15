@@ -8,6 +8,7 @@
 #include "type_printer.hpp"
 #include "py_printer.hpp"
 #include "compiler.hpp"
+#include "cuda_printer.hpp"
 #include <boost/variant.hpp>
 
 using namespace backend;
@@ -48,8 +49,13 @@ int main() {
     py_printer pp(std::cout);
     pp(*source);
 
-    compiler t_compiler(std::string("xpy"));
+    std::string entry_point("xpy");
+    compiler t_compiler(entry_point);
     
     shared_ptr<suite> functorized = t_compiler(*source);
     pp(*functorized);
+
+    std::cout << "---------------------" << std::endl;
+    cuda_printer cp(entry_point, std::cout);
+    cp(*functorized);
 }
