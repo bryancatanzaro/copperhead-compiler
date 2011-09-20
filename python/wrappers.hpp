@@ -41,7 +41,7 @@ class tuple_wrap
 {
 public:
     tuple_wrap(std::vector<std::shared_ptr<expression> > &&values)
-        : backend::tuple(values)
+        : backend::tuple(std::move(values))
     {}
     tuple_wrap()
         : tuple({})
@@ -108,7 +108,7 @@ class suite_wrap
 {
 public:
     suite_wrap(std::vector<std::shared_ptr<statement> > &&stmts)
-        : suite(stmts)
+        : suite(std::move(stmts))
     {}
     suite_wrap()
         : suite({})

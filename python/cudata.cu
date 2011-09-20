@@ -9,11 +9,9 @@ __global__ void test_kernel(stored_sequence<float> a) {
 }
 
 void test(const boost::shared_ptr<cuarray_var>& in) {
-    stored_sequence<float> seq = boost::get<boost::shared_ptr<cuarray<float> > >(*in)->get_remote_w();
+    stored_sequence<float> seq = boost::get<cuarray<float> >(*in).get_remote_w();
     test_kernel<<<1, 2>>>(seq);
 }
-
-
     
 BOOST_PYTHON_MODULE(cudata) {
     import_array();
@@ -21,5 +19,7 @@ BOOST_PYTHON_MODULE(cudata) {
     class_<cuarray_var, boost::shared_ptr<cuarray_var> >("CuArray", no_init)
         .def("__init__", make_constructor(make_cuarray))
         .def("__repr__", repr_cuarray);
+
+    //register_ptr_to_python<boost::shared_ptr<cuarray_var> >();
     def("test", test);
 }

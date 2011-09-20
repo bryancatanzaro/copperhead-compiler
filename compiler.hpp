@@ -28,6 +28,9 @@ public:
         auto functorized = apply(functorizer, n);
         return functorized;
     }
+    const std::string& entry_point() const {
+        return m_entry_point;
+    }
 };
 
 }

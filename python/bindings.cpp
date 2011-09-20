@@ -10,7 +10,8 @@
 #include "expression.hpp"
 #include "py_printer.hpp"
 #include "repr_printer.hpp"
-#include "functorize.hpp"
+#include "compiler.hpp"
+#include "cuda_printer.hpp"
 
 #include <sstream>
 #include <iostream>
@@ -20,35 +21,49 @@ template<class T>
 T* get_pointer(std::shared_ptr<T> const &p) {
     return p.get();
 }
-template<class T, class P=py_printer, bool apply=false>
+
+
+template<class T, class P=py_printer>
 const std::string to_string(std::shared_ptr<T> &p) {
     std::ostringstream os;
     P pp(os);
-    if(apply) 
-        boost::apply_visitor(pp, *p);
-    else
-        pp(*p);
+    pp(*p);
     return os.str();
 }
 
-template<class T, bool apply=false>
+template<class T, class P=py_printer>
+const std::string to_string_apply(std::shared_ptr<T> &p) {
+    std::ostringstream os;
+    P pp(os);
+    boost::apply_visitor(pp, *p);
+    return os.str();
+}
+
+
+template<class T>
 const std::string str(std::shared_ptr<T> &p) {
-    return to_string<T, py_printer, apply>(p);
+    return to_string<T, py_printer>(p);
 }
     
-template<class T, bool apply=false>
+template<class T>
 const std::string repr(std::shared_ptr<T> &p) {
-    return to_string<T, repr_printer, apply>(p);
+    return to_string<T, repr_printer>(p);
 }    
-    
+
+template<class T>
+const std::string str_apply(std::shared_ptr<T> &p) {
+    return to_string_apply<T, py_printer>(p);
+}
+
+template<class T>
+const std::string repr_apply(std::shared_ptr<T> &p) {
+    return to_string_apply<T, repr_printer>(p);
+}
+
+
 }
 using namespace boost::python;
 using namespace backend;
-
-const std::shared_ptr<suite_wrap> functorize_pass(std::shared_ptr<suite_wrap> in) {
-    functorize fnize;
-    return std::static_pointer_cast<suite_wrap>(fnize(*in));
-}
 
 template<typename S, typename T>
 static std::shared_ptr<T> make_from_list(list vals) {
@@ -59,25 +74,31 @@ static std::shared_ptr<T> make_from_list(list vals) {
         std::shared_ptr<S> p_elem = extract<std::shared_ptr<S> >(elem);
         values.push_back(p_elem);
     }
-    auto result = std::shared_ptr<T>(new T(values));
+    auto result = std::shared_ptr<T>(new T(std::move(values)));
     return result;
 }
 
 
-const long use_count(std::shared_ptr<node> in) {
-    return in.use_count();
+std::string compile(std::shared_ptr<compiler> &c,
+                               std::shared_ptr<suite_wrap> &s) {
+    std::shared_ptr<suite> rewritten = c->operator()(*s);
+    std::string entry_point = c->entry_point();
+    std::ostringstream os;
+    cuda_printer p(entry_point, os);
+    p(*rewritten);
+    return os.str();
 }
 
 BOOST_PYTHON_MODULE(bindings) {
     class_<node, std::shared_ptr<node>, boost::noncopyable>("Node", no_init)
-        .def("__str__", &backend::str<node, true>)
-        .def("__repr__", &backend::repr<node, true>);
+        .def("__str__", &backend::str_apply<node>)
+        .def("__repr__", &backend::repr_apply<node>);
     class_<expression, std::shared_ptr<expression>, bases<node>, boost::noncopyable>("Expression", no_init)
-        .def("__str__", &backend::str<expression, true>)
-        .def("__repr__", &backend::repr<expression, true>);
+        .def("__str__", &backend::str_apply<expression>)
+        .def("__repr__", &backend::repr_apply<expression>);
     class_<literal, std::shared_ptr<literal>, bases<expression, node>, boost::noncopyable>("Literal", no_init)
-        .def("__str__", &backend::str<literal, true>)
-        .def("__repr__", &backend::repr<literal, true>);
+        .def("__str__", &backend::str_apply<literal>)
+        .def("__repr__", &backend::repr_apply<literal>);
     class_<name, std::shared_ptr<name>, bases<literal, expression, node> >("Name", init<std::string>())
         .def("id", &name::id)
         .def("__str__", &backend::str<name>)
@@ -102,8 +123,8 @@ BOOST_PYTHON_MODULE(bindings) {
         .def("__str__", &backend::str<lambda_wrap>)
         .def("__repr__", &backend::repr<lambda_wrap>);
     class_<statement, std::shared_ptr<statement>, bases<node>, boost::noncopyable>("Statement", no_init)
-        .def("__str__", &backend::str<statement, true>)
-        .def("__repr__", &backend::repr<statement, true>);
+        .def("__str__", &backend::str_apply<statement>)
+        .def("__repr__", &backend::repr_apply<statement>);
     class_<ret_wrap, std::shared_ptr<ret_wrap>, bases<statement, node> >("Return", init<std::shared_ptr<expression> >())
         .def("val", &ret_wrap::p_val)
         .def("__str__", &backend::str<ret_wrap>)
@@ -129,8 +150,11 @@ BOOST_PYTHON_MODULE(bindings) {
         .def("stmts", &structure_wrap::p_stmts)
         .def("__str__", &backend::str<structure_wrap>)
         .def("__repr__", &backend::repr<structure_wrap>);
-    def("functorize_pass", functorize_pass);
-    def("use_count", use_count);
+
+    class_<compiler, std::shared_ptr<compiler> >("Compiler", init<std::string>())
+        .def("__call__", &compile);
+
+    
     implicitly_convertible<std::shared_ptr<backend::expression>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::literal>, std::shared_ptr<backend::expression> >();
     implicitly_convertible<std::shared_ptr<backend::name>, std::shared_ptr<backend::node> >();
