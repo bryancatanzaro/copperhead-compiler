@@ -26,7 +26,9 @@ public:
     cuarray() : m_h(NULL, 0), m_d(NULL, 0),
                 clean_local(true), clean_remote(true) {
     }
-    cuarray(ssize_t n) : clean_local(true), clean_remote(true) {
+    cuarray(ssize_t n, bool host=true) {
+        clean_local = host;
+        clean_remote = !host;
         T* h = new T[n];
         m_h = stored_sequence<T>(h, n);
         T* d;
@@ -148,7 +150,31 @@ stored_sequence<T> get_remote_r(boost::shared_ptr<cuarray_var> &in) {
 };
 
 template<typename T>
+stored_sequence<T> get_remote_r(cuarray<T>* in) {
+    return in->get_remote_r();
+}
+
+template<typename T>
 stored_sequence<T> get_remote_w(boost::shared_ptr<cuarray_var> &in) {
     return boost::get< cuarray<T> >(*in).get_remote_w();
 };
 
+template<typename T>
+stored_sequence<T> get_remote_w(cuarray<T>* in) {
+    return in->get_remote_w();
+}
+
+template<typename T>
+boost::shared_ptr<cuarray_var> wrap(cuarray<T>* in) {
+    return boost::shared_ptr<cuarray_var>(new cuarray_var(*in));
+}
+
+template<typename T>
+cuarray<T>* make_remote(ssize_t size) {
+    return new cuarray<T>(size, false);
+}
+
+template<typename T>
+cuarray<T>* make_local(ssize_t size) {
+    return new cuarray<T>(size);
+}
