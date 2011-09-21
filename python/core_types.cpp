@@ -57,7 +57,7 @@ static std::shared_ptr<T> make_from_list(list vals) {
     return result;
 }
 
-BOOST_PYTHON_MODULE(core_syntax) {
+BOOST_PYTHON_MODULE(core_types) {
     class_<type_t, std::shared_ptr<type_t>, boost::noncopyable >("Type", no_init)
         .def("__repr__", &backend::repr_apply<type_t>);
     class_<monotype_t, std::shared_ptr<monotype_t>, bases<type_t>, boost::noncopyable >("Monotype", no_init)
@@ -80,4 +80,34 @@ BOOST_PYTHON_MODULE(core_syntax) {
         .def("__repr__", &backend::repr<int32_mt>);
     class_<sequence_t, std::shared_ptr<sequence_t>, bases<monotype_t, type_t> >("Sequence", init<std::shared_ptr<type_t> >())
         .def("__repr__", &backend::repr<sequence_t>);
+    class_<tuple_t, std::shared_ptr<tuple_t>, bases<monotype_t, type_t> >("Tuple", no_init)
+        .def("__init__", make_constructor(make_from_list<type_t, tuple_t>))
+        .def("__repr__", &backend::repr<tuple_t>);
+    class_<fn_t, std::shared_ptr<fn_t>, bases<monotype_t, type_t> >("Fn", init<std::shared_ptr<tuple_t>, std::shared_ptr<type_t> >())
+        .def("__repr__", &backend::repr<fn_t>);
+    implicitly_convertible<std::shared_ptr<backend::monotype_t>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::int32_mt>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::int64_mt>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::uint32_mt>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::uint64_mt>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::float32_mt>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::float64_mt>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::bool_mt>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::void_mt>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::sequence_t>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::int32_mt>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::int64_mt>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::uint32_mt>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::uint64_mt>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::float32_mt>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::float64_mt>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::bool_mt>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::void_mt>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::sequence_t>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::sequence_t>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::tuple_t>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::tuple_t>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::fn_t>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::fn_t>, std::shared_ptr<backend::monotype_t> >();
+    
 }

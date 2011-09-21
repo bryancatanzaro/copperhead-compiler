@@ -223,23 +223,4 @@ BOOST_PYTHON_MODULE(core_syntax) {
     implicitly_convertible<std::shared_ptr<backend::structure_wrap>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::structure_wrap>, std::shared_ptr<backend::statement> >();
     implicitly_convertible<std::shared_ptr<backend::structure_wrap>, std::shared_ptr<backend::structure> >();
-    implicitly_convertible<std::shared_ptr<backend::monotype_t>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::int32_mt>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::int64_mt>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::uint32_mt>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::uint64_mt>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::float32_mt>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::float64_mt>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::bool_mt>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::void_mt>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::sequence_t>, std::shared_ptr<backend::type_t> >();
-    implicitly_convertible<std::shared_ptr<backend::int32_mt>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::int64_mt>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::uint32_mt>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::uint64_mt>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::float32_mt>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::float64_mt>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::bool_mt>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::void_mt>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::sequence_t>, std::shared_ptr<backend::monotype_t> >();
 }
