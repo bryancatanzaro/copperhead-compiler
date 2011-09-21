@@ -65,15 +65,19 @@ class procedure
 public:
     procedure(const std::shared_ptr<name> &id,
               const std::shared_ptr<tuple> &args,
-              const std::shared_ptr<suite> &stmts)
+              const std::shared_ptr<suite> &stmts,
+              const std::shared_ptr<type_t> type =
+              std::shared_ptr<type_t>(new void_mt()))
         : statement(*this),
-          m_id(id), m_args(args), m_stmts(stmts)
+          m_id(id), m_args(args), m_stmts(stmts), m_type(type),
+          m_ctype(new void_mt())
         {}
 protected:
     const std::shared_ptr<name> m_id;
     const std::shared_ptr<tuple> m_args;
     const std::shared_ptr<suite> m_stmts;
-
+    std::shared_ptr<type_t> m_type;
+    std::shared_ptr<type_t> m_ctype;
 public:
     inline const name& id(void) const {
         return *m_id;
@@ -85,6 +89,12 @@ public:
 
     inline const suite& stmts(void) const {
         return *m_stmts;
+    }
+    const type_t& type(void) const {
+        return *m_type;
+    }
+    const type_t& ctype(void) const {
+        return *m_ctype;
     }
     
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/iterator/indirect_iterator.hpp>
 #include "type.hpp"
 
 namespace backend {
@@ -69,6 +70,23 @@ public:
         {}
 };
 
+class tuple_t :
+        public monotype_t
+{
+public:
+    inline tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
+        : monotype_t("Tuple", std::move(sub))
+        {}
+};
 
+class fn_t :
+        public monotype_t
+{
+public:
+    inline fn_t(const std::shared_ptr<tuple_t> args,
+                const std::shared_ptr<type_t> result)
+        : monotype_t("Fn", std::vector<std::shared_ptr<type_t>>{args, result})
+        {}
+};
 
 }
