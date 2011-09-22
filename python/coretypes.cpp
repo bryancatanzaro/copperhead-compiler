@@ -57,7 +57,7 @@ static std::shared_ptr<T> make_from_list(list vals) {
     return result;
 }
 
-BOOST_PYTHON_MODULE(core_types) {
+BOOST_PYTHON_MODULE(coretypes) {
     class_<type_t, std::shared_ptr<type_t>, boost::noncopyable >("Type", no_init)
         .def("__repr__", &backend::repr_apply<type_t>);
     class_<monotype_t, std::shared_ptr<monotype_t>, bases<type_t>, boost::noncopyable >("Monotype", no_init)

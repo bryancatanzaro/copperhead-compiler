@@ -8,7 +8,7 @@ if platform == 'darwin':
 else:
     env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I.. -Os")
 
-for x in ['core_syntax.cpp', 'core_types.cpp']:
+for x in ['coresyntax.cpp', 'coretypes.cpp']:
     basename, extension = os.path.splitext(str(x))
     if platform == 'darwin':
         env.SharedLibrary(target=basename, source=x, LIBPATH=['/Users/catanzar/boost_1_47_0/stage/lib'], LIBS=['boost_python'], SHLIBPREFIX='', SHLIBSUFFIX='.so', LINKFLAGS='-F/System/Library/Frameworks/ -framework Python')

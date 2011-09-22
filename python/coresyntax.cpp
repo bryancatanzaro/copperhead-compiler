@@ -90,7 +90,7 @@ std::string compile(std::shared_ptr<compiler> &c,
     return os.str();
 }
 
-BOOST_PYTHON_MODULE(core_syntax) {
+BOOST_PYTHON_MODULE(coresyntax) {
     class_<node, std::shared_ptr<node>, boost::noncopyable>("Node", no_init)
         .def("__str__", &backend::str_apply<node>)
         .def("__repr__", &backend::repr_apply<node>);
