@@ -1,9 +1,9 @@
 from coresyntax import *
 import coretypes
 
-a = Return(Apply(Name("adjacent_difference"), Tuple([Name("x"), Name("y")])))
+a = Return(Apply(Name("adjacent_difference"), Tuple([Name("x")])))
 body = Suite([a])
-args = Tuple([Name("x"), Name("y")])
+args = Tuple([Name("x")])
 proc = Procedure(Name("adj"), args, body)
 
 arg_types = coretypes.Tuple([coretypes.Sequence(coretypes.Float32())])
