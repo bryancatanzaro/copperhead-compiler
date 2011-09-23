@@ -1,5 +1,7 @@
 #pragma once
 #include "node.hpp"
+#include "type.hpp"
+#include "ctype.hpp"
 
 namespace backend {
 
@@ -26,7 +28,9 @@ public:
             auto n_i = std::static_pointer_cast<expression>(boost::apply_visitor(*this, *i));
             n_values.push_back(n_i);
         }
-        return result_type(new tuple(std::move(n_values)));
+        std::shared_ptr<type_t> t(new type_t(n.type()));
+        std::shared_ptr<ctype::type_t> ct(new ctype::type_t(n.ctype()));
+        return result_type(new tuple(std::move(n_values), t, ct));
     }
     virtual result_type operator()(const apply &n) {
         auto n_fn = std::static_pointer_cast<name>((*this)(n.fn()));
@@ -36,7 +40,9 @@ public:
     virtual result_type operator()(const lambda &n) {
         auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));
         auto n_body = std::static_pointer_cast<expression>(boost::apply_visitor(*this, n.body()));
-        return result_type(new lambda(n_args, n_body));
+        std::shared_ptr<type_t> t(new type_t(n.type()));
+        std::shared_ptr<ctype::type_t> ct(new ctype::type_t(n.ctype()));
+        return result_type(new lambda(n_args, n_body, t, ct));
     }
     virtual result_type operator()(const closure &n) {
         return result_type(new closure());
@@ -57,7 +63,9 @@ public:
         auto n_id = std::static_pointer_cast<name>((*this)(n.id()));
         auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));
         auto n_stmts = std::static_pointer_cast<suite>((*this)(n.stmts()));
-        return result_type(new procedure(n_id, n_args, n_stmts));
+        std::shared_ptr<type_t> t(new type_t(n.type()));
+        std::shared_ptr<ctype::type_t> ct(new ctype::type_t(n.ctype()));
+        return result_type(new procedure(n_id, n_args, n_stmts, t, ct));
     }
     virtual result_type operator()(const suite &n) {
         std::vector<std::shared_ptr<statement> > n_stmts;
