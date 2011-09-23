@@ -7,6 +7,7 @@
 #include <string>
 #include "node.hpp"
 #include "functorize.hpp"
+#include "type_convert.hpp"
 
 namespace backend {
 /*! \p compiler contains state and methods for compiling programs.

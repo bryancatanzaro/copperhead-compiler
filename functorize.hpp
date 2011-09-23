@@ -2,7 +2,6 @@
 #include <string>
 #include <set>
 #include "copier.hpp"
-#include "repr_printer.hpp"
 #include "utility/isinstance.hpp"
 
 namespace backend {

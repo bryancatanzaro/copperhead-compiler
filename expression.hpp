@@ -21,8 +21,10 @@ protected:
     template<typename Derived>
     expression(Derived &self,
                std::shared_ptr<type_t> type =
+               std::shared_ptr<type_t>(new void_mt()),
+               std::shared_ptr<type_t> ctype =
                std::shared_ptr<type_t>(new void_mt()))
-        : node(self), m_type(type), m_ctype(new void_mt())
+        : node(self), m_type(type), m_ctype(ctype)
         {}
 public:
     const type_t& type(void) const {
@@ -40,8 +42,10 @@ protected:
     template<typename Derived>
     literal(Derived &self,
             std::shared_ptr<type_t> type =
+            std::shared_ptr<type_t>(new void_mt()),
+            std::shared_ptr<type_t> ctype =
             std::shared_ptr<type_t>(new void_mt()))
-        : expression(self, type)
+        : expression(self, type, ctype)
         {}
 
 };
@@ -52,8 +56,10 @@ class number
 public:
     number(const std::string &val,
            std::shared_ptr<type_t> type =
+           std::shared_ptr<type_t>(new void_mt()),
+           std::shared_ptr<type_t> ctype =
            std::shared_ptr<type_t>(new void_mt()))
-        : literal(*this, type),
+        : literal(*this, type, ctype),
           m_val(val)
         {}
     inline const std::string val() const {
@@ -69,8 +75,10 @@ class name
 public:
     name(const std::string &val,
          std::shared_ptr<type_t> type =
+         std::shared_ptr<type_t>(new void_mt()),
+         std::shared_ptr<type_t> ctype =
          std::shared_ptr<type_t>(new void_mt()))
-        : literal(*this, type),
+        : literal(*this, type, ctype),
           m_val(val)
         {}
     inline const std::string id() const {
@@ -86,8 +94,10 @@ class tuple
 public:
     tuple(std::vector<std::shared_ptr<expression> > &&values,
           std::shared_ptr<type_t> type =
+          std::shared_ptr<type_t>(new void_mt()),
+          std::shared_ptr<type_t> ctype =
           std::shared_ptr<type_t>(new void_mt()))
-        : expression(*this, type),
+        : expression(*this, type, ctype),
           m_values(std::move(values))
         {}
 protected:
@@ -133,8 +143,10 @@ public:
     lambda(const std::shared_ptr<tuple> &args,
            const std::shared_ptr<expression> &body,
            std::shared_ptr<type_t> type =
+           std::shared_ptr<type_t>(new void_mt()),
+           std::shared_ptr<type_t> ctype =
            std::shared_ptr<type_t>(new void_mt()))
-        : expression(*this, type),
+        : expression(*this, type, ctype),
           m_args(args), m_body(body)
         {}
     inline const tuple &args(void) const {

@@ -26,7 +26,10 @@ public:
             }
             close();
         }
-                    
+    }
+    template<const char* S>
+    inline void operator()(const concrete_t<S> &c) {
+        m_os << s;
     }
     inline void operator()(const polytype_t &pt) {
     }
