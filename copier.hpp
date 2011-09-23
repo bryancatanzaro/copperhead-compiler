@@ -7,7 +7,6 @@ class copier
     : public no_op_visitor<std::shared_ptr<node> >
 {
 public:
-    // XXX why do we have to use 'using' to make the base class's overloads visible?
     using backend::no_op_visitor<std::shared_ptr<node> >::operator();
 
     // Although these operator() methods could be declared here as

@@ -105,21 +105,21 @@ BOOST_PYTHON_MODULE(coresyntax) {
         .def("id", &name_wrap::id)
         .def("__str__", &backend::str<name_wrap>)
         .def("__repr__", &backend::repr<name_wrap>)
-        .add_property("type", &name_wrap::p_type, &name_wrap::set_type)
-        .add_property("ctype", &name_wrap::p_ctype, &name_wrap::set_ctype);  
+        .add_property("type", &name_wrap::p_type, &name_wrap::set_type);
+        //.add_property("ctype", &name_wrap::p_ctype, &name_wrap::set_ctype);  
     class_<number_wrap, std::shared_ptr<number_wrap>, bases<literal, expression, node> >("Number", init<std::string>())
         .def("val", &number_wrap::val)
         .def("__str__", &backend::str<number_wrap>)
         .def("__repr__", &backend::repr<number_wrap>)
-        .add_property("type", &number_wrap::p_type, &number_wrap::set_type)
-        .add_property("ctype", &number_wrap::p_ctype, &number_wrap::set_ctype);
+        .add_property("type", &number_wrap::p_type, &number_wrap::set_type);
+    //.add_property("ctype", &number_wrap::p_ctype, &number_wrap::set_ctype);
     class_<backend::tuple_wrap, std::shared_ptr<backend::tuple_wrap>, bases<expression, node> >("Tuple")
         .def("__init__", make_constructor(make_from_list<expression, backend::tuple_wrap>))
         .def("__iter__", range(&tuple_wrap::p_begin, &tuple_wrap::p_end))
         .def("__str__", &backend::str<backend::tuple_wrap>)
         .def("__repr__", &backend::repr<backend::tuple_wrap>)
-        .add_property("type", &tuple_wrap::p_type, &tuple_wrap::set_type)
-        .add_property("ctype", &tuple_wrap::p_ctype, &tuple_wrap::set_ctype);
+        .add_property("type", &tuple_wrap::p_type, &tuple_wrap::set_type);
+        //.add_property("ctype", &tuple_wrap::p_ctype, &tuple_wrap::set_ctype);
     
     class_<apply_wrap, std::shared_ptr<apply_wrap>, bases<expression, node> >("Apply", init<std::shared_ptr<name>, std::shared_ptr<backend::tuple> >())
         .def("fn", &apply_wrap::p_fn) 
@@ -131,8 +131,8 @@ BOOST_PYTHON_MODULE(coresyntax) {
         .def("body", &lambda_wrap::p_body)
         .def("__str__", &backend::str<lambda_wrap>)
         .def("__repr__", &backend::repr<lambda_wrap>)
-        .add_property("type", &lambda_wrap::p_type, &lambda_wrap::set_type)
-        .add_property("ctype", &lambda_wrap::p_ctype, &lambda_wrap::set_ctype);
+        .add_property("type", &lambda_wrap::p_type, &lambda_wrap::set_type);
+    //.add_property("ctype", &lambda_wrap::p_ctype, &lambda_wrap::set_ctype);
     class_<statement, std::shared_ptr<statement>, bases<node>, boost::noncopyable>("Statement", no_init)
         .def("__str__", &backend::str_apply<statement>)
         .def("__repr__", &backend::repr_apply<statement>);
@@ -151,8 +151,8 @@ BOOST_PYTHON_MODULE(coresyntax) {
         .def("stmts", &procedure_wrap::p_stmts)
         .def("__str__", &backend::str<procedure_wrap>)
         .def("__repr__", &backend::repr<procedure_wrap>)
-        .add_property("type", &procedure_wrap::p_type, &procedure_wrap::set_type)
-        .add_property("ctype", &procedure_wrap::p_ctype, &procedure_wrap::set_ctype);
+        .add_property("type", &procedure_wrap::p_type, &procedure_wrap::set_type);
+        //.add_property("ctype", &procedure_wrap::p_ctype, &procedure_wrap::set_ctype);
     class_<suite_wrap, std::shared_ptr<suite_wrap>, bases<node> >("Suite")
         .def("__init__", make_constructor(make_from_list<statement, suite_wrap>))
         .def("__iter__", range(&suite_wrap::p_begin, &suite_wrap::p_end))

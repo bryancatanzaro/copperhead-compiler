@@ -15,15 +15,15 @@ public:
     inline const std::shared_ptr<type_t> p_type(void) const {
         return m_type;
     }
-    inline const std::shared_ptr<type_t> p_ctype(void) const {
-        return m_ctype;
-    }
+    // inline const std::shared_ptr<type_t> p_ctype(void) const {
+    //     return m_ctype;
+    // }
     inline void set_type(std::shared_ptr<type_t> type) {
         m_type = type;
     }
-    inline void set_ctype(std::shared_ptr<type_t> type) {
-        m_ctype = type;
-    }
+    // inline void set_ctype(std::shared_ptr<type_t> type) {
+    //     m_ctype = type;
+    // }
 };
 
 class number_wrap
@@ -36,15 +36,15 @@ public:
     inline const std::shared_ptr<type_t> p_type(void) const {
         return m_type;
     }
-    inline const std::shared_ptr<type_t> p_ctype(void) const {
-        return m_ctype;
-    }
+    // inline const std::shared_ptr<type_t> p_ctype(void) const {
+    //     return m_ctype;
+    // }
     inline void set_type(std::shared_ptr<type_t> type) {
         m_type = type;
     }
-    inline void set_ctype(std::shared_ptr<type_t> type) {
-        m_ctype = type;
-    }
+    // inline void set_ctype(std::shared_ptr<type_t> type) {
+    //     m_ctype = type;
+    // }
 };
 
     
@@ -65,15 +65,15 @@ public:
     inline const std::shared_ptr<type_t> p_type(void) const {
         return m_type;
     }
-    inline const std::shared_ptr<type_t> p_ctype(void) const {
-        return m_ctype;
-    }
+    // inline const std::shared_ptr<type_t> p_ctype(void) const {
+    //     return m_ctype;
+    // }
     inline void set_type(std::shared_ptr<type_t> type) {
         m_type = type;
     }
-    inline void set_ctype(std::shared_ptr<type_t> type) {
-        m_ctype = type;
-    }
+    // inline void set_ctype(std::shared_ptr<type_t> type) {
+    //     m_ctype = type;
+    // }
 };
 
 class lambda_wrap
@@ -93,15 +93,15 @@ public:
     inline const std::shared_ptr<type_t> p_type(void) const {
         return m_type;
     }
-    inline const std::shared_ptr<type_t> p_ctype(void) const {
-        return m_ctype;
-    }
+    // inline const std::shared_ptr<type_t> p_ctype(void) const {
+    //     return m_ctype;
+    // }
     inline void set_type(std::shared_ptr<type_t> type) {
         m_type = type;
     }
-    inline void set_ctype(std::shared_ptr<type_t> type) {
-        m_ctype = type;
-    }
+    // inline void set_ctype(std::shared_ptr<type_t> type) {
+    //     m_ctype = type;
+    // }
 };
 
 class tuple_wrap
@@ -124,15 +124,15 @@ public:
     inline const std::shared_ptr<type_t> p_type(void) const {
         return m_type;
     }
-    inline const std::shared_ptr<type_t> p_ctype(void) const {
-        return m_ctype;
-    }
+    // inline const std::shared_ptr<type_t> p_ctype(void) const {
+    //     return m_ctype;
+    // }
     inline void set_type(std::shared_ptr<type_t> type) {
         m_type = type;
     }
-    inline void set_ctype(std::shared_ptr<type_t> type) {
-        m_ctype = type;
-    }
+    // inline void set_ctype(std::shared_ptr<type_t> type) {
+    //     m_ctype = type;
+    // }
 };
     
 class ret_wrap
@@ -190,15 +190,15 @@ public:
     inline const std::shared_ptr<type_t> p_type(void) const {
         return m_type;
     }
-    inline const std::shared_ptr<type_t> p_ctype(void) const {
-        return m_ctype;
-    }
+    // inline const std::shared_ptr<type_t> p_ctype(void) const {
+    //     return m_ctype;
+    // }
     inline void set_type(std::shared_ptr<type_t> type) {
         m_type = type;
     }
-    inline void set_ctype(std::shared_ptr<type_t> type) {
-        m_ctype = type;
-    }
+    // inline void set_ctype(std::shared_ptr<type_t> type) {
+    //     m_ctype = type;
+    // }
 };    
     
 class suite_wrap

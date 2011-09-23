@@ -8,6 +8,7 @@
 
 #include "type.hpp"
 #include "monotype.hpp"
+#include "ctype.hpp"
 namespace backend {
 
 
@@ -17,20 +18,20 @@ class expression
 {
 protected:
     std::shared_ptr<type_t> m_type;
-    std::shared_ptr<type_t> m_ctype;
+    std::shared_ptr<ctype::type_t> m_ctype;
     template<typename Derived>
     expression(Derived &self,
                std::shared_ptr<type_t> type =
                std::shared_ptr<type_t>(new void_mt()),
-               std::shared_ptr<type_t> ctype =
-               std::shared_ptr<type_t>(new void_mt()))
+               std::shared_ptr<ctype::type_t> ctype =
+               std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
         : node(self), m_type(type), m_ctype(ctype)
         {}
 public:
     const type_t& type(void) const {
         return *m_type;
     }
-    const type_t& ctype(void) const {
+    const ctype::type_t& ctype(void) const {
         return *m_ctype;
     }
 };
@@ -43,8 +44,8 @@ protected:
     literal(Derived &self,
             std::shared_ptr<type_t> type =
             std::shared_ptr<type_t>(new void_mt()),
-            std::shared_ptr<type_t> ctype =
-            std::shared_ptr<type_t>(new void_mt()))
+            std::shared_ptr<ctype::type_t> ctype =
+            std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
         : expression(self, type, ctype)
         {}
 
@@ -57,8 +58,8 @@ public:
     number(const std::string &val,
            std::shared_ptr<type_t> type =
            std::shared_ptr<type_t>(new void_mt()),
-           std::shared_ptr<type_t> ctype =
-           std::shared_ptr<type_t>(new void_mt()))
+           std::shared_ptr<ctype::type_t> ctype =
+           std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
         : literal(*this, type, ctype),
           m_val(val)
         {}
@@ -76,8 +77,8 @@ public:
     name(const std::string &val,
          std::shared_ptr<type_t> type =
          std::shared_ptr<type_t>(new void_mt()),
-         std::shared_ptr<type_t> ctype =
-         std::shared_ptr<type_t>(new void_mt()))
+         std::shared_ptr<ctype::type_t> ctype =
+         std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
         : literal(*this, type, ctype),
           m_val(val)
         {}
@@ -95,8 +96,8 @@ public:
     tuple(std::vector<std::shared_ptr<expression> > &&values,
           std::shared_ptr<type_t> type =
           std::shared_ptr<type_t>(new void_mt()),
-          std::shared_ptr<type_t> ctype =
-          std::shared_ptr<type_t>(new void_mt()))
+          std::shared_ptr<ctype::type_t> ctype =
+          std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
         : expression(*this, type, ctype),
           m_values(std::move(values))
         {}
@@ -144,8 +145,8 @@ public:
            const std::shared_ptr<expression> &body,
            std::shared_ptr<type_t> type =
            std::shared_ptr<type_t>(new void_mt()),
-           std::shared_ptr<type_t> ctype =
-           std::shared_ptr<type_t>(new void_mt()))
+           std::shared_ptr<ctype::type_t> ctype =
+           std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
         : expression(*this, type, ctype),
           m_args(args), m_body(body)
         {}
