@@ -5,6 +5,19 @@
 
 namespace backend {
 
+class type_copier
+    : public no_op_visitor<std::shared_ptr<type_t> > {
+
+};
+
+namespace ctype {
+class ctype_copier
+    : public no_op_visitor<std::shared_ptr<type_t> > {
+
+};
+}
+
+
 class copier
     : public no_op_visitor<std::shared_ptr<node> >
 {
@@ -60,6 +73,7 @@ public:
         return result_type(new bind(n_lhs, n_rhs));
     }
     virtual result_type operator()(const procedure &n) {
+        std::cout << "Copying procedure" << std::endl;
         auto n_id = std::static_pointer_cast<name>((*this)(n.id()));
         auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));
         auto n_stmts = std::static_pointer_cast<suite>((*this)(n.stmts()));

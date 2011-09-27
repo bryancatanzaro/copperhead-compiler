@@ -1,6 +1,7 @@
 #pragma once
 
 #include "monotype.hpp"
+#include "ctype.hpp"
 
 namespace backend
 {
@@ -27,10 +28,6 @@ public:
             close();
         }
     }
-    template<const char* S>
-    inline void operator()(const concrete_t<S> &c) {
-        m_os << S;
-    }
     inline void operator()(const polytype_t &pt) {
     }
 private:
@@ -46,4 +43,36 @@ private:
     }
 };
 
+namespace ctype {
+class ctype_printer
+    : public boost::static_visitor<>
+{
+public:
+    inline ctype_printer(std::ostream &os)
+        : m_os(os)
+        {}
+    inline void operator()(const monotype_t &mt) {
+        m_os << mt.name();
+    }
+    inline void operator()(const sequence_t &st) {
+        m_os << st.name();
+        open();
+        boost::apply_visitor(*this, st.sub());
+        close();
+    }
+    inline void operator()(const polytype_t &pt) {
+    }
+private:
+    std::ostream &m_os;
+    inline void sep() const {
+        m_os << ", ";
+    }
+    inline void open() const {
+        m_os << "(";
+    }
+    inline void close() const {
+        m_os << ")";
+    }
+};
+}
 }

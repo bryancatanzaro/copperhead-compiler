@@ -6,13 +6,22 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include "type_printer.hpp"
+#include "utility/isinstance.hpp"
+
+
+
 
 namespace backend {
+
 template<class T>
 T* get_pointer(std::shared_ptr<T> const &p) {
     return p.get();
 }
 
+
+bool is_fn(std::shared_ptr<type_t> &t) {
+    return detail::isinstance<fn_t, type_t>(*t);
+}
 
 template<class T, class P=repr_type_printer>
 const std::string to_string(std::shared_ptr<T> &p) {
@@ -57,7 +66,9 @@ static std::shared_ptr<T> make_from_list(list vals) {
     return result;
 }
 
+
 BOOST_PYTHON_MODULE(coretypes) {
+    def("is_fn", &is_fn);
     class_<type_t, std::shared_ptr<type_t>, boost::noncopyable >("Type", no_init)
         .def("__repr__", &backend::repr_apply<type_t>);
     class_<monotype_t, std::shared_ptr<monotype_t>, bases<type_t>, boost::noncopyable >("Monotype", no_init)
@@ -65,19 +76,19 @@ BOOST_PYTHON_MODULE(coretypes) {
     class_<int32_mt, std::shared_ptr<int32_mt>, bases<monotype_t, type_t> >("Int32", init<>())
         .def("__repr__", &backend::repr<int32_mt>);
     class_<int64_mt, std::shared_ptr<int64_mt>, bases<monotype_t, type_t> >("Int64", init<>())
-        .def("__repr__", &backend::repr<int32_mt>);
+        .def("__repr__", &backend::repr<int64_mt>);
     class_<uint32_mt, std::shared_ptr<uint32_mt>, bases<monotype_t, type_t> >("Uint32", init<>())
-        .def("__repr__", &backend::repr<int32_mt>);
+        .def("__repr__", &backend::repr<uint32_mt>);
     class_<uint64_mt, std::shared_ptr<uint64_mt>, bases<monotype_t, type_t> >("Uint64", init<>())
-        .def("__repr__", &backend::repr<int32_mt>);
+        .def("__repr__", &backend::repr<uint64_mt>);
     class_<float32_mt, std::shared_ptr<float32_mt>, bases<monotype_t, type_t> >("Float32", init<>())
-        .def("__repr__", &backend::repr<int32_mt>);
+        .def("__repr__", &backend::repr<float32_mt>);
     class_<float64_mt, std::shared_ptr<float64_mt>, bases<monotype_t, type_t> >("Float64", init<>())
-        .def("__repr__", &backend::repr<int32_mt>);
+        .def("__repr__", &backend::repr<float64_mt>);
     class_<bool_mt, std::shared_ptr<bool_mt>, bases<monotype_t, type_t> >("Bool", init<>())
-        .def("__repr__", &backend::repr<int32_mt>);
+        .def("__repr__", &backend::repr<bool_mt>);
     class_<void_mt, std::shared_ptr<void_mt>, bases<monotype_t, type_t> >("Void", init<>())
-        .def("__repr__", &backend::repr<int32_mt>);
+        .def("__repr__", &backend::repr<void_mt>);
     class_<sequence_t, std::shared_ptr<sequence_t>, bases<monotype_t, type_t> >("Sequence", init<std::shared_ptr<type_t> >())
         .def("__repr__", &backend::repr<sequence_t>);
     class_<tuple_t, std::shared_ptr<tuple_t>, bases<monotype_t, type_t> >("Tuple", no_init)

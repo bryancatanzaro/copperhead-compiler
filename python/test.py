@@ -12,7 +12,6 @@ proc_type = coretypes.Fn(arg_types, return_type)
 proc.type = proc_type
 
 
-
 print(proc)
 print(proc.type)
 

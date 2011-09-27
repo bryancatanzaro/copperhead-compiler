@@ -2,6 +2,7 @@
 #include <vector>
 #include <boost/iterator/indirect_iterator.hpp>
 #include "type.hpp"
+#include <iostream>
 
 
 namespace backend {
@@ -9,21 +10,26 @@ namespace backend {
 class monotype_t :
     public type_t
 {
-private:
+protected:
     const std::string m_name;
     std::vector<std::shared_ptr<type_t> > m_params;
    
 public:
-    monotype_t(const std::string &name)
-        : type_t(*this),
-          m_name(name)
-        {}
     monotype_t(const std::string &name,
-               std::vector<std::shared_ptr<type_t > > &&params)
+               std::vector<std::shared_ptr<type_t > > &&params=
+               std::vector<std::shared_ptr<type_t> >{})
         : type_t(*this),
           m_name(name),
           m_params(std::move(params))
         {}
+
+    template<typename Derived>
+    monotype_t(Derived& self,
+               const std::string &name,
+               std::vector<std::shared_ptr<type_t > > && params=
+               std::vector<std::shared_ptr<type_t> >{}) :
+        type_t(self), m_name(name), m_params(std::move(params)) {}
+    
     const std::string& name(void) const {
         return m_name;
     }
@@ -38,38 +44,66 @@ public:
 
 };
 
-template<const char *s>
-struct concrete_t :
+
+
+struct int32_mt :
         public monotype_t
 {
-    concrete_t() : monotype_t(s) {}
+    int32_mt() : monotype_t(*this, "Int32") {}
 };
 
-char int32_s[]   =   "Int32";
-char int64_s[]   =   "Int64";
-char uint32_s[]  =  "Uint32";
-char uint64_s[]  =  "Uint64";
-char float32_s[] = "Float32";
-char float64_s[] = "Float64";
-char bool_s[]    =    "Bool";
-char void_s[]    =    "Void";
+struct int64_mt :
+        public monotype_t
+{
+    int64_mt() : monotype_t(*this, "Int64") {}
+};
 
-class int32_mt : public concrete_t<int32_s>{};
-class int64_mt : public concrete_t<int64_s>{};
-class uint32_mt : public concrete_t<uint32_s>{};
-class uint64_mt : public concrete_t<uint64_s>{};
-class float32_mt : public concrete_t<float32_s>{};
-class float64_mt : public concrete_t<float64_s>{};
-class bool_mt : public concrete_t<bool_s>{};
-class void_mt : public concrete_t<void_s>{};
+struct uint32_mt :
+        public monotype_t
+{
+    uint32_mt() : monotype_t(*this, "Uint32") {}
+};
+
+struct uint64_mt :
+        public monotype_t
+{
+    uint64_mt() : monotype_t(*this, "Uint64") {}
+};
+
+struct float32_mt :
+        public monotype_t
+{
+    float32_mt() : monotype_t(*this, "Float32") {}
+};
+
+struct float64_mt :
+        public monotype_t
+{
+    float64_mt() : monotype_t(*this, "Float64") {}
+};
+
+struct bool_mt :
+        public monotype_t
+{
+    bool_mt() : monotype_t(*this, "Bool") {}
+};
+
+struct void_mt :
+        public monotype_t
+{
+    void_mt() : monotype_t(*this, "Void") {}
+};
 
 class sequence_t :
         public monotype_t
 {
 public:
     inline sequence_t(const std::shared_ptr<type_t> &sub)
-        : monotype_t("Seq", std::vector<std::shared_ptr<type_t>>{sub})
+        : monotype_t(*this, "Seq", std::vector<std::shared_ptr<type_t>>{sub})
         {}
+    const type_t& sub() const {
+        return *m_params[0];
+    }
 };
 
 class tuple_t :
@@ -77,7 +111,7 @@ class tuple_t :
 {
 public:
     inline tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
-        : monotype_t("Tuple", std::move(sub))
+        : monotype_t(*this, "Tuple", std::move(sub))
         {}
 };
 
@@ -87,8 +121,15 @@ class fn_t :
 public:
     inline fn_t(const std::shared_ptr<tuple_t> args,
                 const std::shared_ptr<type_t> result)
-        : monotype_t("Fn", std::vector<std::shared_ptr<type_t>>{args, result})
+        : monotype_t(*this, "Fn", std::vector<std::shared_ptr<type_t>>{args, result})
         {}
+    ~fn_t() {}
+    inline const tuple_t& args() const {
+        return *std::static_pointer_cast<tuple_t>(m_params[0]);
+    }
+    inline const type_t& result() const {
+        return *m_params[1];
+    }
 };
 
 }

@@ -1,9 +1,27 @@
 #pragma once
 #include <vector>
 #include <boost/iterator/indirect_iterator.hpp>
-
+#include <memory>
+#include <iostream>
 
 namespace backend {
+
+
+namespace detail {
+struct inspect_impl : boost::static_visitor<> {
+    template<typename S>
+    void operator()(const S& n) {
+        std::cout << typeid(n).name();
+    }
+};
+template<typename V>
+void inspect(V& n) {
+    inspect_impl g;
+    boost::apply_visitor(g, n);
+    return;
+}
+}
+
 namespace ctype {
 
 class monotype_t;
@@ -62,106 +80,153 @@ class type_t
 {
 public:
     typedef detail::type_base super_t;
+    static int counter;
+    int id;
     template<typename Derived>
     type_t(Derived &self)
         : super_t(std::ref(self)) //use of std::ref disambiguates variant's copy constructor dispatch
-        {}
+        {
+            id = ++counter;
+            std::cout << "Making a ctype::type_t[" << id <<"](";
+            backend::detail::inspect(self);
+            std::cout << ")" << std::endl;
+        }
 
     type_t(const type_t &other)
         : super_t(detail::make_type_base(this, other))
-        {}
+        {
+            id = ++counter;
+            std::cout << "Copying a ctype::type_t[" << id <<"](";
+            backend::detail::inspect(other);
+            std::cout << ")" << std::endl;
+        }
+    ~type_t() {
+        std::cout << "Destroying a ctype::type_t[" << id << "]"<< std::endl;
+    }
 
 };
+
+int type_t::counter = 0;
 
 class monotype_t :
     public type_t
 {
-private:
+protected:
     const std::string m_name;
-    std::vector<std::shared_ptr<type_t> > m_params;
    
 public:
     monotype_t(const std::string &name)
         : type_t(*this),
           m_name(name)
         {}
-    monotype_t(const std::string &name,
-               std::vector<std::shared_ptr<type_t > > &&params)
-        : type_t(*this),
-          m_name(name),
-          m_params(std::move(params))
+    template<typename Derived>
+    monotype_t(Derived &self,
+               const std::string &name)
+        : type_t(self),
+          m_name(name)
         {}
     const std::string& name(void) const {
         return m_name;
     }
-    typedef decltype(boost::make_indirect_iterator(m_params.cbegin())) const_iterator;
-    const_iterator begin() const {
-        return boost::make_indirect_iterator(m_params.cbegin());
-    }
-
-    const_iterator end() const {
-        return boost::make_indirect_iterator(m_params.cend());
-    }
 
 };
 
-template<const char *s>
-struct concrete_t :
+
+struct int32_mt :
         public monotype_t
 {
-    concrete_t() : monotype_t(s) {}
+    int32_mt() : monotype_t(*this, "int") {}
 };
 
+struct int64_mt :
+        public monotype_t
+{
+    int64_mt() : monotype_t(*this, "long") {}
+};
 
-//XXX need ifdefs for Windows and the various 64 bit C data models
-//These assume Linux/OS X style models
-char int32_s[] = "int";
-char int64_s[] = "long";
-char uint32_s[] = "unsigned int";
-char uint64_s[] = "unsigned long";
-char float32_s[] = "float";
-char float64_s[] = "double";
-char bool_s[] = "bool";
-char void_s[] = "void";
+struct uint32_mt :
+        public monotype_t
+{
+    uint32_mt() : monotype_t(*this, "unsigned int") {}
+};
 
+struct uint64_mt :
+        public monotype_t
+{
+    uint64_mt() : monotype_t(*this, "unsigned long") {}
+};
 
+struct float32_mt :
+        public monotype_t
+{
+    float32_mt() : monotype_t(*this, "float") {}
+};
 
-class int32_mt : public concrete_t<int32_s>{};
-class int64_mt : public concrete_t<int64_s>{};
-class uint32_mt : public concrete_t<uint32_s>{};
-class uint64_mt : public concrete_t<uint64_s>{};
-class float32_mt : public concrete_t<float32_s>{};
-class float64_mt : public concrete_t<float64_s>{};
-class bool_mt : public concrete_t<bool_s>{};
-class void_mt : public concrete_t<void_s>{};
+struct float64_mt :
+        public monotype_t
+{
+    float64_mt() : monotype_t(*this, "double") {}
+};
+
+struct bool_mt :
+        public monotype_t
+{
+    bool_mt() : monotype_t(*this, "bool") {}
+};
+
+struct void_mt :
+        public monotype_t
+{
+    void_mt() : monotype_t(*this, "void") {}
+};
 
 class sequence_t :
         public monotype_t
 {
+private:
+    std::shared_ptr<type_t> m_sub;
 public:
     inline sequence_t(const std::shared_ptr<type_t> &sub)
-        : monotype_t("Seq", std::vector<std::shared_ptr<type_t> >{sub})
-        {}
+        : monotype_t(*this, "sequence"), m_sub(sub) {}
+    const type_t& sub() const {
+        return *m_sub;
+    }
 };
 
 class tuple_t :
         public monotype_t
 {
+private:
+    std::vector<std::shared_ptr<type_t> > m_sub;
 public:
     inline tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
-        : monotype_t("Tuple", std::move(sub))
+        : monotype_t(*this, "Tuple"), m_sub(std::move(sub))
         {}
 };
 
 class fn_t :
         public monotype_t
 {
+private:
+    std::shared_ptr<tuple_t> m_args;
+    std::shared_ptr<type_t> m_result;
 public:
     inline fn_t(const std::shared_ptr<tuple_t> args,
                 const std::shared_ptr<type_t> result)
-        : monotype_t("Fn", std::vector<std::shared_ptr<type_t> >{args, result})
+        : monotype_t(*this, "Fn"), m_args(args), m_result(result)
         {}
+    inline const tuple_t& args() const {
+        return *m_args;
+    }
+    inline const type_t& result() const {
+        return *m_result;
+    }
 };
 
+class polytype_t :
+        public type_t {
+    polytype_t() : type_t(*this) {}
+
+};
 }
 }
