@@ -32,10 +32,8 @@ public:
     std::shared_ptr<suite> operator()(const suite &n) {
         type_convert type_converter;
         std::shared_ptr<suite> type_converted = apply(type_converter, n);
-        std::cout << "Done: type_convert" << std::endl;
         functorize functorizer(m_entry_point);
         auto functorized = apply(functorizer, type_converted);
-        std::cout << "Done:: functorizer" << std::endl;
         return functorized;
     }
     const std::string& entry_point() const {

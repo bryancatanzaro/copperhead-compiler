@@ -102,7 +102,7 @@ private:
     std::vector<std::shared_ptr<type_t> > m_sub;
 public:
     inline tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
-        : monotype_t(*this, "Tuple"), m_sub(sub)
+        : monotype_t(*this, "Tuple"), m_sub(std::move(sub))
         {}
     typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
     const_iterator begin() const {
@@ -113,6 +113,10 @@ public:
         return boost::make_indirect_iterator(m_sub.cend());
     }
 
+    int size() const {
+        return m_sub.size();
+    }
+    
 };
 
 class fn_t :

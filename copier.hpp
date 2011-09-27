@@ -36,31 +36,31 @@ public:
 
 namespace ctype {
 class ctype_copier
-    : public no_op_visitor<std::shared_ptr<type_t> > {
+    : public no_op_visitor<std::shared_ptr<ctype::type_t> > {
 public:
-    inline result_type operator()(const monotype_t &mt) {
-        return result_type(new monotype_t(mt));
+    inline result_type operator()(const ctype::monotype_t &mt) {
+        return result_type(new ctype::monotype_t(mt));
     }
-    inline result_type operator()(const polytype_t &pt) {
+    inline result_type operator()(const ctype::polytype_t &pt) {
         return result_type(new polytype_t(pt));
     }
-    inline result_type operator()(const sequence_t &st) {
+    inline result_type operator()(const ctype::sequence_t &st) {
         result_type sub = boost::apply_visitor(*this, st.sub());
-        return result_type(new sequence_t(sub));
+        return result_type(new ctype::sequence_t(sub));
     }
-    inline result_type operator()(const fn_t &ft) {
-        std::shared_ptr<tuple_t> args = std::static_pointer_cast<tuple_t>(this->operator()(ft.args()));
+    inline result_type operator()(const ctype::fn_t &ft) {
+        std::shared_ptr<ctype::tuple_t> args = std::static_pointer_cast<ctype::tuple_t>(this->operator()(ft.args()));
         result_type result = boost::apply_visitor(*this, ft.result());
-        return result_type(new fn_t(args, result));
+        return result_type(new ctype::fn_t(args, result));
     }
-    inline result_type operator()(const tuple_t &tt) {
+    inline result_type operator()(const ctype::tuple_t &tt) {
         std::vector<result_type> subs;
         for(auto i = tt.begin();
             i != tt.end();
             i++) {
             subs.push_back(boost::apply_visitor(*this, *i));
         }
-        return result_type(new tuple_t(std::move(subs)));
+        return result_type(new ctype::tuple_t(std::move(subs)));
     }
 };
 
@@ -126,7 +126,6 @@ public:
         return result_type(new bind(n_lhs, n_rhs));
     }
     virtual result_type operator()(const procedure &n) {
-        std::cout << "Copying procedure" << std::endl;
         auto n_id = std::static_pointer_cast<name>((*this)(n.id()));
         auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));
         auto n_stmts = std::static_pointer_cast<suite>((*this)(n.stmts()));

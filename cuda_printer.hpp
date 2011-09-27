@@ -69,17 +69,10 @@ public:
         if (!is_entry) {
             m_os << "__device__ ";
         }
-        std::cout << "Asking for fn type" << std::endl;
         const ctype::type_t &n_t = n.ctype();
-        std::cout << "Converting fn type from generic type to concrete type" << std::endl;
-        detail::inspect(n_t);
         const ctype::fn_t &n_f = boost::get<const ctype::fn_t&>(n_t);
-        std::cout << "Extracting return type" << std::endl;
         const ctype::type_t& ret_t = n_f.result();
-        std::cout << "Extracted return type" << std::endl;
-        detail::inspect(ret_t);
         boost::apply_visitor(tp, ret_t);
-        std::cout << "Visited return type" << std::endl;
         m_os << " ";
         (*this)(n.id());
         (*this)(n.args());

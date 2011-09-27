@@ -84,7 +84,6 @@ static std::shared_ptr<T> make_from_list(list vals) {
 std::string compile(std::shared_ptr<compiler> &c,
                     std::shared_ptr<suite_wrap> &s) {
     std::shared_ptr<suite> rewritten = c->operator()(*s);
-    std::cout << "Done compiling" << std::endl;
     std::string entry_point = c->entry_point();
     std::ostringstream os;
     cuda_printer p(entry_point, os);

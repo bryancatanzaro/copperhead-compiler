@@ -75,18 +75,17 @@ class type_convert
 {
 private:
     detail::cu_to_c m_c;
+    type_copier m_tc;
 public:
-    type_convert() : m_c() {}
+    type_convert() : m_c(), m_tc() {}
     using copier::operator();
     result_type operator()(const procedure &p) {
         std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
         std::shared_ptr<name> id = std::static_pointer_cast<name>(this->operator()(p.id()));
         std::shared_ptr<tuple> args = std::static_pointer_cast<tuple>(this->operator()(p.args()));
         std::shared_ptr<suite> stmts = std::static_pointer_cast<suite>(this->operator()(p.stmts()));
-        std::shared_ptr<type_t> t(new type_t(p.type()));
+        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, p.type());
         std::shared_ptr<node> result(new procedure(id, args, stmts, t, ct));
-        ctype::ctype_printer cp(std::cout);
-        boost::apply_visitor(cp, std::static_pointer_cast<procedure>(result)->ctype());
         return result;
     }
 };

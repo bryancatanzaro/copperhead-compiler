@@ -80,33 +80,18 @@ class type_t
 {
 public:
     typedef detail::type_base super_t;
-    static int counter;
-    int id;
+  
     template<typename Derived>
     type_t(Derived &self)
         : super_t(std::ref(self)) //use of std::ref disambiguates variant's copy constructor dispatch
-        {
-            id = ++counter;
-            std::cout << "Making a ctype::type_t[" << id <<"](";
-            backend::detail::inspect(self);
-            std::cout << ")" << std::endl;
-        }
+        {}
 
     type_t(const type_t &other)
         : super_t(detail::make_type_base(this, other))
-        {
-            id = ++counter;
-            std::cout << "Copying a ctype::type_t[" << id <<"](";
-            backend::detail::inspect(other);
-            std::cout << ")" << std::endl;
-        }
-    ~type_t() {
-        std::cout << "Destroying a ctype::type_t[" << id << "]"<< std::endl;
-    }
+        {}
+    ~type_t() {}
 
 };
-
-int type_t::counter = 0;
 
 class monotype_t :
     public type_t
