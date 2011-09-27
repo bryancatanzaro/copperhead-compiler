@@ -4,7 +4,7 @@ env = Environment()
 platform = env['PLATFORM']
 
 if platform == 'darwin':
-    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I.. -I/Users/catanzar/boost_1_47_0 -Os")
+    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I.. -I/Users/catanzar/boost_1_47_0 -g")
 else:
     env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I.. -g")
 

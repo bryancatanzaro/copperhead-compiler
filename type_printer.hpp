@@ -15,21 +15,33 @@ public:
         {}
     inline void operator()(const monotype_t &mt) {
         m_os << mt.name();
-        if (mt.begin() != mt.end()) {
-            open();
-            for(auto i = mt.begin();
-                i != mt.end();
-                i++) {
-                boost::apply_visitor(*this, *i);
-                if (std::next(i) != mt.end()) 
-                    sep();
-
-            }
-            close();
-        }
     }
     inline void operator()(const polytype_t &pt) {
     }
+    inline void operator()(const sequence_t &st) {
+        m_os << st.name();
+        open(); boost::apply_visitor(*this, st.sub()); close();
+    }
+    inline void operator()(const fn_t &ft) {
+        m_os << ft.name();
+        open();
+        boost::apply_visitor(*this, ft.args());
+        boost::apply_visitor(*this, ft.result());
+        close();
+    }
+    inline void operator()(const tuple_t &tt) {
+        m_os << tt.name();
+        open();
+        for(auto i = tt.begin();
+            i != tt.end();
+            i++) {
+            boost::apply_visitor(*this, *i);
+            if (std::next(i) != tt.end())
+                sep();
+        }
+        close();
+    }
+        
 private:
     std::ostream &m_os;
     inline void sep() const {

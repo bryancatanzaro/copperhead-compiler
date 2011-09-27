@@ -72,4 +72,10 @@ public:
 
 };
 
+class polytype_t :
+        public type_t {
+    polytype_t() : type_t(*this) {}
+
+};
+
 }
