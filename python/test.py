@@ -3,17 +3,20 @@ import coretypes
 
 a = Return(Apply(Name("adjacent_difference"), Tuple([Name("x")])))
 body = Suite([a])
-args = Tuple([Name("x")])
+arg = Name("x")
+args = Tuple([arg])
 proc = Procedure(Name("adj"), args, body)
 
-arg_types = coretypes.Tuple([coretypes.Sequence(coretypes.Float32())])
+arg_type = coretypes.Sequence(coretypes.Float32())
+arg_types = coretypes.Tuple([arg_type])
 return_type = coretypes.Sequence(coretypes.Float32())
 proc_type = coretypes.Fn(arg_types, return_type)
 proc.type = proc_type
+args.type = arg_types
+arg.type = arg_type
 
 
 print(proc)
-print(proc.type)
 
 
 

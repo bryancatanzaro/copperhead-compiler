@@ -32,17 +32,25 @@ public:
         if (!declared.exists(n.id())) {
             boost::apply_visitor(tp, n.ctype());
             m_os << " ";
+            declared.insert(n.id());
         }
         m_os << n.id();
     }
 
+    inline void operator()(const templated_name &n) {
+        m_os << n.id();
+        m_os << "<";
+        detail::list(tp, n.template_types);
+        m_os << ">";
+    }
+    
     inline void operator()(const number &n) {
         m_os << n.val();
     }
 
     inline void operator()(const tuple &n) {
         open();
-        list(n);
+        detail::list(*this, n);
         close();
     }
 
@@ -109,7 +117,7 @@ public:
     }
     template<typename T>
         inline void operator()(const std::vector<T> &v) {
-        list(v);
+        detail::list(*this, v);
     }
 };
 

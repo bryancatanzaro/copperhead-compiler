@@ -16,7 +16,7 @@ class cu_to_c
 public:
     result_type operator()(const monotype_t& mt) {
         assert(false);
-        return result_type(new ctype::monotype_t("Empty"));
+        return result_type();
         
     }
     result_type operator()(const sequence_t & st) {
@@ -89,6 +89,14 @@ public:
         std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
 
         std::shared_ptr<node> result(new procedure(id, args, stmts, t, ct));
+        return result;
+    }
+    result_type operator()(const name &p) {
+        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, p.type());
+        
+        //Yes, I really want to make a ctype from a type. That's the point!
+        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
+        result_type result(new name(p.id(), t, ct));
         return result;
     }
 };

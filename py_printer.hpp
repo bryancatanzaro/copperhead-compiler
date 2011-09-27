@@ -9,6 +9,20 @@
 
 namespace backend
 {
+namespace detail {
+template<typename Visitor,
+         typename Iterable>
+inline void list(Visitor& v,
+                 const Iterable &l) {
+    for(auto i = l.begin();
+        i != l.end();
+        i++) {
+        boost::apply_visitor(v, *i);
+        if (std::next(i) != l.end())
+            v.sep();
+    }
+}
+}
 
 class py_printer
     : public no_op_visitor<>
@@ -31,7 +45,7 @@ public:
 
     inline void operator()(const tuple &n) {
         open();
-        list(n);
+        detail::list(*this, n);
         close();
     }
 
@@ -42,7 +56,7 @@ public:
     
     inline void operator()(const lambda &n) {
         m_os << "lambda ";
-        list(n.args());
+        detail::list(*this, n.args());
         m_os << ": ";
         boost::apply_visitor(*this, n.body());
     }
@@ -90,9 +104,9 @@ public:
     }
     template<typename T>
         inline void operator()(const std::vector<T> &v) {
-        list(v);
+        detail::list(this, v);
     }
-protected:
+
     inline void sep(void) const {
         m_os << ", ";
     }
@@ -102,6 +116,7 @@ protected:
     inline void close(void) const {
         m_os << ")";
     }
+    protected:
     template<typename Value>
         inline void name(const std::string &n,
                          const Value &val) {
@@ -110,17 +125,7 @@ protected:
         (*this)(val);
         close();
     }
-    template<typename Iterable>
-    inline void list(const Iterable &l,
-                     const std::string sep = ", ") {
-        for(auto i = l.begin();
-            i != l.end();
-            i++) {
-            boost::apply_visitor(*this, *i);
-            if (std::next(i) != l.end())
-                m_os << sep;
-        }
-    }
+
     std::ostream &m_os;
     int indent_level;
     std::string indent_atom;

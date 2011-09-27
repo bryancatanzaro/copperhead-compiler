@@ -82,6 +82,12 @@ public:
         : literal(*this, type, ctype),
           m_val(val)
         {}
+    template<typename Derived>
+    name(Derived& self, const std::string &val,
+         std::shared_ptr<type_t> type,
+         std::shared_ptr<ctype::type_t> ctype) :
+        literal(self, type, ctype), m_val(val) {}
+    
     inline const std::string id() const {
         return m_val;
     }

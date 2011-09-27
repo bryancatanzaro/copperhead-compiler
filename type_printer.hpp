@@ -26,6 +26,7 @@ public:
         m_os << ft.name();
         open();
         boost::apply_visitor(*this, ft.args());
+        sep();
         boost::apply_visitor(*this, ft.result());
         close();
     }
@@ -67,10 +68,14 @@ public:
         m_os << mt.name();
     }
     inline void operator()(const sequence_t &st) {
-        m_os << st.name();
-        open();
+        m_os << st.name() << "<";
         boost::apply_visitor(*this, st.sub());
-        close();
+        m_os << ">";
+    }
+    inline void operator()(const cuarray_t &ct) {
+        //Because cuarray_t is a variant, we don't want to
+        //print out the template definition.
+        this->operator()((monotype_t)ct);
     }
     inline void operator()(const polytype_t &pt) {
     }

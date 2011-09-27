@@ -21,6 +21,7 @@ class float32_mt;
 class float64_mt;
 class bool_mt;
 class void_mt;
+class cuarray_t;
 
 namespace detail {
 typedef boost::variant<
@@ -36,7 +37,8 @@ typedef boost::variant<
     float32_mt &,
     float64_mt &,
     bool_mt &,
-    void_mt &
+    void_mt &,
+    cuarray_t &
     > type_base;
 
 struct make_type_base_visitor
@@ -88,6 +90,7 @@ public:
         : type_t(*this),
           m_name(name)
         {}
+    
     template<typename Derived>
     monotype_t(Derived &self,
                const std::string &name)
@@ -152,11 +155,16 @@ struct void_mt :
 class sequence_t :
         public monotype_t
 {
-private:
+protected:
     std::shared_ptr<type_t> m_sub;
 public:
     inline sequence_t(const std::shared_ptr<type_t> &sub)
-        : monotype_t(*this, "sequence"), m_sub(sub) {}
+        : monotype_t(*this, "stored_sequence"), m_sub(sub) {}
+    template<typename Derived>
+    inline sequence_t(Derived &self,
+                      const std::string& name,
+                      const std::shared_ptr<type_t> &sub) :
+        monotype_t(self, name), m_sub(sub) {}
     const type_t& sub() const {
         return *m_sub;
     }
@@ -205,5 +213,13 @@ class polytype_t :
     polytype_t() : type_t(*this) {}
 
 };
+
+class cuarray_t :
+        public sequence_t {
+public:
+    cuarray_t(const std::shared_ptr<type_t> sub) :
+        sequence_t(*this, "sp_cuarray_var", sub) {}
+};
+        
 }
 }

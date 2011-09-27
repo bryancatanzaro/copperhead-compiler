@@ -8,22 +8,22 @@ namespace backend {
 class type_copier
     : public no_op_visitor<std::shared_ptr<type_t> > {
 public:
-    inline result_type operator()(const monotype_t &mt) {
+    virtual result_type operator()(const monotype_t &mt) {
         return result_type(new monotype_t(mt));
     }
-    inline result_type operator()(const polytype_t &pt) {
+    virtual result_type operator()(const polytype_t &pt) {
         return result_type(new polytype_t(pt));
     }
-    inline result_type operator()(const sequence_t &st) {
+    virtual result_type operator()(const sequence_t &st) {
         result_type sub = boost::apply_visitor(*this, st.sub());
         return result_type(new sequence_t(sub));
     }
-    inline result_type operator()(const fn_t &ft) {
+    virtual result_type operator()(const fn_t &ft) {
         std::shared_ptr<tuple_t> args = std::static_pointer_cast<tuple_t>(this->operator()(ft.args()));
         result_type result = boost::apply_visitor(*this, ft.result());
         return result_type(new fn_t(args, result));
     }
-    inline result_type operator()(const tuple_t &tt) {
+    virtual result_type operator()(const tuple_t &tt) {
         std::vector<result_type> subs;
         for(auto i = tt.begin();
             i != tt.end();
@@ -38,22 +38,22 @@ namespace ctype {
 class ctype_copier
     : public no_op_visitor<std::shared_ptr<ctype::type_t> > {
 public:
-    inline result_type operator()(const ctype::monotype_t &mt) {
+    virtual result_type operator()(const ctype::monotype_t &mt) {
         return result_type(new ctype::monotype_t(mt));
     }
-    inline result_type operator()(const ctype::polytype_t &pt) {
+    virtual result_type operator()(const ctype::polytype_t &pt) {
         return result_type(new polytype_t(pt));
     }
-    inline result_type operator()(const ctype::sequence_t &st) {
+    virtual result_type operator()(const ctype::sequence_t &st) {
         result_type sub = boost::apply_visitor(*this, st.sub());
         return result_type(new ctype::sequence_t(sub));
     }
-    inline result_type operator()(const ctype::fn_t &ft) {
+    virtual result_type operator()(const ctype::fn_t &ft) {
         std::shared_ptr<ctype::tuple_t> args = std::static_pointer_cast<ctype::tuple_t>(this->operator()(ft.args()));
         result_type result = boost::apply_visitor(*this, ft.result());
         return result_type(new ctype::fn_t(args, result));
     }
-    inline result_type operator()(const ctype::tuple_t &tt) {
+    virtual result_type operator()(const ctype::tuple_t &tt) {
         std::vector<result_type> subs;
         for(auto i = tt.begin();
             i != tt.end();
@@ -70,7 +70,7 @@ public:
 class copier
     : public no_op_visitor<std::shared_ptr<node> >
 {
-private:
+protected:
     type_copier m_tc;
     ctype::ctype_copier m_ctc;
 public:

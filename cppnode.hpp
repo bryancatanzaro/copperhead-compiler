@@ -28,4 +28,24 @@ public:
     }
 };
 
+class templated_name
+    : public name
+{
+protected:
+    std::shared_ptr<ctype::tuple_t> m_template_types;
+public:
+    templated_name(const std::string &id,
+                   const std::shared_ptr<ctype::tuple_t> &template_types,
+                   const std::shared_ptr<type_t> type =
+                   std::shared_ptr<type_t>(new void_mt()),
+                   const std::shared_ptr<ctype::type_t> ctype =
+                   std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
+        : name(*this, id, type, ctype),
+          m_template_types(template_types) {}
+    const ctype::tuple_t& template_types() {
+        return *m_template_types;
+    }
+};
+
+
 }

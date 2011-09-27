@@ -8,6 +8,7 @@
 #include "node.hpp"
 #include "functorize.hpp"
 #include "type_convert.hpp"
+#include "wrap.hpp"
 #include <iostream>
 
 namespace backend {
@@ -34,7 +35,9 @@ public:
         std::shared_ptr<suite> type_converted = apply(type_converter, n);
         functorize functorizer(m_entry_point);
         auto functorized = apply(functorizer, type_converted);
-        return functorized;
+        wrap wrapper(m_entry_point);
+        auto wrapped = apply(wrapper, functorized);
+        return wrapped;
     }
     const std::string& entry_point() const {
         return m_entry_point;
