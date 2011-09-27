@@ -83,10 +83,14 @@ public:
     // class with methods that are not const.
     
     virtual result_type operator()(const number& n) {
-        return result_type(new number(n));
+        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
+        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());    
+        return result_type(new number(n.val(), t, ct));
     }
     virtual result_type operator()(const name &n) {
-        return result_type(new name(n));
+        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
+        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());    
+        return result_type(new name(n.id(), t, ct));
     }
     virtual result_type operator()(const tuple &n) {
         std::vector<std::shared_ptr<expression> > n_values;

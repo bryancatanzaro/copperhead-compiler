@@ -3,6 +3,7 @@
 #include <boost/variant.hpp>
 #include <functional>
 
+
 namespace backend {
 
 class monotype_t;
@@ -70,7 +71,9 @@ public:
         : super_t(detail::make_type_base(this, other))
         {}
 
+
 };
+
 
 class polytype_t :
         public type_t {
