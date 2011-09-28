@@ -1,6 +1,7 @@
 #pragma once
 
 #include "node.hpp"
+#include "expression.hpp"
 #include "statement.hpp"
 #include <vector>
 #include <memory>

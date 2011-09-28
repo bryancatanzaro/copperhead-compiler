@@ -48,6 +48,10 @@ public:
         result_type sub = boost::apply_visitor(*this, st.sub());
         return result_type(new ctype::sequence_t(sub));
     }
+    virtual result_type operator()(const ctype::cuarray_t &ct) {
+        result_type sub = boost::apply_visitor(*this, ct.sub());
+        return result_type(new ctype::cuarray_t(sub));
+    }
     virtual result_type operator()(const ctype::fn_t &ft) {
         std::shared_ptr<ctype::tuple_t> args = std::static_pointer_cast<ctype::tuple_t>(this->operator()(ft.args()));
         result_type result = boost::apply_visitor(*this, ft.result());
@@ -103,7 +107,7 @@ public:
         return result_type(new tuple(std::move(n_values), t, ct));
     }
     virtual result_type operator()(const apply &n) {
-        auto n_fn = std::static_pointer_cast<name>((*this)(n.fn()));
+        auto n_fn = std::static_pointer_cast<name>(boost::apply_visitor(*this, n.fn()));
         auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));
         return result_type(new apply(n_fn, n_args));
     }
