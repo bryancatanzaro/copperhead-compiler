@@ -12,6 +12,8 @@
 #include "wrap.hpp"
 #include <iostream>
 
+#include "cuda_printer.hpp"
+
 namespace backend {
 /*! \p compiler contains state and methods for compiling programs.
  */

@@ -14,11 +14,11 @@ class cuda_printer
     : public py_printer
 {
 private:
-    std::string& entry;
+    const std::string& entry;
     environment<std::string> declared;
     ctype::ctype_printer tp;
 public:
-    inline cuda_printer(std::string &entry_point,
+    inline cuda_printer(const std::string &entry_point,
                         std::ostream &os)
         : py_printer(os), entry(entry_point), tp(os)
         {}
