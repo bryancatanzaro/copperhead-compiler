@@ -129,6 +129,10 @@ public:
         auto n_rhs = std::static_pointer_cast<expression>(boost::apply_visitor(*this, n.rhs()));
         return result_type(new bind(n_lhs, n_rhs));
     }
+    virtual result_type operator()(const call &n) {
+        auto n_sub = std::static_pointer_cast<apply>(boost::apply_visitor(*this, n.sub()));
+        return result_type(new call(n_sub));
+    }
     virtual result_type operator()(const procedure &n) {
         auto n_id = std::static_pointer_cast<name>((*this)(n.id()));
         auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));

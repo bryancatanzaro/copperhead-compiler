@@ -21,6 +21,7 @@ class conditional;
 class tuple;
 class ret;
 class bind;
+class call;
 class procedure;
 class suite;
 class statement;
@@ -47,6 +48,7 @@ typedef boost::variant<
     tuple &,
     ret &,
     bind &,
+    call &,
     procedure &,
     suite &,
     structure &,

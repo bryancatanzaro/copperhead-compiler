@@ -57,6 +57,20 @@ public:
     }
 };
 
+class call
+    : public statement
+{
+protected:
+    const std::shared_ptr<apply> m_sub;
+public:
+    call(const std::shared_ptr<apply> &n)
+        : statement(*this), m_sub(n) {}
+    inline const apply& sub(void) const {
+        return *m_sub;
+    }
+};
+        
+
 class procedure
     : public statement
 {

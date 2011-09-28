@@ -69,6 +69,12 @@ public:
         boost::apply_visitor(*this, n.val());
     }
     inline void operator()(const bind &n) {
+        boost::apply_visitor(*this, n.lhs());
+        m_os << " = ";
+        boost::apply_visitor(*this, n.rhs());
+    }
+    inline void operator()(const call & n) {
+        boost::apply_visitor(*this, n.sub());
     }
     inline void operator()(const procedure &n) {
         m_os << "def ";

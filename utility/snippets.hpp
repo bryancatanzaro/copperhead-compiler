@@ -9,5 +9,9 @@ std::string get_remote_r() {
     return "get_remote_r";
 }
 
+std::string wrap() {
+    return "wrap";
+}
+
 }
 }
