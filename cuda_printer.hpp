@@ -73,6 +73,10 @@ public:
         boost::apply_visitor(*this, n.rhs());
         m_os << ";";
     }
+    inline void operator()(const call &n) {
+        boost::apply_visitor(*this, n.sub());
+        m_os << ";";
+    }
     inline void operator()(const procedure &n) {
         const std::string& proc_id = n.id().id();
         declared.insert(proc_id);

@@ -8,6 +8,7 @@
 #include "node.hpp"
 #include "functorize.hpp"
 #include "type_convert.hpp"
+#include "allocate.hpp"
 #include "wrap.hpp"
 #include <iostream>
 
@@ -35,8 +36,10 @@ public:
         auto type_converted = apply(type_converter, n);
         functorize functorizer(m_entry_point);
         auto functorized = apply(functorizer, type_converted);
+        allocate allocator(m_entry_point);
+        auto allocated = apply(allocator, functorized);
         wrap wrapper(m_entry_point);
-        auto wrapped = apply(wrapper, functorized);
+        auto wrapped = apply(wrapper, allocated);
         return wrapped;
     }
     const std::string& entry_point() const {
