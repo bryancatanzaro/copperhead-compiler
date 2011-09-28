@@ -43,11 +43,11 @@ public:
         close();
     }
         
-private:
     std::ostream &m_os;
     inline void sep() const {
         m_os << ", ";
     }
+protected:
     inline void open() const {
         m_os << "(";
     }
@@ -79,11 +79,11 @@ public:
     }
     inline void operator()(const polytype_t &pt) {
     }
-private:
     std::ostream &m_os;
     inline void sep() const {
         m_os << ", ";
     }
+protected:
     inline void open() const {
         m_os << "(";
     }

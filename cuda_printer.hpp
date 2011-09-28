@@ -40,7 +40,7 @@ public:
     inline void operator()(const templated_name &n) {
         m_os << n.id();
         m_os << "<";
-        detail::list(tp, n.template_types);
+        detail::list(tp, n.template_types());
         m_os << ">";
     }
     
@@ -55,7 +55,7 @@ public:
     }
 
     inline void operator()(const apply &n) {
-        (*this)(n.fn());
+        boost::apply_visitor(*this, n.fn());
         (*this)(n.args());
     }
     inline void operator()(const closure &n) {
@@ -68,6 +68,10 @@ public:
         m_os << ";";
     }
     inline void operator()(const bind &n) {
+        boost::apply_visitor(*this, n.lhs());
+        m_os << " = ";
+        boost::apply_visitor(*this, n.rhs());
+        m_os << ";";
     }
     inline void operator()(const procedure &n) {
         const std::string& proc_id = n.id().id();

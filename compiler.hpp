@@ -32,7 +32,7 @@ public:
         : m_entry_point(entry_point) {}
     std::shared_ptr<suite> operator()(const suite &n) {
         type_convert type_converter;
-        std::shared_ptr<suite> type_converted = apply(type_converter, n);
+        auto type_converted = apply(type_converter, n);
         functorize functorizer(m_entry_point);
         auto functorized = apply(functorizer, type_converted);
         wrap wrapper(m_entry_point);

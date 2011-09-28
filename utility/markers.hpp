@@ -11,3 +11,4 @@ std::string wrap_array_id(const std::string &in) {
     return mark_generated_id(in + "_ary");
 }
 }
+}

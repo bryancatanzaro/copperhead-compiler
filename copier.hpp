@@ -150,7 +150,12 @@ public:
         auto n_stmts = std::static_pointer_cast<suite>((*this)(n.stmts()));
         return result_type(new structure(n_id, n_stmts));
     }
-
+    virtual result_type operator()(const templated_name &n) {
+        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
+        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());
+        auto n_args = std::static_pointer_cast<ctype::tuple_t>(boost::apply_visitor(m_ctc, n.template_types()));
+        return result_type(new templated_name(n.id(), n_args, t, ct));
+    }
 };
 
 }

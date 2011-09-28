@@ -42,7 +42,7 @@ public:
                    std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
         : name(*this, id, type, ctype),
           m_template_types(template_types) {}
-    const ctype::tuple_t& template_types() {
+    const ctype::tuple_t& template_types() const {
         return *m_template_types;
     }
 };

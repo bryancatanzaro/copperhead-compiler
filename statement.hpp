@@ -33,9 +33,6 @@ public:
     inline const expression& val(void) const {
         return *m_val;
     }
-    // inline std::shared_ptr<expression> p_val(void) const {
-    //     return m_val;
-    // }
 };
 
 class bind
