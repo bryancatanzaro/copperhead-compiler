@@ -159,15 +159,7 @@ public:
                     detail::wrap_array_id(val.id()),
                     boost::apply_visitor(m_tc, val.type()),
                     boost::apply_visitor(m_ctc, val.ctype())));
-            std::shared_ptr<tuple> wrap_call_tuple(
-                new tuple(
-                    std::vector<std::shared_ptr<expression> >{array_wrapped}));
-            std::shared_ptr<apply> wrap_call(
-                new apply(
-                    std::shared_ptr<name>(
-                        new name(detail::wrap())),
-                    wrap_call_tuple));
-            return result_type(new ret(wrap_call));
+            return result_type(new ret(array_wrapped));
         } else {
             return this->copier::operator()(n);
         }

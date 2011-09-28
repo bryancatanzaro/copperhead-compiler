@@ -92,9 +92,9 @@ public:
 
 typedef boost::variant<cuarray<bool>, cuarray<int>, cuarray<long>, cuarray<float>, cuarray<double> > cuarray_var;
 
+typedef boost::shared_ptr<cuarray_var> sp_cuarray_var;
 
-
-boost::shared_ptr<cuarray_var> make_cuarray(PyObject* in) {
+sp_cuarray_var make_cuarray(PyObject* in) {
     if (!(PyArray_Check(in))) {
         throw std::invalid_argument("Input was not a numpy array");
     }
@@ -108,15 +108,15 @@ boost::shared_ptr<cuarray_var> make_cuarray(PyObject* in) {
     void* d = vecin->data;
     switch (dtype) {
     case NPY_BOOL:
-        return boost::shared_ptr<cuarray_var>(new cuarray_var(*new cuarray<bool>(n, (bool*)d)));
+        return sp_cuarray_var(new cuarray_var(*new cuarray<bool>(n, (bool*)d)));
     case NPY_INT:
-        return boost::shared_ptr<cuarray_var>(new cuarray_var(*new cuarray<int>(n, (int*)d)));
+        return sp_cuarray_var(new cuarray_var(*new cuarray<int>(n, (int*)d)));
     case NPY_LONG:
-        return boost::shared_ptr<cuarray_var>(new cuarray_var(*new cuarray<long>(n, (long*)d)));
+        return sp_cuarray_var(new cuarray_var(*new cuarray<long>(n, (long*)d)));
     case NPY_FLOAT:
-        return boost::shared_ptr<cuarray_var>(new cuarray_var(*new cuarray<float>(n, (float*)d)));
+        return sp_cuarray_var(new cuarray_var(*new cuarray<float>(n, (float*)d)));
     case NPY_DOUBLE:
-        return boost::shared_ptr<cuarray_var>(new cuarray_var(*new cuarray<double>(n, (double*)d)));
+        return sp_cuarray_var(new cuarray_var(*new cuarray<double>(n, (double*)d)));
     default:
         throw std::invalid_argument("Can't create CuArray from this object");
     }
@@ -139,13 +139,13 @@ struct repr_cuarray_printer :
     }
 };
 
-std::string repr_cuarray(const boost::shared_ptr<cuarray_var> &in) {
+std::string repr_cuarray(const sp_cuarray_var &in) {
     repr_cuarray_printer rp;
     return boost::apply_visitor(rp, *in);
 }
 
 template<typename T>
-stored_sequence<T> get_remote_r(boost::shared_ptr<cuarray_var> &in) {
+stored_sequence<T> get_remote_r(sp_cuarray_var &in) {
     return boost::get<cuarray<T> >(*in).get_remote_r();
 };
 
@@ -155,7 +155,7 @@ stored_sequence<T> get_remote_r(cuarray<T>* in) {
 }
 
 template<typename T>
-stored_sequence<T> get_remote_w(boost::shared_ptr<cuarray_var> &in) {
+stored_sequence<T> get_remote_w(sp_cuarray_var &in) {
     return boost::get< cuarray<T> >(*in).get_remote_w();
 };
 
@@ -165,16 +165,13 @@ stored_sequence<T> get_remote_w(cuarray<T>* in) {
 }
 
 template<typename T>
-boost::shared_ptr<cuarray_var> wrap(cuarray<T>* in) {
-    return boost::shared_ptr<cuarray_var>(new cuarray_var(*in));
+sp_cuarray_var make_remote(ssize_t size) {
+    return sp_cuarray_var(new cuarray_var(
+                              *new cuarray<T>(size, false)));
 }
 
 template<typename T>
-cuarray<T>* make_remote(ssize_t size) {
-    return new cuarray<T>(size, false);
-}
-
-template<typename T>
-cuarray<T>* make_local(ssize_t size) {
-    return new cuarray<T>(size);
+sp_cuarray_var make_local(ssize_t size) {
+    return sp_cuarray_var(new cuarray_var(
+                              *new cuarray<T>(size, true)));
 }
