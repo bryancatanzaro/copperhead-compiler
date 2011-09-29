@@ -1,4 +1,4 @@
-#include "cudata.h"
+#include "../cudata/cudata.h"
 
 __global__ void test_kernel(stored_sequence<float> a) {
     if (threadIdx.x == 0) {
@@ -19,7 +19,4 @@ BOOST_PYTHON_MODULE(cudata) {
     class_<cuarray_var, boost::shared_ptr<cuarray_var> >("CuArray", no_init)
         .def("__init__", make_constructor(make_cuarray))
         .def("__repr__", repr_cuarray);
-
-    //register_ptr_to_python<boost::shared_ptr<cuarray_var> >();
-    def("test", test);
 }

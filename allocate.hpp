@@ -76,14 +76,17 @@ public:
             const name& pre_lhs = boost::get<const name&>(n.lhs());
             const apply& pre_apply = boost::get<const apply&>(
                 n.rhs());
-            const tuple& pre_args = boost::get<const tuple&>(
-                pre_apply.args());
 
+
+            
             //Construct cuarray for result
             const ctype::sequence_t& pre_lhs_ct =
                 boost::get<const ctype::sequence_t&>(pre_lhs.ctype());
             std::shared_ptr<ctype::type_t> sub_lhs_ct =
                 boost::apply_visitor(m_ctc, pre_lhs_ct.sub());
+            std::shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct(
+                new ctype::tuple_t(
+                    std::vector<std::shared_ptr<ctype::type_t> >{sub_lhs_ct}));
             std::shared_ptr<ctype::type_t> result_ct(
                 new ctype::cuarray_t(sub_lhs_ct));
             std::shared_ptr<type_t> result_t =
@@ -92,26 +95,13 @@ public:
                 new name(detail::wrap_array_id(pre_lhs.id()),
                          result_t,
                          result_ct));
-            std::shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct(
-                new ctype::tuple_t(
-                    std::vector<std::shared_ptr<ctype::type_t> >{
-                        sub_lhs_ct}));
-            std::shared_ptr<templated_name> maker_name(
-                        new templated_name(detail::make_remote(),
-                                           tuple_sub_lhs_ct));
 
-            //XXX THIS IS A NULLARY SHAPE INFERENCE HACK XXX
-            const name& first_arg = boost::get<const name&>(
-                *pre_args.begin());
-            std::shared_ptr<name> size(
-                new name(first_arg.id() + ".size()"));
-            std::shared_ptr<tuple> size_tupled(
-                new tuple(std::vector<std::shared_ptr<expression> >{size}));
-            std::shared_ptr<apply> maker_call(
-                new apply(maker_name, size_tupled));
+            std::shared_ptr<expression> new_rhs =
+                std::static_pointer_cast<expression>(
+                    boost::apply_visitor(*this, n.rhs()));
             
             std::shared_ptr<bind> allocator(
-                new bind(result_name, maker_call));
+                new bind(result_name, new_rhs));
             m_allocations.push_back(allocator);
             
 
@@ -127,31 +117,7 @@ public:
                 new apply(getter_name, getter_args));
             std::shared_ptr<bind> retriever(
                 new bind(new_lhs, getter_call));
-            m_allocations.push_back(retriever);
-            
-
-            //Return convert
-            std::vector<std::shared_ptr<expression> > args;
-
-            for(auto i = pre_args.begin();
-                i != pre_args.end();
-                i++) {
-                args.push_back(
-                    std::static_pointer_cast<expression>(
-                        boost::apply_visitor(*this, *i)));
-            }
-            args.push_back(new_lhs);
-            std::shared_ptr<tuple> converted_args(
-                new tuple(std::move(args)));
-            std::shared_ptr<name> id =
-                std::static_pointer_cast<name>(
-                    boost::apply_visitor(*this, pre_apply.fn()));
-            std::shared_ptr<apply> converted_apply(
-                new apply(id, converted_args));
-            std::shared_ptr<call> make_the_call(
-                new call(converted_apply));
-            
-            return make_the_call;
+            return retriever;
         } else {
             return this->copier::operator()(n);
         }
