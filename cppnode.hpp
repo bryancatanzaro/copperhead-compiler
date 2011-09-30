@@ -48,5 +48,29 @@ public:
     }
 };
 
+class include
+    : public statement
+{
+protected:
+    const std::shared_ptr<name> m_id;
+    const char m_open;
+    const char m_close;
+public:
+    include(const std::shared_ptr<name> &id,
+            const char open = '\"',
+            const char close = '\"') : statement(*this),
+                                       m_id(id),
+                                       m_open(open),
+                                       m_close(close) {}
+    const name& id() {
+        return *m_id;
+    }
+    const char& open() {
+        return m_open;
+    }
+    const char& close() {
+        return m_close;
+    }
+};
 
 }

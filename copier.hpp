@@ -3,6 +3,15 @@
 #include "type.hpp"
 #include "ctype.hpp"
 
+//XXX Do we really need to copy everything?
+//I think we could forgo all the copying -
+//since we're not actually mutating the nodes.
+//Instead, the copiers should be friends of the
+//various classes they copy and return the shared_ptr(s) which
+//are being held by the classes.
+//This would save lots of extra construction/deconstruction
+//After all, we're using shared_ptr, it's designed for this stuff!
+
 namespace backend {
 
 class type_copier

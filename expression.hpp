@@ -63,11 +63,11 @@ public:
         : literal(*this, type, ctype),
           m_val(val)
         {}
-    inline const std::string val() const {
+    inline const std::string& val() const {
         return m_val;
     }
 protected:
-    std::string m_val;
+    const std::string m_val;
 };
 
 class name
@@ -88,11 +88,11 @@ public:
          std::shared_ptr<ctype::type_t> ctype) :
         literal(self, type, ctype), m_val(val) {}
     
-    inline const std::string id() const {
+    inline const std::string& id() const {
         return m_val;
     }
 protected:
-    std::string m_val;
+    const std::string m_val;
 };
 
 class tuple
@@ -108,7 +108,7 @@ public:
           m_values(std::move(values))
         {}
 protected:
-    std::vector<std::shared_ptr<expression> > m_values;
+    const std::vector<std::shared_ptr<expression> > m_values;
 public:
     typedef decltype(boost::make_indirect_iterator(m_values.cbegin())) const_iterator;
     const_iterator begin() const {
@@ -124,8 +124,8 @@ class apply
     : public expression
 {
 protected:
-    std::shared_ptr<name> m_fn;
-    std::shared_ptr<tuple> m_args;
+    const std::shared_ptr<name> m_fn;
+    const std::shared_ptr<tuple> m_args;
 public:
     apply(const std::shared_ptr<name> &fn,
           const std::shared_ptr<tuple> &args)
@@ -144,8 +144,8 @@ class lambda
     : public expression
 {
 protected:
-    std::shared_ptr<tuple> m_args;
-    std::shared_ptr<expression> m_body;
+    const std::shared_ptr<tuple> m_args;
+    const std::shared_ptr<expression> m_body;
 public:
     lambda(const std::shared_ptr<tuple> &args,
            const std::shared_ptr<expression> &body,

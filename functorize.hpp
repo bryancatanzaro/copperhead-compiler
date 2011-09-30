@@ -49,17 +49,19 @@ public:
     }
     
     result_type operator()(const suite &n) {
-        std::shared_ptr<suite> result(new suite({}));
+        std::vector<std::shared_ptr<statement> > stmts;
         for(auto i = n.begin(); i != n.end(); i++) {
             auto p = std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i));
-            result->push_back(p);
+            stmts.push_back(p);
             while(m_additionals.size() > 0) {
                 auto p = std::static_pointer_cast<statement>(m_additionals.back());
-                result->push_back(p);
+                stmts.push_back(p);
                 m_additionals.pop_back();
             }
         }
-        return result;
+        return result_type(
+            new suite(
+                std::move(stmts)));
     }
     result_type operator()(const procedure &n) {
         auto n_proc = std::static_pointer_cast<procedure>(this->copier::operator()(n));

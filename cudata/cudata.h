@@ -48,7 +48,8 @@ public:
             stored_sequence<T> _d,
             bool _local,
             bool _remote)
-        : m_h(_h), m_d(_d), clean_local(_local), clean_remote(_remote) {}
+        : m_h(_h), m_d(_d), clean_local(_local), clean_remote(_remote) {
+    }
     
     ~cuarray() {
         if (m_h.data != NULL)

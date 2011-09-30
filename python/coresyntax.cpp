@@ -86,7 +86,10 @@ std::string compile(std::shared_ptr<compiler> &c,
     std::shared_ptr<suite> rewritten = c->operator()(*s);
     std::string entry_point = c->entry_point();
     std::ostringstream os;
-    cuda_printer p(entry_point, os);
+    std::shared_ptr<library> thrust = get_thrust_library();
+    registry r;
+    r.add_library(thrust);
+    cuda_printer p(entry_point, r, os);
     p(*rewritten);
     return os.str();
 }

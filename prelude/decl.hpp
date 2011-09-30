@@ -4,6 +4,7 @@
 #include <map>
 #include <cstdlib>
 #include "../import/library.hpp"
+#include "../import/paths.hpp"
 
 #define PRELUDE_PATH "PRELUDE_PATH"
 #define PRELUDE_FILE "prelude.hpp"
@@ -63,15 +64,6 @@ void load_scalars(
     }
 }
 
-const char* get_prelude_path() {
-    char* path = getenv(PRELUDE_PATH);
-    if (path != nullptr) {
-        return path;
-    } else {
-        return "";
-    }
-}
-
 }
 
 
@@ -79,7 +71,7 @@ std::shared_ptr<library> get_builtins() {
     std::map<ident, fn_info> fns;
     detail::load_scalars(fns, detail::unary_scalar_operators);
     detail::load_scalars(fns, detail::binary_scalar_operators);
-    std::string path(detail::get_prelude_path());
+    std::string path(detail::get_path(PRELUDE_PATH));
     std::set<std::string> include_paths;
     if (path.length() > 0) {
         include_paths.insert(path);

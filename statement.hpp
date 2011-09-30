@@ -122,7 +122,7 @@ public:
           m_stmts(std::move(stmts))
         {}
 protected:
-    std::vector<std::shared_ptr<statement> > m_stmts;
+    const std::vector<std::shared_ptr<statement> > m_stmts;
 public:
     typedef decltype(boost::make_indirect_iterator(m_stmts.cbegin())) const_iterator;
     const_iterator begin() const {
@@ -131,9 +131,6 @@ public:
 
     const_iterator end() const {
         return boost::make_indirect_iterator(m_stmts.cend());
-    }
-    void push_back(const std::shared_ptr<statement> &x) {
-        m_stmts.push_back(x);
     }
 };
 

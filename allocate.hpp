@@ -74,10 +74,6 @@ public:
             assert(lhs_is_name);
 
             const name& pre_lhs = boost::get<const name&>(n.lhs());
-            const apply& pre_apply = boost::get<const apply&>(
-                n.rhs());
-
-
             
             //Construct cuarray for result
             const ctype::sequence_t& pre_lhs_ct =
