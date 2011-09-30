@@ -2,7 +2,7 @@
 
 #include <boost/variant.hpp>
 #include <functional>
-
+#include <memory>
 
 namespace backend {
 
@@ -58,7 +58,8 @@ type_base make_type_base(void *ptr, const type_base &other) {
 }
 
 class type_t
-    : public detail::type_base
+    : public detail::type_base,
+      public std::enable_shared_from_this<type_t>
 {
 public:
     typedef detail::type_base super_t;

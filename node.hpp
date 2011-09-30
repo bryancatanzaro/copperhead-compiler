@@ -79,7 +79,8 @@ node_base make_node_base(void *ptr, const node_base &other) {
 } // end detail
 
 class node
-    : public detail::node_base
+    : public detail::node_base,
+      public std::enable_shared_from_this<node>
 {
 protected:
     typedef detail::node_base super_t;

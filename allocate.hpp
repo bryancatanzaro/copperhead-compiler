@@ -49,8 +49,8 @@ public:
             std::shared_ptr<tuple> args =
                 std::static_pointer_cast<tuple>(
                     boost::apply_visitor(*this, n.args()));
-            auto t = boost::apply_visitor(m_tc, n.type());
-            auto ct = boost::apply_visitor(m_ctc, n.ctype());
+            auto t = get_type_ptr(n.type());
+            auto ct = get_ctype_ptr(n.ctype());
             std::shared_ptr<name> id =
                 std::static_pointer_cast<name>(
                     boost::apply_visitor(*this, n.id()));
@@ -79,14 +79,14 @@ public:
             const ctype::sequence_t& pre_lhs_ct =
                 boost::get<const ctype::sequence_t&>(pre_lhs.ctype());
             std::shared_ptr<ctype::type_t> sub_lhs_ct =
-                boost::apply_visitor(m_ctc, pre_lhs_ct.sub());
+                get_ctype_ptr(pre_lhs_ct.sub());
             std::shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct(
                 new ctype::tuple_t(
                     std::vector<std::shared_ptr<ctype::type_t> >{sub_lhs_ct}));
             std::shared_ptr<ctype::type_t> result_ct(
                 new ctype::cuarray_t(sub_lhs_ct));
             std::shared_ptr<type_t> result_t =
-                boost::apply_visitor(m_tc, pre_lhs.type());
+                get_type_ptr(pre_lhs.type());
             std::shared_ptr<name> result_name(
                 new name(detail::wrap_array_id(pre_lhs.id()),
                          result_t,

@@ -40,11 +40,11 @@ public:
                     assert(is_node);
                     
                     std::shared_ptr<type_t> t =
-                        boost::apply_visitor(m_tc, i->type());
+                        get_type_ptr(i->type());
                     const ctype::sequence_t& arg_c_type =
                         boost::get<const ctype::sequence_t&>(i->ctype());
                     std::shared_ptr<ctype::type_t> sub_ct =
-                        boost::apply_visitor(m_ctc, arg_c_type.sub());
+                        get_ctype_ptr(arg_c_type.sub());
                     std::shared_ptr<ctype::type_t> ct(
                         new ctype::cuarray_t(sub_ct));
                     const name& arg_name =
@@ -107,7 +107,7 @@ public:
                 i != wrapped_args.end();
                 i++) {
                 arg_cts.push_back(
-                    boost::apply_visitor(m_ctc, (*i)->ctype()));
+                    get_ctype_ptr((*i)->ctype()));
             }
             std::shared_ptr<ctype::tuple_t> new_args_ct(
                 new ctype::tuple_t(std::move(arg_cts)));
@@ -117,7 +117,7 @@ public:
                 const ctype::sequence_t& res_seq_t =
                     boost::get<const ctype::sequence_t&>(previous_c_res_t);
                 std::shared_ptr<ctype::type_t> sub_res_t =
-                    boost::apply_visitor(m_ctc, res_seq_t.sub());
+                    get_ctype_ptr(res_seq_t.sub());
                 
                 std::shared_ptr<ctype::type_t> new_res_ct(
                     new ctype::cuarray_t(sub_res_t));
@@ -126,7 +126,7 @@ public:
                                                       
             } else {
                 std::shared_ptr<ctype::type_t> new_res_ct =
-                    boost::apply_visitor(m_ctc, previous_c_res_t);
+                    get_ctype_ptr(previous_c_res_t);
                 new_ct = std::shared_ptr<ctype::fn_t>(
                     new ctype::fn_t(new_args_ct, new_res_ct));
             }
@@ -139,7 +139,7 @@ public:
                 new tuple(std::move(wrapped_args)));
 
             auto id = std::static_pointer_cast<name>(this->operator()(n.id()));
-            auto t = boost::apply_visitor(m_tc, n.type());
+            auto t = get_type_ptr(n.type());
             result_type completed_wrap(
                 new procedure(id, args, stmts, t, new_ct));
             m_wrapping = false;
@@ -157,8 +157,8 @@ public:
             std::shared_ptr<name> array_wrapped(
                 new name(
                     detail::wrap_array_id(val.id()),
-                    boost::apply_visitor(m_tc, val.type()),
-                    boost::apply_visitor(m_ctc, val.ctype())));
+                    get_type_ptr(val.type()),
+                    get_ctype_ptr(val.ctype())));
             return result_type(new ret(array_wrapped));
         } else {
             return this->copier::operator()(n);

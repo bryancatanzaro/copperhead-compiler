@@ -3,106 +3,38 @@
 #include "type.hpp"
 #include "ctype.hpp"
 
-//XXX Do we really need to copy everything?
-//I think we could forgo all the copying -
-//since we're not actually mutating the nodes.
-//Instead, the copiers should be friends of the
-//various classes they copy and return the shared_ptr(s) which
-//are being held by the classes.
-//This would save lots of extra construction/deconstruction
-//After all, we're using shared_ptr, it's designed for this stuff!
-
 namespace backend {
-
-class type_copier
-    : public no_op_visitor<std::shared_ptr<type_t> > {
-public:
-    virtual result_type operator()(const monotype_t &mt) {
-        return result_type(new monotype_t(mt));
-    }
-    virtual result_type operator()(const polytype_t &pt) {
-        return result_type(new polytype_t(pt));
-    }
-    virtual result_type operator()(const sequence_t &st) {
-        result_type sub = boost::apply_visitor(*this, st.sub());
-        return result_type(new sequence_t(sub));
-    }
-    virtual result_type operator()(const fn_t &ft) {
-        std::shared_ptr<tuple_t> args = std::static_pointer_cast<tuple_t>(this->operator()(ft.args()));
-        result_type result = boost::apply_visitor(*this, ft.result());
-        return result_type(new fn_t(args, result));
-    }
-    virtual result_type operator()(const tuple_t &tt) {
-        std::vector<result_type> subs;
-        for(auto i = tt.begin();
-            i != tt.end();
-            i++) {
-            subs.push_back(boost::apply_visitor(*this, *i));
-        }
-        return result_type(new tuple_t(std::move(subs)));
-    }
-};
-
-namespace ctype {
-class ctype_copier
-    : public no_op_visitor<std::shared_ptr<ctype::type_t> > {
-public:
-    virtual result_type operator()(const ctype::monotype_t &mt) {
-        return result_type(new ctype::monotype_t(mt));
-    }
-    virtual result_type operator()(const ctype::polytype_t &pt) {
-        return result_type(new polytype_t(pt));
-    }
-    virtual result_type operator()(const ctype::sequence_t &st) {
-        result_type sub = boost::apply_visitor(*this, st.sub());
-        return result_type(new ctype::sequence_t(sub));
-    }
-    virtual result_type operator()(const ctype::cuarray_t &ct) {
-        result_type sub = boost::apply_visitor(*this, ct.sub());
-        return result_type(new ctype::cuarray_t(sub));
-    }
-    virtual result_type operator()(const ctype::fn_t &ft) {
-        std::shared_ptr<ctype::tuple_t> args = std::static_pointer_cast<ctype::tuple_t>(this->operator()(ft.args()));
-        result_type result = boost::apply_visitor(*this, ft.result());
-        return result_type(new ctype::fn_t(args, result));
-    }
-    virtual result_type operator()(const ctype::tuple_t &tt) {
-        std::vector<result_type> subs;
-        for(auto i = tt.begin();
-            i != tt.end();
-            i++) {
-            subs.push_back(boost::apply_visitor(*this, *i));
-        }
-        return result_type(new ctype::tuple_t(std::move(subs)));
-    }
-};
-
-}
-
 
 class copier
     : public no_op_visitor<std::shared_ptr<node> >
 {
 protected:
-    type_copier m_tc;
-    ctype::ctype_copier m_ctc;
+    //If you know you're not going to do any rewriting at deeper
+    //levels of the AST, just grab the pointer from the node
+    template<typename Node>
+    result_type get_node_ptr(const Node &n) {
+        return std::const_pointer_cast<node>(n.shared_from_this());
+    }
+    template<typename Type>
+    std::shared_ptr<type_t> get_type_ptr(const Type &n) {
+        return std::const_pointer_cast<type_t>(n.shared_from_this());
+    }
+    template<typename Ctype>
+    std::shared_ptr<ctype::type_t> get_ctype_ptr(const Ctype &n) {
+        return std::const_pointer_cast<ctype::type_t>(n.shared_from_this());
+    }
 public:
-    copier() : m_tc(), m_ctc() {}
     using backend::no_op_visitor<std::shared_ptr<node> >::operator();
-
-    // Although these operator() methods could be declared here as
-    // ... operator(..) const
-    // I'm leaving out the const because they may be overridden in a sub
-    // class with methods that are not const.
+  
     
     virtual result_type operator()(const literal& n) {
-        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
-        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());    
+        std::shared_ptr<type_t> t = get_type_ptr(n.type());
+        std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
         return result_type(new literal(n.id(), t, ct));
     }
     virtual result_type operator()(const name &n) {
-        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
-        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());    
+        std::shared_ptr<type_t> t = get_type_ptr(n.type());
+        std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
         return result_type(new name(n.id(), t, ct));
     }
     virtual result_type operator()(const tuple &n) {
@@ -111,8 +43,9 @@ public:
             auto n_i = std::static_pointer_cast<expression>(boost::apply_visitor(*this, *i));
             n_values.push_back(n_i);
         }
-        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
-        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());
+        std::shared_ptr<type_t> t = get_type_ptr(n.type());
+        std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
+        
         return result_type(new tuple(std::move(n_values), t, ct));
     }
     virtual result_type operator()(const apply &n) {
@@ -123,8 +56,8 @@ public:
     virtual result_type operator()(const lambda &n) {
         auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));
         auto n_body = std::static_pointer_cast<expression>(boost::apply_visitor(*this, n.body()));
-        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
-        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());
+        std::shared_ptr<type_t> t = get_type_ptr(n.type());
+        std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
         return result_type(new lambda(n_args, n_body, t, ct));
     }
     virtual result_type operator()(const closure &n) {
@@ -150,8 +83,9 @@ public:
         auto n_id = std::static_pointer_cast<name>((*this)(n.id()));
         auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));
         auto n_stmts = std::static_pointer_cast<suite>((*this)(n.stmts()));
-        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
-        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());
+        std::shared_ptr<type_t> t = get_type_ptr(n.type());
+        std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
+
         return result_type(new procedure(n_id, n_args, n_stmts, t, ct));
     }
     virtual result_type operator()(const suite &n) {
@@ -168,9 +102,10 @@ public:
         return result_type(new structure(n_id, n_stmts));
     }
     virtual result_type operator()(const templated_name &n) {
-        std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
-        std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());
-        auto n_args = std::static_pointer_cast<ctype::tuple_t>(boost::apply_visitor(m_ctc, n.template_types()));
+        std::shared_ptr<type_t> t = get_type_ptr(n.type());
+        std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
+        auto n_args = std::static_pointer_cast<ctype::tuple_t>(
+            get_ctype_ptr(n.template_types()));
         return result_type(new templated_name(n.id(), n_args, t, ct));
     }
     virtual result_type operator()(const include &n) {
