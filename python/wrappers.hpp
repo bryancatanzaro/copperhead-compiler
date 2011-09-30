@@ -9,9 +9,12 @@ class name_wrap
     : public name
 {
 public:
-    name_wrap(const std::string &id)
+    name_wrap(const std::string& id)
         : name(id)
         {}
+    inline const std::string id(void) const {
+        return m_val;
+    }
     inline const std::shared_ptr<type_t> p_type(void) const {
         return m_type;
     }
@@ -30,9 +33,12 @@ class number_wrap
     : public number
 {
 public:
-    number_wrap(const std::string &id)
+    number_wrap(const std::string& id)
         : number(id)
         {}
+    inline const std::string val(void) const {
+        return m_val;
+    }
     inline const std::shared_ptr<type_t> p_type(void) const {
         return m_type;
     }

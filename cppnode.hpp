@@ -62,13 +62,13 @@ public:
                                        m_id(id),
                                        m_open(open),
                                        m_close(close) {}
-    const name& id() {
+    const name& id() const {
         return *m_id;
     }
-    const char& open() {
+    const char& open() const {
         return m_open;
     }
-    const char& close() {
+    const char& close() const {
         return m_close;
     }
 };

@@ -173,6 +173,11 @@ public:
         auto n_args = std::static_pointer_cast<ctype::tuple_t>(boost::apply_visitor(m_ctc, n.template_types()));
         return result_type(new templated_name(n.id(), n_args, t, ct));
     }
+    virtual result_type operator()(const include &n) {
+        std::shared_ptr<name> id = std::static_pointer_cast<name>(
+            boost::apply_visitor(*this, n.id()));
+        return result_type(new include(id));
+    }
 };
 
 }

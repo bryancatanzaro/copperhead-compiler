@@ -65,6 +65,12 @@ public:
         list(n);
         m_os << ")";
     }
+    inline void operator()(const include &n) {
+        m_os << "Include(";
+        boost::apply_visitor(*this, n.id());
+        m_os << ")";
+    }
+        
     inline void operator()(const std::string &s) {
         m_os << s;
     }

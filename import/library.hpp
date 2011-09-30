@@ -67,10 +67,11 @@ private:
 struct library {
 private:
     std::map<ident, fn_info> m_fns;
-    std::set<std::string> m_include_dirs;
     std::set<std::string> m_includes;
-    std::set<std::string> m_link_dirs;
+    std::set<std::string> m_include_dirs;
     std::set<std::string> m_links;
+    std::set<std::string> m_link_dirs;
+
 public:
     inline library(std::map<ident, fn_info> &&fns,
                    std::set<std::string> &&includes=std::set<std::string>(),

@@ -4,6 +4,7 @@
 #include <map>
 #include <cstdlib>
 #include "../import/library.hpp"
+#include "../import/paths.hpp"
 
 #define PRELUDE_PATH "PRELUDE_PATH"
 #define THRUST_PATH "THRUST_PATH"
@@ -27,9 +28,9 @@ std::shared_ptr<library> get_thrust() {
     for(auto i = detail::thrust_fn_names.begin();
         i != detail::thrust_fn_names.end();
         i++) {
-        fns.insert(std::pair<ident, fn_info{
-                ident{std::string(*i), iteration_structure::parallel},
-                    blank});
+        fns.insert(std::pair<ident, fn_info>(
+                       ident(std::string(*i), iteration_structure::parallel),
+                       blank));
 
     }
     //XXX HACK.  NEED boost::filesystem path manipulation

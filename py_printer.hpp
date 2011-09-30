@@ -105,6 +105,9 @@ public:
         (*this)(n.stmts());
         dedent();
     }
+    inline void operator()(const include &n) {
+    }
+    
     inline void operator()(const std::string &s) {
         m_os << s;
     }

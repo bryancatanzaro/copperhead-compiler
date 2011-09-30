@@ -6,7 +6,7 @@
 #include "utility/markers.hpp"
 #include "utility/snippets.hpp"
 #include "py_printer.hpp"
-#include "library.hpp"
+#include "import/library.hpp"
 
 namespace backend {
 
@@ -19,12 +19,12 @@ private:
     std::vector<std::shared_ptr<include> > m_includes;
     bool m_outer;
 public:
-    wrap(const std::string& entry_point,
+    bpl_wrap(const std::string& entry_point,
          const registry& reg)
         : m_entry_point(entry_point),
           m_outer(true) {
-        for(auto i = reg.includes.cbegin();
-            i != reg.includes.cend();
+        for(auto i = reg.includes().cbegin();
+            i != reg.includes().cend();
             i++) {
             m_includes.push_back(
                 std::shared_ptr<include>(
@@ -37,7 +37,7 @@ public:
     using copier::operator();
     result_type operator()(const suite& n) {
         if (!m_outer) {
-            return this->copier::operator(n);
+            return this->copier::operator()(n);
         }
         m_outer = false;
         std::vector<std::shared_ptr<statement> > stmts;
@@ -49,7 +49,8 @@ public:
         for(auto i = n.begin();
             i != n.end();
             i++) {
-            stmts.insert(boost::apply_visitor(*this, *i));
+            stmts.push_back(
+                std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i)));
         }
 
         std::shared_ptr<name> entry_name(
@@ -68,19 +69,19 @@ public:
                     new apply(def_fn, def_args))));
         std::shared_ptr<suite> def_suite(
             new suite(
-                std::vector<std::shared_ptr<suite> >{def_call}));
+                std::vector<std::shared_ptr<statement> >{def_call}));
         std::shared_ptr<name> bpl_module(
             new name(
                 detail::boost_python_module()));
         std::shared_ptr<tuple> bpl_module_args(
             new tuple(
-                std::vector<std::shared_ptr<expression>{entry_name}));
+                std::vector<std::shared_ptr<expression> >{entry_name}));
         std::shared_ptr<procedure> bpl_proc(
             new procedure(
                 bpl_module,
                 bpl_module_args,
                 def_suite));
-        stmts.insert(bpl_proc);
+        stmts.push_back(bpl_proc);
 
         return result_type(
             new suite(std::move(stmts)));
