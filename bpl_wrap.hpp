@@ -29,8 +29,8 @@ public:
             m_includes.push_back(
                 std::shared_ptr<include>(
                     new include(
-                        std::shared_ptr<name>(
-                            new name(*i)))));
+                        std::shared_ptr<literal>(
+                            new literal(*i)))));
         }
 
     }
@@ -55,8 +55,8 @@ public:
 
         std::shared_ptr<name> entry_name(
             new name(m_entry_point));
-        std::shared_ptr<name> python_entry_name(
-            new name("\"" + m_entry_point + "\""));
+        std::shared_ptr<literal> python_entry_name(
+            new literal("\"" + m_entry_point + "\""));
         std::shared_ptr<tuple> def_args(
             new tuple(
                 std::vector<std::shared_ptr<expression> >{python_entry_name, entry_name}));

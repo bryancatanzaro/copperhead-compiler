@@ -52,17 +52,17 @@ class include
     : public statement
 {
 protected:
-    const std::shared_ptr<name> m_id;
+    const std::shared_ptr<literal> m_id;
     const char m_open;
     const char m_close;
 public:
-    include(const std::shared_ptr<name> &id,
+    include(const std::shared_ptr<literal> &id,
             const char open = '\"',
             const char close = '\"') : statement(*this),
                                        m_id(id),
                                        m_open(open),
                                        m_close(close) {}
-    const name& id() const {
+    const literal& id() const {
         return *m_id;
     }
     const char& open() const {
