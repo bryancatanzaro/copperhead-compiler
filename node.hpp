@@ -12,7 +12,7 @@
 namespace backend
 {
 
-class number;
+class literal;
 class name;
 class apply;
 class lambda;
@@ -32,7 +32,6 @@ class include;
 class node;
 class statement;
 class expression;
-class literal;
 class cppnode;
 
 
@@ -40,7 +39,7 @@ namespace detail
 {
 
 typedef boost::variant<
-    number &,
+    literal &,
     name &,
     apply &,
     lambda &,

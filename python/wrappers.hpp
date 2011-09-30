@@ -5,12 +5,12 @@
 
 namespace backend {
 
-class name_wrap
-    : public name
+class literal_wrap
+    : public literal
 {
 public:
-    name_wrap(const std::string& id)
-        : name(id)
+    literal_wrap(const std::string& id)
+        : literal(id)
         {}
     inline const std::string id(void) const {
         return m_val;
@@ -29,14 +29,15 @@ public:
     // }
 };
 
-class number_wrap
-    : public number
+
+class name_wrap
+    : public name
 {
 public:
-    number_wrap(const std::string& id)
-        : number(id)
+    name_wrap(const std::string& id)
+        : name(id)
         {}
-    inline const std::string val(void) const {
+        inline const std::string id(void) const {
         return m_val;
     }
     inline const std::shared_ptr<type_t> p_type(void) const {
@@ -52,6 +53,7 @@ public:
     //     m_ctype = type;
     // }
 };
+
 
     
 class apply_wrap

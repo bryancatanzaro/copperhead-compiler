@@ -33,9 +33,6 @@ public:
     
     using backend::py_printer::operator();
 
-    //XXX Why do I need to qualify backend::name?
-    //Am I hiding backend::name somewhere?
-    //Or a compiler bug?
     inline void operator()(const backend::name &n) {
         if (!declared.exists(n.id())) {
             boost::apply_visitor(tp, n.ctype());
@@ -52,8 +49,8 @@ public:
         m_os << ">";
     }
     
-    inline void operator()(const number &n) {
-        m_os << n.val();
+    inline void operator()(const literal &n) {
+        m_os << n.id();
     }
 
     inline void operator()(const tuple &n) {
@@ -136,7 +133,6 @@ public:
     
     inline void operator()(const include &n) {
         m_os << "#include " << n.open();
-        m_os << n.open();
         boost::apply_visitor(*this, n.id());
         m_os << n.close() << std::endl;
     }

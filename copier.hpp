@@ -95,10 +95,10 @@ public:
     // I'm leaving out the const because they may be overridden in a sub
     // class with methods that are not const.
     
-    virtual result_type operator()(const number& n) {
+    virtual result_type operator()(const literal& n) {
         std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());
         std::shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_ctc, n.ctype());    
-        return result_type(new number(n.val(), t, ct));
+        return result_type(new literal(n.id(), t, ct));
     }
     virtual result_type operator()(const name &n) {
         std::shared_ptr<type_t> t = boost::apply_visitor(m_tc, n.type());

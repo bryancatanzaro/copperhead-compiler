@@ -40,34 +40,28 @@ class literal
     : public expression
 {
 protected:
+    const std::string m_val;
+public:
     template<typename Derived>
     literal(Derived &self,
+            const std::string& val,
             std::shared_ptr<type_t> type =
             std::shared_ptr<type_t>(new void_mt()),
             std::shared_ptr<ctype::type_t> ctype =
             std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
-        : expression(self, type, ctype)
+        : expression(self, type, ctype), m_val(val)
         {}
-
-};
-
-class number
-    : public literal
-{
-public:
-    number(const std::string &val,
-           std::shared_ptr<type_t> type =
-           std::shared_ptr<type_t>(new void_mt()),
-           std::shared_ptr<ctype::type_t> ctype =
-           std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
-        : literal(*this, type, ctype),
-          m_val(val)
+    literal(const std::string& val,
+            std::shared_ptr<type_t> type =
+            std::shared_ptr<type_t>(new void_mt()),
+            std::shared_ptr<ctype::type_t> ctype =
+            std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
+        : expression(*this, type, ctype), m_val(val)
         {}
-    inline const std::string& val() const {
+    const std::string& id(void) const {
         return m_val;
     }
-protected:
-    const std::string m_val;
+
 };
 
 class name
@@ -79,20 +73,13 @@ public:
          std::shared_ptr<type_t>(new void_mt()),
          std::shared_ptr<ctype::type_t> ctype =
          std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
-        : literal(*this, type, ctype),
-          m_val(val)
+        : literal(*this, val, type, ctype)
         {}
     template<typename Derived>
     name(Derived& self, const std::string &val,
          std::shared_ptr<type_t> type,
          std::shared_ptr<ctype::type_t> ctype) :
-        literal(self, type, ctype), m_val(val) {}
-    
-    inline const std::string& id() const {
-        return m_val;
-    }
-protected:
-    const std::string m_val;
+        literal(self, val, type, ctype) {}
 };
 
 class tuple

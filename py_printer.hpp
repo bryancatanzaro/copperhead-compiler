@@ -35,12 +35,8 @@ public:
 // XXX why do we have to use 'using' to make the base class's overloads visible?
     //using backend::no_op_visitor<>::operator();
 
-    inline void operator()(const name &n) {
+    inline void operator()(const literal &n) {
         m_os << n.id();
-    }
-
-    inline void operator()(const number &n) {
-        m_os << n.val();
     }
 
     inline void operator()(const tuple &n) {
@@ -126,14 +122,6 @@ public:
         m_os << ")";
     }
     protected:
-    template<typename Value>
-        inline void name(const std::string &n,
-                         const Value &val) {
-        m_os << n;
-        open();
-        (*this)(val);
-        close();
-    }
 
     std::ostream &m_os;
     int indent_level;

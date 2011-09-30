@@ -18,8 +18,8 @@ public:
         name("Name", n.id());
     }
 
-    inline void operator()(const number &n) {
-        name("Number", n.val());
+    inline void operator()(const literal &n) {
+        name("Literal", n.id());
     }
 
     inline void operator()(const tuple &n) {

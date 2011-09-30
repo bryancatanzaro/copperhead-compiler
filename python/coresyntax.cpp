@@ -98,21 +98,18 @@ BOOST_PYTHON_MODULE(coresyntax) {
     class_<expression, std::shared_ptr<expression>, bases<node>, boost::noncopyable>("Expression", no_init)
         .def("__str__", &backend::str_apply<expression>)
         .def("__repr__", &backend::repr_apply<expression>);
-    class_<literal, std::shared_ptr<literal>, bases<expression, node>, boost::noncopyable>("Literal", no_init)
-        .def("__str__", &backend::str_apply<literal>)
-        .def("__repr__", &backend::repr_apply<literal>);
-    class_<name_wrap, std::shared_ptr<name_wrap>, bases<literal, expression, node> >("Name", init<std::string>())
+    class_<literal_wrap, std::shared_ptr<literal_wrap>, bases<expression, node> >("Literal", init<std::string>())
+        .def("id", &literal_wrap::id)
+        .def("__str__", &backend::str<literal_wrap>)
+        .def("__repr__", &backend::repr<literal_wrap>)
+        .add_property("type", &literal_wrap::p_type, &literal_wrap::set_type);
+    //.add_property("ctype", &number_wrap::p_ctype, &number_wrap::set_ctype);
+    class_<name_wrap, std::shared_ptr<name_wrap>, bases<expression, node> >("Name", init<std::string>())
         .def("id", &name_wrap::id)
         .def("__str__", &backend::str<name_wrap>)
         .def("__repr__", &backend::repr<name_wrap>)
         .add_property("type", &name_wrap::p_type, &name_wrap::set_type);
-        //.add_property("ctype", &name_wrap::p_ctype, &name_wrap::set_ctype);  
-    class_<number_wrap, std::shared_ptr<number_wrap>, bases<literal, expression, node> >("Number", init<std::string>())
-        .def("val", &number_wrap::val)
-        .def("__str__", &backend::str<number_wrap>)
-        .def("__repr__", &backend::repr<number_wrap>)
-        .add_property("type", &number_wrap::p_type, &number_wrap::set_type);
-    //.add_property("ctype", &number_wrap::p_ctype, &number_wrap::set_ctype);
+        //.add_property("ctype", &name_wrap::p_ctype, &name_wrap::set_ctype);
     class_<backend::tuple_wrap, std::shared_ptr<backend::tuple_wrap>, bases<expression, node> >("Tuple")
         .def("__init__", make_constructor(make_from_list<expression, backend::tuple_wrap>))
         .def("__iter__", range(&tuple_wrap::p_begin, &tuple_wrap::p_end))
@@ -170,7 +167,11 @@ BOOST_PYTHON_MODULE(coresyntax) {
    
     
     implicitly_convertible<std::shared_ptr<backend::expression>, std::shared_ptr<backend::node> >();
+    implicitly_convertible<std::shared_ptr<backend::literal>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::literal>, std::shared_ptr<backend::expression> >();
+    implicitly_convertible<std::shared_ptr<backend::literal_wrap>, std::shared_ptr<backend::node> >();
+    implicitly_convertible<std::shared_ptr<backend::literal_wrap>, std::shared_ptr<backend::expression> >();
+    implicitly_convertible<std::shared_ptr<backend::literal_wrap>, std::shared_ptr<backend::literal> >();
     implicitly_convertible<std::shared_ptr<backend::name>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::name>, std::shared_ptr<backend::expression> >();
     implicitly_convertible<std::shared_ptr<backend::name>, std::shared_ptr<backend::literal> >();
@@ -178,13 +179,6 @@ BOOST_PYTHON_MODULE(coresyntax) {
     implicitly_convertible<std::shared_ptr<backend::name_wrap>, std::shared_ptr<backend::expression> >();
     implicitly_convertible<std::shared_ptr<backend::name_wrap>, std::shared_ptr<backend::literal> >();
     implicitly_convertible<std::shared_ptr<backend::name_wrap>, std::shared_ptr<backend::name> >();
-    implicitly_convertible<std::shared_ptr<backend::number>, std::shared_ptr<backend::node> >();
-    implicitly_convertible<std::shared_ptr<backend::number>, std::shared_ptr<backend::expression> >();
-    implicitly_convertible<std::shared_ptr<backend::number>, std::shared_ptr<backend::literal> >();
-    implicitly_convertible<std::shared_ptr<backend::number_wrap>, std::shared_ptr<backend::node> >();
-    implicitly_convertible<std::shared_ptr<backend::number_wrap>, std::shared_ptr<backend::expression> >();
-    implicitly_convertible<std::shared_ptr<backend::number_wrap>, std::shared_ptr<backend::literal> >();
-    implicitly_convertible<std::shared_ptr<backend::number_wrap>, std::shared_ptr<backend::number> >();
     implicitly_convertible<std::shared_ptr<backend::tuple>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::tuple>, std::shared_ptr<backend::expression> >();
     implicitly_convertible<std::shared_ptr<backend::tuple_wrap>, std::shared_ptr<backend::node> >();
