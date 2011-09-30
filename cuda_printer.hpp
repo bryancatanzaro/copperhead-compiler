@@ -133,6 +133,14 @@ public:
         dedent();
         m_os << "};" << std::endl;
     }
+    
+    inline void operator()(const include &n) {
+        m_os << "#include " << n.open();
+        m_os << n.open();
+        boost::apply_visitor(*this, n.id());
+        m_os << n.close() << std::endl;
+    }
+    
     inline void operator()(const std::string &s) {
         m_os << s;
     }
