@@ -72,9 +72,8 @@ public:
             //We can only deal with names on the LHS of a bind
             bool lhs_is_name = detail::isinstance<name, node>(n.lhs());
             assert(lhs_is_name);
-
             const name& pre_lhs = boost::get<const name&>(n.lhs());
-            
+
             //Construct cuarray for result
             const ctype::sequence_t& pre_lhs_ct =
                 boost::get<const ctype::sequence_t&>(pre_lhs.ctype());

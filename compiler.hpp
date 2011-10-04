@@ -13,7 +13,7 @@
 #include "bpl_wrap.hpp"
 #include <iostream>
 #include "thrust/library.hpp"
-
+#include "prelude/decl.hpp"
 #include "cuda_printer.hpp"
 
 namespace backend {
@@ -38,17 +38,33 @@ public:
         : m_entry_point(entry_point) {
         std::shared_ptr<library> thrust = get_thrust();
         m_registry.add_library(thrust);
+        std::shared_ptr<library> prelude = get_builtins();
+        m_registry.add_library(prelude);
 
     }
     std::shared_ptr<suite> operator()(const suite &n) {
+        cuda_printer cp(m_entry_point, m_registry, std::cout);
+        
         type_convert type_converter;
         auto type_converted = apply(type_converter, n);
-        functorize functorizer(m_entry_point);
+
+        boost::apply_visitor(cp, *type_converted);
+        
+        functorize functorizer(m_entry_point, m_registry);
         auto functorized = apply(functorizer, type_converted);
+
+        boost::apply_visitor(cp, *functorized);
+                
         allocate allocator(m_entry_point);
         auto allocated = apply(allocator, functorized);
+
+        boost::apply_visitor(cp, *allocated);
+        
         wrap wrapper(m_entry_point);
         auto wrapped = apply(wrapper, allocated);
+
+        boost::apply_visitor(cp, *wrapped);
+        
         bpl_wrap bpl_wrapper(m_entry_point, m_registry);
         auto bpl_wrapped = apply(bpl_wrapper, wrapped);
         return bpl_wrapped;

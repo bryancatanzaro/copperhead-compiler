@@ -97,7 +97,6 @@ public:
             if (!is_entry) {
                 m_os << "__device__ ";
             }
-      
             const ctype::fn_t &n_f = boost::get<const ctype::fn_t&>(n_t);
             const ctype::type_t& ret_t = n_f.result();
             boost::apply_visitor(tp, ret_t);
@@ -126,7 +125,7 @@ public:
     inline void operator()(const structure &n) {
         indentation();
         m_os << "struct ";
-        (*this)(n.id());
+        m_os << n.id().id();
         m_os << " {" << std::endl;
         indent();
         (*this)(n.stmts());

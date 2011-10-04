@@ -41,6 +41,7 @@ public:
                     
                     std::shared_ptr<type_t> t =
                         get_type_ptr(i->type());
+                    
                     const ctype::sequence_t& arg_c_type =
                         boost::get<const ctype::sequence_t&>(i->ctype());
                     std::shared_ptr<ctype::type_t> sub_ct =
@@ -150,19 +151,20 @@ public:
         
     }
     result_type operator()(const ret& n) {
-        const name& val =
-            boost::get<const name&>(n.val());
-        if (m_wrapping && detail::isinstance<ctype::sequence_t,
-            ctype::type_t>(val.ctype())) {
-            std::shared_ptr<name> array_wrapped(
-                new name(
-                    detail::wrap_array_id(val.id()),
-                    get_type_ptr(val.type()),
-                    get_ctype_ptr(val.ctype())));
-            return result_type(new ret(array_wrapped));
-        } else {
-            return this->copier::operator()(n);
+        if (m_wrapping && detail::isinstance<name, node>(n.val())) {
+            const name& val =
+                boost::get<const name&>(n.val());
+            if (detail::isinstance<ctype::sequence_t,
+                                   ctype::type_t>(val.ctype())) {
+                std::shared_ptr<name> array_wrapped(
+                    new name(
+                        detail::wrap_array_id(val.id()),
+                        get_type_ptr(val.type()),
+                        get_ctype_ptr(val.ctype())));
+                return result_type(new ret(array_wrapped));
+            }
         }
+        return this->copier::operator()(n);
     }
 };
 }

@@ -77,9 +77,9 @@ std::shared_ptr<library> get_builtins() {
         include_paths.insert(path);
     }
     std::string include(PRELUDE_FILE);
-    std::shared_ptr<library> l(new library(fns,
+    std::shared_ptr<library> l(new library(std::move(fns),
                                            std::set<std::string>{include},
-                                           include_paths));
+                                           std::move(include_paths)));
     return l;
 }
 

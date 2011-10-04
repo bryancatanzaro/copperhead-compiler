@@ -3,6 +3,7 @@
 #include <set>
 #include "copier.hpp"
 #include "utility/isinstance.hpp"
+#include "import/library.hpp"
 
 namespace backend {
 
@@ -17,10 +18,25 @@ private:
     const std::string& m_entry_point;
     std::vector<result_type> m_additionals;
     std::set<std::string> m_fns;
+    const registry& m_reg;
 public:
-    /*! \param entry_point The name of the entry point procedure */
-    functorize(const std::string& entry_point)
-        : m_entry_point(entry_point), m_additionals({}) {}
+    /*! \param entry_point The name of the entry point procedure
+        \param reg The registry of functions the compiler knows about
+     */
+    functorize(const std::string& entry_point,
+               const registry& reg)
+        : m_entry_point(entry_point), m_additionals({}),
+          m_reg(reg) {
+        for(auto i = reg.fns().cbegin();
+            i != reg.fns().cend();
+            i++) {
+            auto id = i->first;
+            std::string fn_name = std::get<0>(id);
+            m_fns.insert(fn_name);
+        }
+               
+
+    }
 public:
     using copier::operator();
 
@@ -37,9 +53,13 @@ public:
                 const std::string id = p_name->id();
                 auto found = m_fns.find(id);
                 if (found == m_fns.end()) {
-                    n_arg_list.push_back(std::static_pointer_cast<expression>(boost::apply_visitor(*this, *n_arg)));
+                    n_arg_list.push_back(
+                        std::static_pointer_cast<expression>(
+                            boost::apply_visitor(*this, *n_arg)));
                 } else {
-                    n_arg_list.push_back(std::shared_ptr<name>(new name(id + std::string("_fn()"))));
+                    n_arg_list.push_back(
+                        std::shared_ptr<literal>(
+                            new literal(id + std::string("_fn()"))));
                 }
             }
         }
@@ -74,7 +94,11 @@ public:
             std::shared_ptr<suite> op_body(new suite(std::move(op_body_stmts)));
             auto op_args = std::static_pointer_cast<tuple>(this->copier::operator()(n.args()));
             std::shared_ptr<name> op_id(new name(std::string("operator()")));
-            std::shared_ptr<procedure> op(new procedure(op_id, op_args, op_body));
+            std::shared_ptr<procedure> op(
+                new procedure(
+                    op_id, op_args, op_body,
+                    get_type_ptr(n.type()),
+                    get_ctype_ptr(n.ctype())));
             std::shared_ptr<suite> st_body(new suite(std::vector<std::shared_ptr<statement> >{op}));
             std::shared_ptr<name> st_id(new name(std::string(n_proc->id().id() + "_fn")));
             std::shared_ptr<structure> st(new structure(st_id, st_body));
