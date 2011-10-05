@@ -5,7 +5,7 @@
 #include <thrust/transform.h>
 
 template<typename F, typename T>
-sp_cuarray_var map(F& fn,
+sp_cuarray_var map(const F& fn,
                    stored_sequence<T>& x) {
     sp_cuarray_var result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
@@ -17,7 +17,7 @@ sp_cuarray_var map(F& fn,
 }
 
 template<typename F, typename T>
-sp_cuarray_var map(F& fn,
+sp_cuarray_var map(const F& fn,
                    stored_sequence<T>& x,
                    stored_sequence<T>& y) {
     sp_cuarray_var result_ary = make_remote<T>(x.size());

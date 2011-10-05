@@ -5,7 +5,7 @@
 #include <thrust/adjacent_difference.h>
 
 template<typename F, typename T>
-sp_cuarray_var adjacent_difference(F& fn, stored_sequence<T>& x) {
+sp_cuarray_var adjacent_difference(const F& fn, stored_sequence<T>& x) {
     sp_cuarray_var result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
     thrust::adjacent_difference(extract_device_begin(x),
