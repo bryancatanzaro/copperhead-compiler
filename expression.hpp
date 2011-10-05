@@ -105,6 +105,9 @@ public:
     const_iterator end() const {
         return boost::make_indirect_iterator(m_values.cend());
     }
+    int arity() const {
+        return m_values.size();
+    }
 };
 
 class apply
@@ -154,10 +157,26 @@ public:
 class closure
     : public expression
 {
+protected:
+    const std::shared_ptr<tuple> m_args;
+    const std::shared_ptr<expression> m_body;
+    
 public:
-    closure()
-        : expression(*this)
+    closure(const std::shared_ptr<tuple> &args,
+            const std::shared_ptr<expression> &body,
+            std::shared_ptr<type_t> type =
+            std::shared_ptr<type_t>(new void_mt()),
+            std::shared_ptr<ctype::type_t> ctype =
+            std::shared_ptr<ctype::type_t>(new ctype::void_mt())
+            )
+        : expression(*this, type, ctype), m_args(args), m_body(body)
         {}
+    inline const tuple &args(void) const {
+        return *m_args;
+    }
+    inline const expression &body(void) const {
+        return *m_body;
+    }
 };
 
 class conditional

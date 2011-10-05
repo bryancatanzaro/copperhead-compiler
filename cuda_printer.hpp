@@ -64,6 +64,30 @@ public:
         (*this)(n.args());
     }
     inline void operator()(const closure &n) {
+        m_os << "closure";
+        int arity = n.args().arity();
+        assert(arity > 0);
+        m_os << arity << "<";
+        for(auto i = n.args().begin();
+            i != n.args().end();
+            i++) {
+            boost::apply_visitor(tp, i->ctype());
+            m_os << ", ";
+        }
+        boost::apply_visitor(*this, n.body());
+        m_os << "_fn, ";
+        const ctype::fn_t& t = boost::get<const ctype::fn_t&>(n.body().ctype());
+        const ctype::type_t& ret_t = t.result();
+        boost::apply_visitor(tp, ret_t);
+        m_os << ">(";
+        for(auto i = n.args().begin();
+            i != n.args().end();
+            i++) {
+            boost::apply_visitor(*this, *i);
+            m_os << ", ";
+        }
+        boost::apply_visitor(*this, n.body());
+        m_os << "_fn())";
     }
     inline void operator()(const conditional &n) {
     }

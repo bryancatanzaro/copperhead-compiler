@@ -44,7 +44,14 @@ public:
         boost::apply_visitor(*this, n.body());
         m_os << ")";
     }
-   
+    inline void operator()(const closure &n) {
+        m_os << "Closure(";
+        (*this)(n.args());
+        sep();
+        boost::apply_visitor(*this, n.body());
+        m_os << ")";
+    }
+    
     inline void operator()(const ret &n) {
         m_os << "Return(";
         boost::apply_visitor(*this, n.val());

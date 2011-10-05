@@ -57,6 +57,11 @@ public:
         boost::apply_visitor(*this, n.body());
     }
     inline void operator()(const closure &n) {
+        m_os << "closure([";
+        detail::list(*this, n.args());
+        m_os << "], ";
+        boost::apply_visitor(*this, n.body());
+        m_os << ")";
     }
     inline void operator()(const conditional &n) {
     }

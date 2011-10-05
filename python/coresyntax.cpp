@@ -129,7 +129,11 @@ BOOST_PYTHON_MODULE(coresyntax) {
         .def("__str__", &backend::str<lambda_wrap>)
         .def("__repr__", &backend::repr<lambda_wrap>)
         .add_property("type", &lambda_wrap::p_type, &lambda_wrap::set_type);
-    //.add_property("ctype", &lambda_wrap::p_ctype, &lambda_wrap::set_ctype);
+    class_<closure, std::shared_ptr<closure>, bases<expression, node> >("Closure", init<std::shared_ptr<backend::tuple>, std::shared_ptr<expression> >())
+        .def("args", &lambda_wrap::p_args)
+        .def("body", &lambda_wrap::p_body)
+        .def("__str__", &backend::str<closure>)
+        .def("__repr__", &backend::repr<closure>);
     class_<statement, std::shared_ptr<statement>, bases<node>, boost::noncopyable>("Statement", no_init)
         .def("__str__", &backend::str_apply<statement>)
         .def("__repr__", &backend::repr_apply<statement>);
@@ -194,6 +198,8 @@ BOOST_PYTHON_MODULE(coresyntax) {
     implicitly_convertible<std::shared_ptr<backend::lambda_wrap>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::lambda_wrap>, std::shared_ptr<backend::expression> >();
     implicitly_convertible<std::shared_ptr<backend::lambda_wrap>, std::shared_ptr<backend::lambda> >();
+    implicitly_convertible<std::shared_ptr<backend::closure>, std::shared_ptr<backend::node> >();
+    implicitly_convertible<std::shared_ptr<backend::closure>, std::shared_ptr<backend::expression> >();
     implicitly_convertible<std::shared_ptr<backend::statement>, std::shared_ptr<backend::node> >();
     implicitly_convertible<std::shared_ptr<backend::ret>, std::shared_ptr<backend::statement> >();
     implicitly_convertible<std::shared_ptr<backend::ret>, std::shared_ptr<backend::node> >();

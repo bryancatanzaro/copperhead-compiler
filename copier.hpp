@@ -82,7 +82,14 @@ public:
         return result_type(new lambda(n_args, n_body, t, ct));
     }
     virtual result_type operator()(const closure &n) {
-        return result_type(new closure());
+        auto n_args = std::static_pointer_cast<tuple>((*this)(n.args()));
+        auto n_body = std::static_pointer_cast<expression>(boost::apply_visitor(*this, n.body()));
+        start_match();
+        update_match(n_args, n.args());
+        update_match(n_body, n.body());
+        std::shared_ptr<type_t> t = get_type_ptr(n.type());
+        std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
+        return result_type(new closure(n_args, n_body, t, ct));
     }
     virtual result_type operator()(const conditional &n) {
         return result_type(new conditional());
