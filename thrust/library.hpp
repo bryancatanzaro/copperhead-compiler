@@ -16,7 +16,12 @@ namespace backend {
 
 namespace detail {
 std::vector<const char*> thrust_fn_names = {
-    "adjacent_difference"
+    "adjacent_difference",
+    "map",
+    "scan",
+    "rscan"/*,
+    "exscan",
+    "exrscan"*/
 };
 
 }
