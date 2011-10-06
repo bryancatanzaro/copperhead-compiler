@@ -94,12 +94,18 @@ public:
         boost::apply_visitor(*this, n.cond());
         m_os << ") {" << std::endl;
         indent();
+        declared.begin_scope();
         boost::apply_visitor(*this, n.then());
         dedent();
+        declared.end_scope();
+        indentation();
         m_os << "} else {" << std::endl;
         indent();
+        declared.begin_scope();
         boost::apply_visitor(*this, n.orelse());
         dedent();
+        declared.end_scope();
+        indentation();
         m_os << "}" << std::endl;
     }
     inline void operator()(const ret &n) {
@@ -172,6 +178,14 @@ public:
         m_os << "#include " << n.open();
         boost::apply_visitor(*this, n.id());
         m_os << n.close() << std::endl;
+    }
+
+    inline void operator()(const typedefn &n) {
+        m_os << "typedef ";
+        boost::apply_visitor(tp, n.origin());
+        m_os << " ";
+        boost::apply_visitor(tp, n.rename());
+        m_os << ";";
     }
     
     inline void operator()(const std::string &s) {

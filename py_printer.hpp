@@ -70,6 +70,7 @@ public:
         indent();
         boost::apply_visitor(*this, n.then());
         dedent();
+        indentation();
         m_os << "else:" << std::endl;
         indent();
         boost::apply_visitor(*this, n.orelse());
@@ -117,6 +118,13 @@ public:
         dedent();
     }
     inline void operator()(const include &n) {
+        //No #include statement in python
+        assert(false);
+    }
+
+    inline void operator()(const typedefn &n) {
+        //No typedef statement in python
+        assert(false);
     }
     
     inline void operator()(const std::string &s) {

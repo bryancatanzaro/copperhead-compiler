@@ -28,6 +28,7 @@ class statement;
 class structure;
 class templated_name;
 class include;
+class typedefn;
 
 class node;
 class statement;
@@ -53,7 +54,8 @@ typedef boost::variant<
     suite &,
     structure &,
     templated_name &,
-    include &
+    include &,
+    typedefn &
     > node_base;
 
 struct make_node_base_visitor

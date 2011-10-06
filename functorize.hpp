@@ -86,6 +86,16 @@ public:
     result_type operator()(const procedure &n) {
         auto n_proc = std::static_pointer_cast<procedure>(this->copier::operator()(n));
         if (n_proc->id().id() != m_entry_point) {
+            const ctype::fn_t& n_t = boost::get<const ctype::fn_t&>(
+                n.ctype());
+            const ctype::type_t& r_t = n_t.result();
+            std::shared_ptr<ctype::type_t> origin = get_ctype_ptr(r_t);
+            std::shared_ptr<ctype::type_t> rename(
+                new ctype::monotype_t("result_type"));
+            std::shared_ptr<typedefn> res_defn(
+                new typedefn(origin, rename));
+
+            
             std::shared_ptr<tuple> forward_args = std::static_pointer_cast<tuple>(this->copier::operator()(n_proc->args()));
             std::shared_ptr<name> forward_name = std::static_pointer_cast<name>(this->copier::operator()(n_proc->id()));
             std::shared_ptr<apply> op_call(new apply(forward_name, forward_args));
@@ -99,7 +109,7 @@ public:
                     op_id, op_args, op_body,
                     get_type_ptr(n.type()),
                     get_ctype_ptr(n.ctype())));
-            std::shared_ptr<suite> st_body(new suite(std::vector<std::shared_ptr<statement> >{op}));
+            std::shared_ptr<suite> st_body(new suite(std::vector<std::shared_ptr<statement> >{res_defn, op}));
             std::shared_ptr<name> st_id(new name(std::string(n_proc->id().id() + "_fn")));
             std::shared_ptr<structure> st(new structure(st_id, st_body));
             m_additionals.push_back(st);
