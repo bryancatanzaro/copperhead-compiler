@@ -155,17 +155,12 @@ BOOST_PYTHON_MODULE(coresyntax) {
         .def("__repr__", &backend::repr<procedure_wrap>)
         .add_property("type", &procedure_wrap::p_type, &procedure_wrap::set_type);
         //.add_property("ctype", &procedure_wrap::p_ctype, &procedure_wrap::set_ctype);
-    class_<procedure_wrap, std::shared_ptr<procedure_wrap>, bases<statement, node> >("Procedure", init<std::shared_ptr<name>, std::shared_ptr<backend::tuple>, std::shared_ptr<suite> >())
-        .def("id", &procedure_wrap::p_id)
-        .def("args", &procedure_wrap::p_args)
-        .def("stmts", &procedure_wrap::p_stmts)
-        .def("__str__", &backend::str<procedure_wrap>)
-        .def("__repr__", &backend::repr<procedure_wrap>)
-        .add_property("type", &procedure_wrap::p_type, &procedure_wrap::set_type);
     class_<conditional_wrap, std::shared_ptr<conditional_wrap>, bases<statement, node> >("Conditional", init<std::shared_ptr<expression>, std::shared_ptr<suite>, std::shared_ptr<suite> >())
         .def("cond", &conditional_wrap::p_cond)
         .def("then", &conditional_wrap::p_then)
-        .def("orelse", &conditional_wrap::p_orelse);
+        .def("orelse", &conditional_wrap::p_orelse)
+        .def("__str__", &backend::str<conditional_wrap>)
+        .def("__repr__", &backend::repr<conditional_wrap>);
     class_<suite_wrap, std::shared_ptr<suite_wrap>, bases<node> >("Suite")
         .def("__init__", make_constructor(make_from_list<statement, suite_wrap>))
         .def("__iter__", range(&suite_wrap::p_begin, &suite_wrap::p_end))
