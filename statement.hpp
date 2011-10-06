@@ -113,6 +113,34 @@ public:
     
 };
 
+class conditional
+    : public statement
+{
+protected:
+    std::shared_ptr<expression> m_cond;
+    std::shared_ptr<suite> m_then;
+    std::shared_ptr<suite> m_orelse;
+    
+public:
+    conditional(std::shared_ptr<expression> cond,
+                std::shared_ptr<suite> then,
+                std::shared_ptr<suite> orelse)
+        : statement(*this), m_cond(cond),
+          m_then(then), m_orelse(orelse)
+        {}
+    inline const expression& cond(void) const {
+        return *m_cond;
+    }
+    inline const suite& then(void) const {
+        return *m_then;
+    }
+    inline const suite& orelse(void) const {
+        return *m_orelse;
+    }
+};
+
+
+
 class suite 
     : public node
 {

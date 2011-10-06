@@ -4,9 +4,9 @@ env = Environment()
 platform = env['PLATFORM']
 
 if platform == 'darwin':
-    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I.. -I/Users/catanzar/boost_1_47_0 -g")
+    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I/Users/catanzar/boost_1_47_0 -g")
 else:
-    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I.. -g")
+    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -g")
 
 for x in ['coresyntax.cpp', 'coretypes.cpp']:
     basename, extension = os.path.splitext(str(x))

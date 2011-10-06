@@ -77,6 +77,8 @@ public:
         start_match();
         update_match(n_args, n.args());
         update_match(n_body, n.body());
+        if (is_match())
+            return get_node_ptr(n);
         std::shared_ptr<type_t> t = get_type_ptr(n.type());
         std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
         return result_type(new lambda(n_args, n_body, t, ct));
@@ -87,12 +89,23 @@ public:
         start_match();
         update_match(n_args, n.args());
         update_match(n_body, n.body());
+        if (is_match())
+            return get_node_ptr(n);
         std::shared_ptr<type_t> t = get_type_ptr(n.type());
         std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
         return result_type(new closure(n_args, n_body, t, ct));
     }
     virtual result_type operator()(const conditional &n) {
-        return result_type(new conditional());
+        auto n_cond = std::static_pointer_cast<expression>(boost::apply_visitor(*this, n.cond()));
+        auto n_then = std::static_pointer_cast<suite>(boost::apply_visitor(*this, n.then()));
+        auto n_orelse = std::static_pointer_cast<suite>(boost::apply_visitor(*this, n.orelse()));
+        start_match();
+        update_match(n_cond, n.cond());
+        update_match(n_then, n.then());
+        update_match(n_orelse, n.orelse());
+        if (is_match())
+            return get_node_ptr(n);
+        return result_type(new conditional(n_cond, n_then, n_orelse));
     }
     virtual result_type operator()(const ret &n) {
         auto n_val = std::static_pointer_cast<expression>(boost::apply_visitor(*this, n.val()));

@@ -90,6 +90,17 @@ public:
         m_os << "_fn())";
     }
     inline void operator()(const conditional &n) {
+        m_os << "if (";
+        boost::apply_visitor(*this, n.cond());
+        m_os << ") {" << std::endl;
+        indent();
+        boost::apply_visitor(*this, n.then());
+        dedent();
+        m_os << "} else {" << std::endl;
+        indent();
+        boost::apply_visitor(*this, n.orelse());
+        dedent();
+        m_os << "}" << std::endl;
     }
     inline void operator()(const ret &n) {
         m_os << "return ";

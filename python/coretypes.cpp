@@ -5,8 +5,8 @@
 #include <boost/variant.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/return_value_policy.hpp>
-#include "type_printer.hpp"
-#include "utility/isinstance.hpp"
+#include "../type_printer.hpp"
+#include "../utility/isinstance.hpp"
 
 
 

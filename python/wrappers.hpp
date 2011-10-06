@@ -1,7 +1,7 @@
 #pragma once
-#include "expression.hpp"
-#include "statement.hpp"
-#include "cppnode.hpp"
+#include "../expression.hpp"
+#include "../statement.hpp"
+#include "../cppnode.hpp"
 
 namespace backend {
 
@@ -112,6 +112,23 @@ public:
     // }
 };
 
+class closure_wrap
+    : public closure
+{
+public:
+    closure_wrap(const std::shared_ptr<tuple> &args,
+                const std::shared_ptr<expression> &body)
+        : closure(args, body)
+        {}
+    inline const std::shared_ptr<tuple> p_args(void) const {
+        return m_args;
+    }
+    inline const std::shared_ptr<expression> p_body(void) const {
+        return m_body;
+    }
+
+};
+
 class tuple_wrap
     : public backend::tuple
 {
@@ -208,7 +225,28 @@ public:
     //     m_ctype = type;
     // }
 };    
+
+class conditional_wrap
+    : public conditional
+{
+public:
+    conditional_wrap(const std::shared_ptr<expression> &cond,
+                     const std::shared_ptr<suite> &then,
+                     const std::shared_ptr<suite> &orelse)
+        : conditional(cond, then, orelse) {}
+    inline const std::shared_ptr<expression> p_cond(void) const {
+        return m_cond;
+    }
+    inline const std::shared_ptr<suite> p_then(void) const {
+        return m_then;
+    }
+    inline const std::shared_ptr<suite> p_orelse(void) const {
+        return m_orelse;
+    }
     
+};
+
+
 class suite_wrap
     : public suite
 {

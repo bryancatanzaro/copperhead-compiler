@@ -179,14 +179,6 @@ public:
     }
 };
 
-class conditional
-    : public expression
-{
-public:
-    conditional()
-        : expression(*this)
-        {}
-};
 
 }
     

@@ -77,7 +77,17 @@ public:
         boost::apply_visitor(*this, n.id());
         m_os << ")";
     }
-        
+
+    inline void operator()(const conditional &n) {
+        m_os << "Conditional(";
+        boost::apply_visitor(*this, n.cond());
+        m_os << ", ";
+        boost::apply_visitor(*this, n.then());
+        m_os << ", ";
+        boost::apply_visitor(*this, n.orelse());
+        m_os << ")";
+    }
+    
     inline void operator()(const std::string &s) {
         m_os << s;
     }
