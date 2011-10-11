@@ -73,6 +73,9 @@ struct zipped_sequence {
                 m_seqs,
                 detail::extract_end());
     }
+    int size() const {
+        return thrust::get<0>(m_seqs).size();
+    }
 };
 
 template<typename T0>
