@@ -4,6 +4,8 @@
 
 #include <thrust/transform.h>
 #include <thrust/detail/type_traits.h>
+#include "transformed_sequence.h"
+#include "zipped_sequence.h"
 
 template<typename F,
          typename Seq0>
@@ -12,11 +14,18 @@ sp_cuarray_var map(const F& fn,
     typedef typename F::result_type T;
     sp_cuarray_var result_ary = make_remote<T>(x0.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
-    thrust::transform(extract_device_begin(x0),
-                      extract_device_end(x0),
-                      extract_device_begin(result),
+    thrust::transform(x0.begin(),
+                      x0.end(),
+                      result.begin(),
                       fn);
     return result_ary;
+}
+
+template<typename F,
+         typename Seq0>
+transformed_sequence<F, Seq0> map_lazy(const F& fn,
+                                        Seq0& x0) {
+    return transformed_sequence<F, Seq0>(fn, x0);
 }
 
 template<typename F,
@@ -27,13 +36,15 @@ sp_cuarray_var map(const F& fn,
     typedef typename F::result_type T;
     sp_cuarray_var result_ary = make_remote<T>(x0.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
-    thrust::transform(extract_device_begin(x0),
-                      extract_device_end(x0),
-                      extract_device_begin(x1),
-                      extract_device_begin(result),
+    thrust::transform(x0.begin(),
+                      x0.end(),
+                      x1.begin(),
+                      result.begin(),
                       fn);
     return result_ary;
 }
+
+
 
 template<typename F>
 struct map_adapter {
@@ -82,15 +93,15 @@ sp_cuarray_var map(const F& fn,
     
     thrust::transform(thrust::make_zip_iterator(
                           thrust::make_tuple(
-                              extract_device_begin(x0),
-                              extract_device_begin(x1),
-                              extract_device_begin(x2))),
+                              x0.begin(),
+                              x1.begin(),
+                              x2.begin())),
                       thrust::make_zip_iterator(
                           thrust::make_tuple(
-                              extract_device_end(x0),
-                              extract_device_end(x1),
-                              extract_device_end(x2))),
-                      extract_device_begin(result),
+                              x0.end(),
+                              x1.end(),
+                              x2.end())),
+                      result.begin(),
                       make_map_adapter(fn));
     return result_ary;
 }
@@ -111,17 +122,17 @@ sp_cuarray_var map(const F& fn,
    
     thrust::transform(thrust::make_zip_iterator(
                           thrust::make_tuple(
-                              extract_device_begin(x0),
-                              extract_device_begin(x1),
-                              extract_device_begin(x2),
-                              extract_device_begin(x3))),
+                              x0.begin(),
+                              x1.begin(),
+                              x2.begin(),
+                              x3.begin())),
                       thrust::make_zip_iterator(
                           thrust::make_tuple(
-                              extract_device_end(x0),
-                              extract_device_end(x1),
-                              extract_device_end(x2),
-                              extract_device_end(x3))),
-                      extract_device_begin(result),
+                              x0.end(),
+                              x1.end(),
+                              x2.end(),
+                              x3.end())),
+                      result.begin(),
                       make_map_adapter(fn));
     return result_ary;
 }

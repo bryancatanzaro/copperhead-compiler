@@ -9,12 +9,13 @@
 template<typename F, typename Seq>
 sp_cuarray_var scan(const F& fn,
                     Seq& x) {
+    //XXX should look at F::result_type
     typedef typename Seq::value_type T;
     sp_cuarray_var result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
-    thrust::inclusive_scan(extract_device_begin(x),
-                           extract_device_end(x),
-                           extract_device_begin(result),
+    thrust::inclusive_scan(x.begin(),
+                           x.end(),
+                           result.begin(),
                            fn);
     return result_ary;
 }
@@ -31,17 +32,17 @@ sp_cuarray_var scan(const F& fn,
 //     return result_ary;
 // }
 
-template<typename F, typename T>
+template<typename F, typename Seq>
 sp_cuarray_var rscan(const F& fn,
-                     stored_sequence<T>& x) {
-    typename thrust::device_vector<T>::reverse_iterator drbegin(
-        extract_device_end(x));
-    typename thrust::device_vector<T>::reverse_iterator drend(
-        extract_device_begin(x));
+                     Seq& x) {
+    //XXX should look at F::result_type
+    typedef typename Seq::value_type T;
+    typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
+    iterator_type drbegin(x.end());
+    iterator_type drend(x.begin());
     sp_cuarray_var result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
-    typename thrust::device_vector<T>::reverse_iterator orbegin(
-        extract_device_end(result));
+    thrust::reverse_iterator<thrust::device_ptr<T> > orbegin(result.end());
     thrust::inclusive_scan(drbegin, drend, orbegin, fn);
     return result_ary;
 }

@@ -151,19 +151,21 @@ stored_sequence<T> get_remote_r(sp_cuarray_var &in) {
 };
 
 template<typename T>
-stored_sequence<T> get_remote_r(cuarray<T>* in) {
-    return in->get_remote_r();
-}
-
-template<typename T>
 stored_sequence<T> get_remote_w(sp_cuarray_var &in) {
     return boost::get< cuarray<T> >(*in).get_remote_w();
 };
 
 template<typename T>
-stored_sequence<T> get_remote_w(cuarray<T>* in) {
-    return in->get_remote_w();
-}
+stored_sequence<T> get_local_r(sp_cuarray_var &in) {
+    return boost::get<cuarray<T> >(*in).get_local_r();
+};
+
+template<typename T>
+stored_sequence<T> get_local_w(sp_cuarray_var &in) {
+    return boost::get< cuarray<T> >(*in).get_local_w();
+};
+
+
 
 template<typename T>
 sp_cuarray_var make_remote(ssize_t size) {

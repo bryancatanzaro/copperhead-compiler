@@ -3,10 +3,9 @@
 //If NVCC ever supports variadic templates...
 
 template<typename K0,
-         typename F,
-         typename R>
+         typename F>
 struct closure1 {
-    typedef R result_type;
+    typedef typename F::result_type result_type;
     K0 m_k0;
     F m_f;
     __host__ __device__ closure1(const K0& k0,
@@ -15,13 +14,13 @@ struct closure1 {
           m_f(f) {}
 
     template<typename T0>
-    __host__ __device__ R operator()(const T0& t0) {
+    __host__ __device__ result_type operator()(const T0& t0) {
         return m_f(t0,
                    m_k0);
     }
     template<typename T0,
              typename T1>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1) {
         return m_f(t0,
                    t1,
@@ -31,7 +30,7 @@ struct closure1 {
     template<typename T0,
              typename T1,
              typename T2>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2) {
         return m_f(t0,
@@ -44,7 +43,7 @@ struct closure1 {
              typename T1,
              typename T2,
              typename T3>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3) {
@@ -60,7 +59,7 @@ struct closure1 {
              typename T2,
              typename T3,
              typename T4>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -79,7 +78,7 @@ struct closure1 {
              typename T3,
              typename T4,
              typename T5>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -101,7 +100,7 @@ struct closure1 {
              typename T4,
              typename T5,
              typename T6>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -126,7 +125,7 @@ struct closure1 {
              typename T5,
              typename T6,
              typename T7>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -154,7 +153,7 @@ struct closure1 {
              typename T6,
              typename T7,
              typename T8>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -185,7 +184,7 @@ struct closure1 {
              typename T7,
              typename T8,
              typename T9>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -213,28 +212,27 @@ struct closure1 {
 
 template<typename K0,
          typename K1,
-         typename F,
-         typename R>
+         typename F>
 struct closure2 {
-    typedef R result_type;
+    typedef typename F::result_type result_type;
     K0 m_k0;
     K1 m_k1;
     F m_f;
-    __host__ __device__ closure1(const K0& k0,
+    __host__ __device__ closure2(const K0& k0,
                                  const K1& k1,
                                  const F& f)
         : m_k0(k0),
           m_f(f) {}
 
     template<typename T0>
-    __host__ __device__ R operator()(const T0& t0) {
+    __host__ __device__ result_type operator()(const T0& t0) {
         return m_f(t0,
                    m_k0,
                    m_k1);
     }
     template<typename T0,
              typename T1>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1) {
         return m_f(t0,
                    t1,
@@ -245,7 +243,7 @@ struct closure2 {
     template<typename T0,
              typename T1,
              typename T2>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2) {
         return m_f(t0,
@@ -259,7 +257,7 @@ struct closure2 {
              typename T1,
              typename T2,
              typename T3>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3) {
@@ -276,7 +274,7 @@ struct closure2 {
              typename T2,
              typename T3,
              typename T4>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -296,7 +294,7 @@ struct closure2 {
              typename T3,
              typename T4,
              typename T5>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -319,7 +317,7 @@ struct closure2 {
              typename T4,
              typename T5,
              typename T6>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -345,7 +343,7 @@ struct closure2 {
              typename T5,
              typename T6,
              typename T7>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -374,7 +372,7 @@ struct closure2 {
              typename T6,
              typename T7,
              typename T8>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -406,7 +404,7 @@ struct closure2 {
              typename T7,
              typename T8,
              typename T9>
-    __host__ __device__ R operator()(const T0& t0,
+    __host__ __device__ result_type operator()(const T0& t0,
                                      const T1& t1,
                                      const T2& t2,
                                      const T3& t3,
@@ -431,3 +429,19 @@ struct closure2 {
     }
 
 };
+
+template<typename K0,
+         typename F>
+closure1<K0, F> make_closure(K0 _k0,
+                             F f) {
+    return closure1<K0, F>(_k0, f);
+}
+
+template<typename K0,
+         typename K1,
+         typename F>
+closure2<K0, K1, F> make_closure(K0 _k0,
+                                 K1 _k1,
+                                 F f) {
+    return closure2<K0, K1, F>(_k0, _k1, f);
+}
