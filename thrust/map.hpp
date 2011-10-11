@@ -174,6 +174,12 @@ map_adapter<F> make_map_adapter(const F& in) {
    return map_adapter<F>(in);
 }
 
+template<typename F,
+         typename Seq0>
+transformed_sequence<F, Seq0> map_lazy(const F& fn,
+                                        Seq0& x0) {
+    return transformed_sequence<F, Seq0>(fn, x0);
+}
 
 template<typename F,
          typename Seq0>
@@ -218,4 +224,3 @@ map(const F& fn,
     Seq3& x3) {
     return transformed_sequence<map_adapter<F>, zipped_sequence<thrust::tuple<Seq0, Seq1, Seq2, Seq3> > >(make_map_adapter(fn), make_zipped_sequence(x0, x1, x2, x3));
 }
-
