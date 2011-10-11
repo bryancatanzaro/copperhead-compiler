@@ -78,6 +78,10 @@ public:
         m_os << ")";
     }
 
+    inline void operator()(const typedefn &n) {
+        m_os << "Typedef()";
+    }
+    
     inline void operator()(const conditional &n) {
         m_os << "Conditional(";
         boost::apply_visitor(*this, n.cond());

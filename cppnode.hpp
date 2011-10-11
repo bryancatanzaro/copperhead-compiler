@@ -73,4 +73,24 @@ public:
     }
 };
 
+class typedefn
+    : public statement
+{
+protected:
+    const std::shared_ptr<ctype::type_t> m_origin;
+    const std::shared_ptr<ctype::type_t> m_rename;
+public:
+    typedefn(const std::shared_ptr<ctype::type_t> origin,
+             const std::shared_ptr<ctype::type_t> rename)
+        : statement(*this),
+          m_origin(origin),
+          m_rename(rename) {}
+    const ctype::type_t& origin() const {
+        return *m_origin;
+    }
+    const ctype::type_t& rename() const {
+        return *m_rename;
+    }
+};
+
 }
