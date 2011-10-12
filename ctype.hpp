@@ -22,6 +22,7 @@ class float64_mt;
 class bool_mt;
 class void_mt;
 class cuarray_t;
+class templated_t;
 
 namespace detail {
 typedef boost::variant<
@@ -38,7 +39,8 @@ typedef boost::variant<
     float64_mt &,
     bool_mt &,
     void_mt &,
-    cuarray_t &
+    cuarray_t &,
+    templated_t &
     > type_base;
 
 struct make_type_base_visitor
@@ -221,6 +223,30 @@ public:
     cuarray_t(const std::shared_ptr<type_t> sub) :
         sequence_t(*this, "sp_cuarray_var", sub) {}
 };
-        
+
+class templated_t
+    : public type_t {
+private:
+    std::shared_ptr<type_t> m_base;
+    std::vector<std::shared_ptr<type_t> > m_sub;
+public:
+    inline templated_t(std::shared_ptr<type_t> base, std::vector<std::shared_ptr<type_t> > && sub)
+        : type_t(*this), m_base(base), m_sub(std::move(sub))
+        {}
+
+    const type_t& base() const {
+        return *m_base;
+    }
+    
+    typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
+    const_iterator begin() const {
+        return boost::make_indirect_iterator(m_sub.cbegin());
+    }
+
+    const_iterator end() const {
+        return boost::make_indirect_iterator(m_sub.cend());
+    }
+};
+
 }
 }

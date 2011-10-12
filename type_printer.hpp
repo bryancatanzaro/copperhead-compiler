@@ -79,6 +79,19 @@ public:
     }
     inline void operator()(const polytype_t &pt) {
     }
+    inline void operator()(const templated_t &tt) {
+        boost::apply_visitor(*this, tt.base());
+        m_os << "<";
+        for(auto i = tt.begin();
+            i != tt.end();
+            i++) {
+            boost::apply_visitor(*this, *i);
+            if (std::next(i) != tt.end()) {
+                m_os << ", ";
+            }
+        }
+        m_os << " >";
+    }
     std::ostream &m_os;
     inline void sep() const {
         m_os << ", ";
