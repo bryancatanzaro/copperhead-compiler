@@ -1,16 +1,18 @@
 #pragma once
 #include "../cudata/cudata.h"
-#include "convert.hpp"
 
 #include <thrust/adjacent_difference.h>
 
-template<typename F, typename T>
-sp_cuarray_var adjacent_difference(const F& fn, stored_sequence<T>& x) {
-    sp_cuarray_var result_ary = make_remote<T>(x.size());
+//XXX Need to look at F::result_type instead of Seq::value_type
+template<typename F, typename Seq>
+boost::shared_ptr<cuarray<typename Seq::value_type> >
+adjacent_difference(const F& fn, Seq& x) {
+    typedef typename Seq::value_type T;
+    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
-    thrust::adjacent_difference(extract_device_begin(x),
-                                extract_device_end(x),
-                                extract_device_begin(result),
+    thrust::adjacent_difference(x.begin(),
+                                x.end(),
+                                result.begin(),
                                 fn);
     return result_ary;
 }

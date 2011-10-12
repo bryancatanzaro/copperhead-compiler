@@ -1,22 +1,37 @@
 #pragma once
 #include "../cudata/cudata.h"
-#include "convert.hpp"
 
 #include <thrust/scan.h>
 #include <thrust/device_vector.h>
 #include <thrust/iterator/reverse_iterator.h>
 
+//XXX should look at F::result_type
 template<typename F, typename Seq>
-sp_cuarray_var scan(const F& fn,
-                    Seq& x) {
-    //XXX should look at F::result_type
+boost::shared_ptr<cuarray<typename Seq::value_type> >
+scan(const F& fn, Seq& x) {
     typedef typename Seq::value_type T;
-    sp_cuarray_var result_ary = make_remote<T>(x.size());
+    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
     thrust::inclusive_scan(x.begin(),
                            x.end(),
                            result.begin(),
                            fn);
+    return result_ary;
+}
+
+//XXX should look at F::result_type
+//Need to make operator structs monomorphic to do this
+template<typename F, typename Seq>
+boost::shared_ptr<cuarray<typename Seq::value_type> >
+rscan(const F& fn, Seq& x) {
+    typedef typename Seq::value_type T;
+    typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
+    iterator_type drbegin(x.end());
+    iterator_type drend(x.begin());
+    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
+    stored_sequence<T> result = get_remote_w<T>(result_ary);
+    thrust::reverse_iterator<thrust::device_ptr<T> > orbegin(result.end());
+    thrust::inclusive_scan(drbegin, drend, orbegin, fn);
     return result_ary;
 }
 
@@ -32,20 +47,6 @@ sp_cuarray_var scan(const F& fn,
 //     return result_ary;
 // }
 
-template<typename F, typename Seq>
-sp_cuarray_var rscan(const F& fn,
-                     Seq& x) {
-    //XXX should look at F::result_type
-    typedef typename Seq::value_type T;
-    typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
-    iterator_type drbegin(x.end());
-    iterator_type drend(x.begin());
-    sp_cuarray_var result_ary = make_remote<T>(x.size());
-    stored_sequence<T> result = get_remote_w<T>(result_ary);
-    thrust::reverse_iterator<thrust::device_ptr<T> > orbegin(result.end());
-    thrust::inclusive_scan(drbegin, drend, orbegin, fn);
-    return result_ary;
-}
 
 // template<typename F, typename T>
 // sp_cuarray_var exrscan(F& fn,

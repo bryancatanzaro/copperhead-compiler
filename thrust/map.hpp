@@ -1,6 +1,5 @@
 #pragma once
 #include "../cudata/cudata.h"
-#include "convert.hpp"
 
 #include <thrust/transform.h>
 #include <thrust/detail/type_traits.h>
