@@ -3,6 +3,7 @@
 #include <set>
 #include "copier.hpp"
 #include "utility/isinstance.hpp"
+#include "utility/markers.hpp"
 #include "import/library.hpp"
 
 namespace backend {
@@ -59,7 +60,7 @@ public:
                 } else {
                     n_arg_list.push_back(
                         std::shared_ptr<literal>(
-                            new literal(id + std::string("_fn()"))));
+                            new literal(detail::fnize_id(id) + "()")));
                 }
             }
         }
@@ -110,7 +111,7 @@ public:
                     get_type_ptr(n.type()),
                     get_ctype_ptr(n.ctype())));
             std::shared_ptr<suite> st_body(new suite(std::vector<std::shared_ptr<statement> >{res_defn, op}));
-            std::shared_ptr<name> st_id(new name(std::string(n_proc->id().id() + "_fn")));
+            std::shared_ptr<name> st_id(new name(detail::fnize_id(n_proc->id().id())));
             std::shared_ptr<structure> st(new structure(st_id, st_body));
             m_additionals.push_back(st);
             m_fns.insert(n_proc->id().id());

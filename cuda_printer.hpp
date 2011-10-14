@@ -7,6 +7,7 @@
 #include "py_printer.hpp"
 #include "type_printer.hpp"
 #include "utility/markers.hpp"
+#include "utility/isinstance.hpp"
 
 namespace backend
 {
@@ -76,20 +77,19 @@ public:
             boost::apply_visitor(tp, i->ctype());
             m_os << ", ";
         }
-        boost::apply_visitor(*this, n.body());
-        m_os << "_fn, ";
-        const ctype::fn_t& t = boost::get<const ctype::fn_t&>(n.body().ctype());
-        const ctype::type_t& ret_t = t.result();
-        boost::apply_visitor(tp, ret_t);
-        m_os << ">(";
+        //Can only deal with names in the body of a closure
+        assert(detail::isinstance<name>(n.body()));
+        const name& body = boost::get<const name&>(n.body());
+        std::string body_fn = detail::fnize_id(body.id());
+        m_os << body_fn << ">(";
         for(auto i = n.args().begin();
             i != n.args().end();
             i++) {
             boost::apply_visitor(*this, *i);
             m_os << ", ";
         }
-        boost::apply_visitor(*this, n.body());
-        m_os << "_fn())";
+       
+        m_os << body_fn << "())";
     }
     inline void operator()(const conditional &n) {
         m_os << "if (";
