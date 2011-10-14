@@ -94,16 +94,21 @@ public:
             const ctype::type_t& previous_c_res_t =
                 previous_c_t.result();
             
+            std::shared_ptr<ctype::type_t> new_wrap_ct;
             std::shared_ptr<ctype::type_t> new_ct;
-            std::vector<std::shared_ptr<ctype::type_t> > arg_cts;
+            std::shared_ptr<ctype::type_t> new_res_ct;
+            std::vector<std::shared_ptr<ctype::type_t> > wrap_arg_cts;
             for(auto i=wrapper_args.begin();
                 i != wrapper_args.end();
                 i++) {
-                arg_cts.push_back(
+                wrap_arg_cts.push_back(
                     get_ctype_ptr((*i)->ctype()));
             }
-            std::shared_ptr<ctype::tuple_t> new_args_ct(
-                new ctype::tuple_t(std::move(arg_cts)));
+            std::shared_ptr<ctype::tuple_t> new_wrap_args_ct =
+                std::make_shared<ctype::tuple_t>(std::move(wrap_arg_cts));
+            std::shared_ptr<ctype::tuple_t> new_args_ct =
+                std::static_pointer_cast<ctype::tuple_t>(
+                    get_ctype_ptr(previous_c_t.args()));
 
             if (detail::isinstance<ctype::sequence_t, ctype::type_t>(
                     previous_c_res_t)) {
@@ -112,43 +117,75 @@ public:
                 std::shared_ptr<ctype::type_t> sub_res_t =
                     get_ctype_ptr(res_seq_t.sub());
                 
-                std::shared_ptr<ctype::type_t> new_res_ct(
+                std::shared_ptr<ctype::type_t> new_wrap_res_ct(
                     new ctype::cuarray_t(sub_res_t));
-                new_ct = std::shared_ptr<ctype::fn_t>(
-                    new ctype::fn_t(new_args_ct, new_res_ct));
-                                                      
+                new_wrap_ct = std::shared_ptr<ctype::fn_t>(
+                    new ctype::fn_t(new_wrap_args_ct, new_wrap_res_ct));
+
+                new_res_ct =
+                    std::make_shared<ctype::templated_t>(
+                        std::make_shared<ctype::monotype_t>(
+                            "boost::shared_ptr"),
+                        std::vector<std::shared_ptr<ctype::type_t> >{
+                            std::make_shared<ctype::templated_t>(
+                                std::make_shared<ctype::monotype_t>("cuarray"),
+                                std::vector<std::shared_ptr<ctype::type_t> >{
+                                    sub_res_t})});
+                new_ct = std::make_shared<ctype::fn_t>(
+                    new_args_ct,
+                    new_res_ct);
+                
             } else {
                 std::shared_ptr<ctype::type_t> new_res_ct =
                     get_ctype_ptr(previous_c_res_t);
-                new_ct = std::shared_ptr<ctype::fn_t>(
-                    new ctype::fn_t(new_args_ct, new_res_ct));
+                new_wrap_ct = std::shared_ptr<ctype::fn_t>(
+                    new ctype::fn_t(new_wrap_args_ct, new_res_ct));
+                new_ct = get_ctype_ptr(previous_c_t);
+                new_res_ct = get_ctype_ptr(previous_c_res_t);
             }
 
+
+
+            
             std::shared_ptr<name> wrapper_proc_id =
                 std::make_shared<name>(
                     detail::wrap_proc_id(n.id().id()));
-                        
 
-            std::shared_ptr<call> make_the_call =
-                std::make_shared<call>(
+            auto t = get_type_ptr(n.type());
+            auto res_t = get_type_ptr(
+                std::static_pointer_cast<fn_t>(t)->result());
+            
+            std::shared_ptr<name> result_id =
+                std::make_shared<name>(
+                    "result", res_t, new_res_ct);
+            std::shared_ptr<bind> make_the_call =
+                std::make_shared<bind>(
+                    result_id,
                     std::make_shared<apply>(
                         std::static_pointer_cast<name>(get_node_ptr(n.id())),
                         std::make_shared<tuple>(
                             std::move(getter_args))));
+            std::shared_ptr<ret> dynamize =
+                std::make_shared<ret>(
+                    std::make_shared<apply>(
+                        std::make_shared<name>("wrap_cuarray"),
+                        std::make_shared<tuple>(
+                            std::vector<std::shared_ptr<expression> >{
+                                result_id})));
             std::shared_ptr<suite> wrapper_stmts =
                 std::make_shared<suite>(
-                    std::vector<std::shared_ptr<statement> >{make_the_call});
+                    std::vector<std::shared_ptr<statement> >{
+                        make_the_call,
+                            dynamize});
             std::shared_ptr<tuple> wrapper_args_tuple(
                 new tuple(std::move(wrapper_args)));
-            auto t = get_type_ptr(n.type());
             std::shared_ptr<procedure> completed_wrapper =
                 std::make_shared<procedure>(wrapper_proc_id,
                                             wrapper_args_tuple,
                                             wrapper_stmts,
-                                            t, new_ct, "");
+                                            t, new_wrap_ct, "");
             m_wrapper = completed_wrapper;
 
-            //Temporary
             result_type rewritten =
                 std::make_shared<procedure>(
                     std::static_pointer_cast<name>(
@@ -158,7 +195,7 @@ public:
                     std::static_pointer_cast<suite>(
                         boost::apply_visitor(*this, n.stmts())),
                     get_type_ptr(n.type()),
-                    get_ctype_ptr(n.ctype()),
+                    new_ct,
                     "");
             m_wrapping = false;
             return rewritten;

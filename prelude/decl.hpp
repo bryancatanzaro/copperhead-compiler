@@ -51,6 +51,10 @@ std::vector<const char*> unary_scalar_operators = {
     "op_not"
 };
 
+std::vector<const char*> cpp_support_fns = {
+    "wrap_cuarray"
+};
+
 void load_scalars(
     std::map<ident, fn_info>& fns,
     const std::vector<const char*>& names) {
@@ -71,6 +75,7 @@ std::shared_ptr<library> get_builtins() {
     std::map<ident, fn_info> fns;
     detail::load_scalars(fns, detail::unary_scalar_operators);
     detail::load_scalars(fns, detail::binary_scalar_operators);
+    detail::load_scalars(fns, detail::cpp_support_fns);
     std::string path(detail::get_path(PRELUDE_PATH));
     std::set<std::string> include_paths;
     if (path.length() > 0) {

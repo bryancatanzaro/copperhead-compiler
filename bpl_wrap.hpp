@@ -53,14 +53,15 @@ public:
                 std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i)));
         }
         std::shared_ptr<name> entry_name(
-            new name(m_entry_point));
+            new name(detail::wrap_proc_id(m_entry_point)));
         std::shared_ptr<name> entry_generated_name(
             new name(detail::mark_generated_id(m_entry_point)));
         std::shared_ptr<literal> python_entry_name(
             new literal("\"" + entry_generated_name->id() + "\""));
         std::shared_ptr<tuple> def_args(
             new tuple(
-                std::vector<std::shared_ptr<expression> >{python_entry_name, entry_name}));
+                std::vector<std::shared_ptr<expression> >{
+                    python_entry_name, entry_name}));
         std::shared_ptr<name> def_fn(
             new name(
                 detail::boost_python_def()));
