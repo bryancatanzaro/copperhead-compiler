@@ -15,6 +15,7 @@
 #include "thrust/library.hpp"
 #include "prelude/decl.hpp"
 #include "cuda_printer.hpp"
+#include "typedefify.hpp"
 
 namespace backend {
 /*! \p compiler contains state and methods for compiling programs.
@@ -48,22 +49,14 @@ public:
         type_convert type_converter;
         auto type_converted = apply(type_converter, n);
 
-        boost::apply_visitor(cp, *type_converted);
-        
         functorize functorizer(m_entry_point, m_registry);
         auto functorized = apply(functorizer, type_converted);
 
-        boost::apply_visitor(cp, *functorized);
-                
-        allocate allocator(m_entry_point);
-        auto allocated = apply(allocator, functorized);
-
-        boost::apply_visitor(cp, *allocated);
+        typedefify typedefifier;
+        auto typedefified = apply(typedefifier, functorized);
         
         wrap wrapper(m_entry_point);
-        auto wrapped = apply(wrapper, allocated);
-
-        boost::apply_visitor(cp, *wrapped);
+        auto wrapped = apply(wrapper, typedefified);
         
         bpl_wrap bpl_wrapper(m_entry_point, m_registry);
         auto bpl_wrapped = apply(bpl_wrapper, wrapped);
