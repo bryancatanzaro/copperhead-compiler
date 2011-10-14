@@ -16,17 +16,18 @@ class wrap
 private:
     const std::string& m_entry_point;
     bool m_wrapping;
+    std::shared_ptr<procedure> m_wrapper;
 public:
     wrap(const std::string& entry_point) : m_entry_point(entry_point),
-                                           m_wrapping(false){}
+                                           m_wrapping(false),
+                                           m_wrapper(){}
     using copier::operator();
     result_type operator()(const procedure &n) {
         if (n.id().id()  == m_entry_point) {
             m_wrapping = true;
-            std::vector<std::shared_ptr<expression> > wrapped_args;
-            std::vector<std::shared_ptr<statement> > statements;
-            py_printer pp(std::cout);
-
+                        
+            std::vector<std::shared_ptr<expression> > wrapper_args;
+            std::vector<std::shared_ptr<expression> > getter_args;
             //Wrap input arguments
             for(auto i = n.args().begin();
                 i != n.args().end();
@@ -53,10 +54,8 @@ public:
                     std::shared_ptr<name> wrapped_name(
                         new name(detail::wrap_array_id(arg_name.id()),
                                  t, ct));
-                    wrapped_args.push_back(wrapped_name);
-                    std::shared_ptr<name> original_name =
-                        std::static_pointer_cast<name>(
-                            boost::apply_visitor(*this, *i));
+                    wrapper_args.push_back(wrapped_name);
+                    
                     std::shared_ptr<ctype::tuple_t> tuple_sub_ct(
                         new ctype::tuple_t(
                             std::vector<std::shared_ptr<ctype::type_t> >{
@@ -77,26 +76,19 @@ public:
                     std::shared_ptr<apply> getter_apply(
                         new apply(getter_name,
                                   wrapped_name_tuple));
-                    std::shared_ptr<bind> do_get(
-                        new bind(original_name, 
-                                 getter_apply));
-               
-                    statements.push_back(do_get);
+                    getter_args.push_back(getter_apply);
                 } else {
                     //Fallback
-                    wrapped_args.push_back(
-                        std::static_pointer_cast<expression>(boost::apply_visitor(*this, *i)));
+                    std::shared_ptr<expression> passed =
+                        std::static_pointer_cast<expression>(
+                            boost::apply_visitor(*this, *i));
+                    wrapper_args.push_back(passed);
+                    getter_args.push_back(passed);                    
                 }
             }
-            //Concatenate the extractors and the body of the procedure
-            for(auto i = n.stmts().begin();
-                i != n.stmts().end();
-                i++) {
-                statements.push_back(
-                    std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i)));
-            }
+            
 
-            //Derive the new output c type of the procedure
+            //Derive the new output c type of the wrapper procedure
             const ctype::fn_t& previous_c_t =
                 boost::get<const ctype::fn_t&>(n.ctype());
             const ctype::type_t& previous_c_res_t =
@@ -104,8 +96,8 @@ public:
             
             std::shared_ptr<ctype::type_t> new_ct;
             std::vector<std::shared_ptr<ctype::type_t> > arg_cts;
-            for(auto i=wrapped_args.begin();
-                i != wrapped_args.end();
+            for(auto i=wrapper_args.begin();
+                i != wrapper_args.end();
                 i++) {
                 arg_cts.push_back(
                     get_ctype_ptr((*i)->ctype()));
@@ -132,19 +124,44 @@ public:
                     new ctype::fn_t(new_args_ct, new_res_ct));
             }
 
-            
-            std::shared_ptr<suite> stmts(
-                new suite(std::move(statements)));
-            
-            std::shared_ptr<tuple> args(
-                new tuple(std::move(wrapped_args)));
+            std::shared_ptr<name> wrapper_proc_id =
+                std::make_shared<name>(
+                    detail::wrap_proc_id(n.id().id()));
+                        
 
-            auto id = std::static_pointer_cast<name>(this->operator()(n.id()));
+            std::shared_ptr<call> make_the_call =
+                std::make_shared<call>(
+                    std::make_shared<apply>(
+                        std::static_pointer_cast<name>(get_node_ptr(n.id())),
+                        std::make_shared<tuple>(
+                            std::move(getter_args))));
+            std::shared_ptr<suite> wrapper_stmts =
+                std::make_shared<suite>(
+                    std::vector<std::shared_ptr<statement> >{make_the_call});
+            std::shared_ptr<tuple> wrapper_args_tuple(
+                new tuple(std::move(wrapper_args)));
             auto t = get_type_ptr(n.type());
-            result_type completed_wrap(
-                new procedure(id, args, stmts, t, new_ct));
+            std::shared_ptr<procedure> completed_wrapper =
+                std::make_shared<procedure>(wrapper_proc_id,
+                                            wrapper_args_tuple,
+                                            wrapper_stmts,
+                                            t, new_ct, "");
+            m_wrapper = completed_wrapper;
+
+            //Temporary
+            result_type rewritten =
+                std::make_shared<procedure>(
+                    std::static_pointer_cast<name>(
+                        get_node_ptr(n.id())),
+                    std::static_pointer_cast<tuple>(
+                        get_node_ptr(n.args())),
+                    std::static_pointer_cast<suite>(
+                        boost::apply_visitor(*this, n.stmts())),
+                    get_type_ptr(n.type()),
+                    get_ctype_ptr(n.ctype()),
+                    "");
             m_wrapping = false;
-            return completed_wrap;
+            return rewritten;
         } else {
             return this->copier::operator()(n);
         }
@@ -166,5 +183,21 @@ public:
         }
         return this->copier::operator()(n);
     }
+    result_type operator()(const suite&n) {
+        std::vector<std::shared_ptr<statement> > stmts;
+        for(auto i = n.begin();
+            i != n.end();
+            i++) {
+            stmts.push_back(
+                std::static_pointer_cast<statement>(
+                    boost::apply_visitor(*this, *i)));
+        }
+        if (!m_wrapping && m_wrapper) {
+            stmts.push_back(m_wrapper);
+            m_wrapper = std::shared_ptr<procedure>();
+        }
+        return result_type(new suite(std::move(stmts)));
+    }
 };
+
 }

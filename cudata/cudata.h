@@ -168,11 +168,6 @@ std::string repr_cuarray(const sp_cuarray_var &in) {
 }
 
 template<typename T>
-cuarray<T>* get_cuarray(sp_cuarray_var &in) {
-    return &boost::get<cuarray<T> >(*in);
-}
-
-template<typename T>
 stored_sequence<T> get_remote_r(sp_cuarray_var &in) {
     return boost::get<cuarray<T> >(*in).get_remote_r();
 };
@@ -213,26 +208,6 @@ stored_sequence<T> get_local_w(boost::shared_ptr<cuarray<T> > &in) {
     return in->get_local_w();
 };
 
-template<typename T>
-stored_sequence<T> get_remote_r(cuarray<T>* in) {
-    return in->get_remote_r();
-};
-
-template<typename T>
-stored_sequence<T> get_remote_w(cuarray<T>* in) {
-    return in->get_remote_w();
-};
-
-template<typename T>
-stored_sequence<T> get_local_r(cuarray<T>* &in) {
-    return in->get_local_r();
-};
-
-template<typename T>
-stored_sequence<T> get_local_w(cuarray<T>* &in) {
-    return in->get_local_w();
-};
-
 namespace detail {
 
 template<typename T>
@@ -242,7 +217,7 @@ public:
     void release() {m_released = true;}
     void operator()(T* ptr){if(!m_released) delete ptr;}
 private:
-  bool m_released;
+    bool m_released;
 };
 
 template<typename T>

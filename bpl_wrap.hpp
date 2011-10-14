@@ -52,11 +52,12 @@ public:
             stmts.push_back(
                 std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i)));
         }
-
         std::shared_ptr<name> entry_name(
             new name(m_entry_point));
+        std::shared_ptr<name> entry_generated_name(
+            new name(detail::mark_generated_id(m_entry_point)));
         std::shared_ptr<literal> python_entry_name(
-            new literal("\"" + m_entry_point + "\""));
+            new literal("\"" + entry_generated_name->id() + "\""));
         std::shared_ptr<tuple> def_args(
             new tuple(
                 std::vector<std::shared_ptr<expression> >{python_entry_name, entry_name}));
@@ -75,7 +76,7 @@ public:
                 detail::boost_python_module()));
         std::shared_ptr<tuple> bpl_module_args(
             new tuple(
-                std::vector<std::shared_ptr<expression> >{entry_name}));
+                std::vector<std::shared_ptr<expression> >{entry_generated_name}));
         std::shared_ptr<procedure> bpl_proc(
             new procedure(
                 bpl_module,

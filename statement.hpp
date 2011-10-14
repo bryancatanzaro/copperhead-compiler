@@ -81,10 +81,12 @@ public:
               const std::shared_ptr<type_t> type =
               std::shared_ptr<type_t>(new void_mt()),
               std::shared_ptr<ctype::type_t> ctype =
-              std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
+              std::shared_ptr<ctype::type_t>(new ctype::void_mt()),
+              const std::string &place =
+              "__device__")
         : statement(*this),
           m_id(id), m_args(args), m_stmts(stmts), m_type(type),
-          m_ctype(ctype)
+          m_ctype(ctype), m_place(place)
         {}
 protected:
     const std::shared_ptr<name> m_id;
@@ -92,6 +94,7 @@ protected:
     const std::shared_ptr<suite> m_stmts;
     std::shared_ptr<type_t> m_type;
     std::shared_ptr<ctype::type_t> m_ctype;
+    const std::string m_place;
 public:
     inline const name& id(void) const {
         return *m_id;
@@ -109,6 +112,10 @@ public:
     }
     const ctype::type_t& ctype(void) const {
         return *m_ctype;
+    }
+
+    const std::string& place(void) const {
+        return m_place;
     }
     
 };

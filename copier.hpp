@@ -176,6 +176,9 @@ public:
     virtual result_type operator()(const include &n) {
         return get_node_ptr(n);
     }
+    virtual result_type operator()(const typedefn &n) {
+        return get_node_ptr(n);
+    }
 };
 
 }
