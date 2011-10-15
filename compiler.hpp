@@ -52,8 +52,11 @@ public:
         functorize functorizer(m_entry_point, m_registry);
         auto functorized = apply(functorizer, type_converted);
 
+        allocate allocator(m_entry_point);
+        auto allocated = apply(allocator, functorized);
+        
         typedefify typedefifier;
-        auto typedefified = apply(typedefifier, functorized);
+        auto typedefified = apply(typedefifier, allocated);
         
         wrap wrapper(m_entry_point);
         auto wrapped = apply(wrapper, typedefified);
