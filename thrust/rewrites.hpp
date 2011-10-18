@@ -10,6 +10,8 @@
 #include "../utility/isinstance.hpp"
 #include "../utility/markers.hpp"
 
+#include "../type_printer.hpp"
+
 namespace backend {
 
 class thrust_rewriter
@@ -80,10 +82,25 @@ private:
             std::make_shared<ctype::templated_t>(
                 std::make_shared<ctype::monotype_t>("thrust::tuple"),
                 std::move(arg_types));
+        std::shared_ptr<ctype::templated_t> transform_t =
+            std::make_shared<ctype::templated_t>(
+                std::make_shared<ctype::monotype_t>("transformed_sequence"),
+                std::vector<std::shared_ptr<ctype::type_t> >{
+                    fn_t, thrust_tupled});
+        std::shared_ptr<apply> n_rhs =
+            std::static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+        //Can only handle names on the LHS
+        assert(detail::isinstance<name>(n.lhs()));
+        const name& lhs = boost::get<const name&>(n.lhs());
+        std::shared_ptr<name> n_lhs = std::make_shared<name>(lhs.id(),
+                                 get_type_ptr(lhs.type()),
+                                 transform_t);
+        auto result = std::make_shared<bind>(n_lhs, n_rhs);
+        ctype::ctype_printer cp(std::cout);
+        boost::apply_visitor(cp, result->lhs().ctype());
+        std::cout << std::endl;
+        return result;
         
-        
-        
-        return get_node_ptr(n);
     }
     static result_type indices_rewrite(const bind& n) {
         return get_node_ptr(n);

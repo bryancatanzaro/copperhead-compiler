@@ -60,9 +60,11 @@ namespace ctype {
 class ctype_printer
     : public boost::static_visitor<>
 {
+private:
+    int m_level;
 public:
     inline ctype_printer(std::ostream &os)
-        : m_os(os)
+        : m_level(0), m_os(os)
         {}
     inline void operator()(const monotype_t &mt) {
         m_os << mt.name();
@@ -82,6 +84,8 @@ public:
     inline void operator()(const templated_t &tt) {
         boost::apply_visitor(*this, tt.base());
         m_os << "<";
+        m_level++;
+        int level = m_level;
         for(auto i = tt.begin();
             i != tt.end();
             i++) {
@@ -90,7 +94,12 @@ public:
                 m_os << ", ";
             }
         }
-        m_os << " >";
+        //This can be removed once C++OX support is nvcc
+        //It is a workaround to prevent emitting foo<bar<baz>>
+        //And instead emit foo<bar<baz> >
+        if (m_level != level)
+            m_os << " ";
+        m_os << ">";
     }
     std::ostream &m_os;
     inline void sep() const {
