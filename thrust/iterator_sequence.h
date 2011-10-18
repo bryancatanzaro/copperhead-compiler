@@ -45,12 +45,12 @@ struct iterator_sequence
     int size() const { return length; }
 
     __host__ __device__
-    I begin() {
+    I begin() const {
       return data;
     }
   
     __host__ __device__
-    I end() {
+    I end() const {
       return data + length;
     }
 };

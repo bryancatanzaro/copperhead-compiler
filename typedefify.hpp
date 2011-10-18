@@ -80,9 +80,14 @@ public:
         for(auto i = n.stmts().begin();
             i != n.stmts().end();
             i++) {
-            stmts.push_back(
-                std::static_pointer_cast<statement>(
-                    boost::apply_visitor(*this, *i)));
+            auto s = std::static_pointer_cast<statement>(
+                boost::apply_visitor(*this, *i));
+            if (m_typedef) {
+                stmts.push_back(m_typedef);
+                m_typedef = std::shared_ptr<statement>();
+            }
+            stmts.push_back(s);
+          
         }
         std::shared_ptr<name> n_name =
             std::static_pointer_cast<name>(

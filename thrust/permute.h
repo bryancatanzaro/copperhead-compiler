@@ -3,7 +3,7 @@
 
 template<typename SeqX,
          typename SeqI>
-boost::shared_ptr<cuarray<typename SeqX::value_type> > indices(
+boost::shared_ptr<cuarray<typename SeqX::value_type> > permute(
     SeqX& x,
     SeqI& i) {
     typedef typename SeqX::value_type T;
@@ -13,5 +13,5 @@ boost::shared_ptr<cuarray<typename SeqX::value_type> > indices(
                     x.end(),
                     i.begin(),
                     result.begin());
-    return index_sequence(x0.size());
+    return result_ary;
 }

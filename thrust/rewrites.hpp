@@ -109,15 +109,12 @@ private:
         //Indices must have arguments
         assert(ap_args.begin() != ap_args.end());
         const ctype::type_t& arg_t = ap_args.begin()->ctype();
-        //Argument must have sequence type
+        //Argument must have Seq[Int] type
         assert(detail::isinstance<ctype::sequence_t>(arg_t));
-        const ctype::type_t& sub_t = boost::get<const ctype::sequence_t>(arg_t).sub();
-        std::shared_ptr<ctype::templated_t> index_t =
-            std::make_shared<ctype::templated_t>(
-                std::make_shared<ctype::monotype_t>("index_sequence"),
-                std::vector<std::shared_ptr<ctype::type_t> >{
-                    get_ctype_ptr(sub_t)});
-              std::shared_ptr<apply> n_rhs =
+        
+        std::shared_ptr<ctype::monotype_t> index_t =
+            std::make_shared<ctype::monotype_t>("index_sequence");
+        std::shared_ptr<apply> n_rhs =
             std::static_pointer_cast<apply>(get_node_ptr(n.rhs()));
         //Can only handle names on the LHS
         assert(detail::isinstance<name>(n.lhs()));
