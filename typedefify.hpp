@@ -60,6 +60,51 @@ public:
             new bind(
                 new_lhs, rhs));
     }
+    result_type operator()(const procedure &n) {
+        const tuple& args = n.args();
+        std::vector<std::shared_ptr<statement> > stmts;
+        for(auto i = args.begin();
+            i != args.end();
+            i++) {
+            assert(detail::isinstance<name>(*i));
+            const name& arg_name = boost::get<const name&>(*i);
+            std::shared_ptr<ctype::type_t> unique_type =
+            std::make_shared<ctype::monotype_t>(
+                detail::typify(arg_name.id()));
+            std::shared_ptr<typedefn> arg_typedef =
+                std::make_shared<typedefn>(
+                    get_ctype_ptr(arg_name.ctype()),
+                    unique_type);
+            stmts.push_back(arg_typedef);
+        }
+        for(auto i = n.stmts().begin();
+            i != n.stmts().end();
+            i++) {
+            stmts.push_back(
+                std::static_pointer_cast<statement>(
+                    boost::apply_visitor(*this, *i)));
+        }
+        std::shared_ptr<name> n_name =
+            std::static_pointer_cast<name>(
+                boost::apply_visitor(*this, n.id()));
+        std::shared_ptr<tuple> n_args =
+            std::static_pointer_cast<tuple>(
+                boost::apply_visitor(*this, args));
+        std::shared_ptr<suite> n_stmts =
+            std::make_shared<suite>(std::move(stmts));
+        std::shared_ptr<type_t> n_type =
+            get_type_ptr(n.type());
+        std::shared_ptr<ctype::type_t> n_ctype =
+            get_ctype_ptr(n.ctype());
+        
+        
+        return std::make_shared<procedure>(
+            n_name,
+            n_args,
+            n_stmts,
+            n_type,
+            n_ctype);
+    }
 };
 
 }

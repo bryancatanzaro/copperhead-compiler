@@ -65,12 +65,12 @@ public:
     }
     result_type operator()(const bind &n) {
         if (m_in_entry &&
-            detail::isinstance<ctype::sequence_t, ctype::type_t>(
+            detail::isinstance<ctype::sequence_t>(
                 n.lhs().ctype()) &&
-            detail::isinstance<apply, node>(n.rhs())) {
+            detail::isinstance<apply>(n.rhs())) {
 
             //We can only deal with names on the LHS of a bind
-            bool lhs_is_name = detail::isinstance<name, node>(n.lhs());
+            bool lhs_is_name = detail::isinstance<name>(n.lhs());
             assert(lhs_is_name);
             const name& pre_lhs = boost::get<const name&>(n.lhs());
 
@@ -82,8 +82,16 @@ public:
             std::shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct(
                 new ctype::tuple_t(
                     std::vector<std::shared_ptr<ctype::type_t> >{sub_lhs_ct}));
-            std::shared_ptr<ctype::type_t> result_ct(
-                new ctype::cuarray_t(sub_lhs_ct));
+            std::shared_ptr<ctype::type_t> result_ct =
+                std::make_shared<ctype::templated_t>(
+                    std::make_shared<ctype::monotype_t>(
+                        "boost::shared_ptr"),
+                    std::vector<std::shared_ptr<ctype::type_t> >{
+                        std::make_shared<ctype::templated_t>(
+                            std::make_shared<ctype::monotype_t>(
+                                "cuarray"),
+                            std::vector<std::shared_ptr<ctype::type_t> >{
+                                sub_lhs_ct})});
             std::shared_ptr<type_t> result_t =
                 get_type_ptr(pre_lhs.type());
             std::shared_ptr<name> result_name(
