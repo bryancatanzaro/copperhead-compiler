@@ -96,9 +96,6 @@ private:
                                  get_type_ptr(lhs.type()),
                                  transform_t);
         auto result = std::make_shared<bind>(n_lhs, n_rhs);
-        ctype::ctype_printer cp(std::cout);
-        boost::apply_visitor(cp, result->lhs().ctype());
-        std::cout << std::endl;
         return result;
         
     }

@@ -1,7 +1,11 @@
 #pragma once
+#include <stack>
 #include "node.hpp"
 #include "type.hpp"
 #include "ctype.hpp"
+
+#include "type_printer.hpp"
+#include "utility/isinstance.hpp"
 
 namespace backend {
 
@@ -23,16 +27,18 @@ protected:
     static inline std::shared_ptr<ctype::type_t> get_ctype_ptr(const Ctype &n) {
         return std::const_pointer_cast<ctype::type_t>(n.shared_from_this());
     }
-    bool m_match;
+    std::stack<bool> m_matches;
     void start_match() {
-        m_match = true;
+        m_matches.push(true);
     }
     template<typename T, typename U>
     inline void update_match(const T& t, const U& u) {
-        m_match = m_match && (t == get_node_ptr(u));
+        m_matches.top() = m_matches.top() && (t == get_node_ptr(u));
     }
     bool is_match() {
-        return m_match;
+        bool result = m_matches.top();
+        m_matches.pop();
+        return result;
     }
 
 public:
@@ -151,6 +157,7 @@ public:
     virtual result_type operator()(const suite &n) {
         start_match();
         std::vector<std::shared_ptr<statement> > n_stmts;
+        ctype::ctype_printer cp(std::cout);
         for(auto i = n.begin(); i != n.end(); i++) {
             auto n_stmt = std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i));
             update_match(n_stmt, *i);

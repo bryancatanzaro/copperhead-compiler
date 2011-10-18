@@ -59,9 +59,6 @@ public:
 
         thrust_rewriter thrustizer;
         auto thrust_rewritten = apply(thrustizer, functorized);
-        std::cout << "-----------------------------" << std::endl;
-        boost::apply_visitor(cp, *thrust_rewritten);
-        std::cout << "-----------------------------" << std::endl;
         
         allocate allocator(m_entry_point);
         auto allocated = apply(allocator, thrust_rewritten);
