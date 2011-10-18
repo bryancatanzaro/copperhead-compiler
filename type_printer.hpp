@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include "monotype.hpp"
 #include "ctype.hpp"
 
@@ -61,31 +63,35 @@ class ctype_printer
     : public boost::static_visitor<>
 {
 private:
-    int m_level;
+    std::stack<bool> m_need_space;
 public:
     inline ctype_printer(std::ostream &os)
-        : m_level(0), m_os(os)
-        {}
+        : m_os(os)
+        {
+            m_need_space.push(false);
+        }
     inline void operator()(const monotype_t &mt) {
         m_os << mt.name();
+        m_need_space.top() = false;
     }
     inline void operator()(const sequence_t &st) {
         m_os << st.name() << "<";
         boost::apply_visitor(*this, st.sub());
         m_os << ">";
+        m_need_space.top() = true;
     }
     inline void operator()(const cuarray_t &ct) {
         //Because cuarray_t is a variant, we don't want to
         //print out the template definition.
         this->operator()((monotype_t)ct);
+        m_need_space.top() = false;
     }
     inline void operator()(const polytype_t &pt) {
     }
     inline void operator()(const templated_t &tt) {
         boost::apply_visitor(*this, tt.base());
         m_os << "<";
-        m_level++;
-        int level = m_level;
+        m_need_space.push(false);
         for(auto i = tt.begin();
             i != tt.end();
             i++) {
@@ -96,9 +102,11 @@ public:
         }
         //This can be removed once C++OX support is nvcc
         //It is a workaround to prevent emitting foo<bar<baz>>
-        //And instead emit foo<bar<baz> >
-        if (m_level != level)
+        //And instead emit foo<bar<baz> > 
+        if (m_need_space.top())
             m_os << " ";
+        m_need_space.pop();
+        m_need_space.top() = true;
         m_os << ">";
     }
     std::ostream &m_os;
