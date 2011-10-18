@@ -12,15 +12,15 @@ protected:
     //If you know you're not going to do any rewriting at deeper
     //levels of the AST, just grab the pointer from the node
     template<typename Node>
-    inline result_type get_node_ptr(const Node &n) {
+    static inline result_type get_node_ptr(const Node &n) {
         return std::const_pointer_cast<node>(n.shared_from_this());
     }
     template<typename Type>
-    inline std::shared_ptr<type_t> get_type_ptr(const Type &n) {
+    static inline std::shared_ptr<type_t> get_type_ptr(const Type &n) {
         return std::const_pointer_cast<type_t>(n.shared_from_this());
     }
     template<typename Ctype>
-    inline std::shared_ptr<ctype::type_t> get_ctype_ptr(const Ctype &n) {
+    static inline std::shared_ptr<ctype::type_t> get_ctype_ptr(const Ctype &n) {
         return std::const_pointer_cast<ctype::type_t>(n.shared_from_this());
     }
     bool m_match;

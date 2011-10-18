@@ -1,4 +1,6 @@
 #pragma once
+#include <boost/type_traits.hpp>
+#include <boost/mpl/logical.hpp>
 
 namespace backend {
 namespace detail {
@@ -10,11 +12,15 @@ class type_checker:
 public:
     explicit type_checker(bool& res) : m_res(res) {}
     template<typename U>
-    void operator()(const U& u) const {
+    typename boost::disable_if<
+        boost::is_base_of<T, U> >::type
+    operator()(const U& u) const {
         m_res = false;
     }
-
-    void operator()(const T& t) const {
+    template<typename U>
+    typename boost::enable_if<
+        boost::is_base_of<T, U> >::type
+    operator()(const U& t) const {
         m_res = true;
     }
 private:

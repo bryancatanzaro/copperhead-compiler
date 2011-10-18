@@ -47,11 +47,11 @@ public:
         for(auto n_arg = n_args.begin();
             n_arg != n_args.end();
             ++n_arg) {
-            if (!(detail::isinstance<name, expression>(*n_arg)))
+            if (!(detail::isinstance<name>(*n_arg)))
                 n_arg_list.push_back(std::static_pointer_cast<expression>(boost::apply_visitor(*this, *n_arg)));
             else {
-                name* p_name = static_cast<name*>(&*n_arg);
-                const std::string id = p_name->id();
+                const name& n_name = boost::get<const name&>(*n_arg);
+                const std::string id = n_name.id();
                 auto found = m_fns.find(id);
                 if (found == m_fns.end()) {
                     n_arg_list.push_back(

@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include "../import/library.hpp"
 #include "../import/paths.hpp"
+#include "../node.hpp"
 
 #define PRELUDE_PATH "PRELUDE_PATH"
 #define THRUST_PATH "THRUST_PATH"
@@ -19,7 +20,9 @@ std::vector<const char*> thrust_fn_names = {
     "adjacent_difference",
     "map",
     "scan",
-    "rscan"/*,
+    "rscan",
+    "indices",
+    "permute"/*,
     "exscan",
     "exrscan"*/
 };
@@ -54,5 +57,6 @@ std::shared_ptr<library> get_thrust() {
                     std::set<std::string>{std::string(THRUST_FILE)},
                     std::move(include_paths)));
 }
+
 
 }

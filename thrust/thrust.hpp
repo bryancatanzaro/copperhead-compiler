@@ -1,4 +1,6 @@
 #pragma once
-#include "adjacent_difference.hpp"
-#include "scan.hpp"
-#include "map.hpp"
+#include "adjacent_difference.h"
+#include "scan.h"
+#include "map.h"
+#include "indices.h"
+#include "permute.h"

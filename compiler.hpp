@@ -17,6 +17,11 @@
 #include "cuda_printer.hpp"
 #include "typedefify.hpp"
 
+//XXX We need an interface for libraries to insert compiler passes
+//In lieu of such an interface, this is hard coded.
+//And must be changed!
+#include "thrust/rewrites.hpp"
+
 namespace backend {
 /*! \p compiler contains state and methods for compiling programs.
  */
@@ -52,8 +57,11 @@ public:
         functorize functorizer(m_entry_point, m_registry);
         auto functorized = apply(functorizer, type_converted);
 
+        thrust_rewriter thrustizer;
+        auto thrust_rewritten = apply(thrustizer, functorized);
+
         allocate allocator(m_entry_point);
-        auto allocated = apply(allocator, functorized);
+        auto allocated = apply(allocator, thrust_rewritten);
         
         typedefify typedefifier;
         auto typedefified = apply(typedefifier, allocated);
