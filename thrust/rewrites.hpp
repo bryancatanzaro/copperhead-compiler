@@ -100,7 +100,33 @@ private:
         
     }
     static result_type indices_rewrite(const bind& n) {
-        return get_node_ptr(n);
+        //The rhs must be an apply
+        assert(detail::isinstance<apply>(n.rhs()));
+        const apply& rhs = boost::get<const apply&>(n.rhs());
+        //The rhs must apply "indices"
+        assert(rhs.fn().id() == std::string("indices"));
+        const tuple& ap_args = rhs.args();
+        //Indices must have arguments
+        assert(ap_args.begin() != ap_args.end());
+        const ctype::type_t& arg_t = ap_args.begin()->ctype();
+        //Argument must have sequence type
+        assert(detail::isinstance<ctype::sequence_t>(arg_t));
+        const ctype::type_t& sub_t = boost::get<const ctype::sequence_t>(arg_t).sub();
+        std::shared_ptr<ctype::templated_t> index_t =
+            std::make_shared<ctype::templated_t>(
+                std::make_shared<ctype::monotype_t>("index_sequence"),
+                std::vector<std::shared_ptr<ctype::type_t> >{
+                    get_ctype_ptr(sub_t)});
+              std::shared_ptr<apply> n_rhs =
+            std::static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+        //Can only handle names on the LHS
+        assert(detail::isinstance<name>(n.lhs()));
+        const name& lhs = boost::get<const name&>(n.lhs());
+        std::shared_ptr<name> n_lhs = std::make_shared<name>(lhs.id(),
+                                 get_type_ptr(lhs.type()),
+                                 index_t);
+        auto result = std::make_shared<bind>(n_lhs, n_rhs);
+        return result;
     }
 
     typedef result_type(*rewrite_fn)(const bind&);
