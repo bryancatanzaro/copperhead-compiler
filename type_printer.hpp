@@ -3,6 +3,7 @@
 #include <stack>
 
 #include "monotype.hpp"
+#include "polytype.hpp"
 #include "ctype.hpp"
 
 namespace backend
@@ -19,6 +20,15 @@ public:
         m_os << mt.name();
     }
     inline void operator()(const polytype_t &pt) {
+        m_os << "Polytype(";
+        for(auto i = pt.begin();
+            i != pt.end();
+            i++) {
+            boost::apply_visitor(*this, *i);
+            m_os << ", ";
+        }
+        boost::apply_visitor(*this, pt.monotype());
+        m_os << ")";
     }
     inline void operator()(const sequence_t &st) {
         m_os << st.name();

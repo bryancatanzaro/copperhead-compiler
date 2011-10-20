@@ -66,13 +66,29 @@ static std::shared_ptr<T> make_from_list(list vals) {
     return result;
 }
 
+static std::shared_ptr<polytype_t> make_polytype(list vals,
+                                                 std::shared_ptr<monotype_t> sub) {
+    std::vector<std::shared_ptr<monotype_t> > values;
+    boost::python::ssize_t n = len(vals);
+    for(boost::python::ssize_t i=0; i<n; i++) {
+        object elem = vals[i];
+        std::shared_ptr<monotype_t> p_elem = extract<std::shared_ptr<monotype_t> >(elem);
+        values.push_back(p_elem);
+    }
+    auto result = std::make_shared<polytype_t>(std::move(values), sub);
+    return result;
+}
+
 
 BOOST_PYTHON_MODULE(coretypes) {
     def("is_fn", &is_fn);
     class_<type_t, std::shared_ptr<type_t>, boost::noncopyable >("Type", no_init)
         .def("__repr__", &backend::repr_apply<type_t>);
-    class_<monotype_t, std::shared_ptr<monotype_t>, bases<type_t>, boost::noncopyable >("Monotype", no_init)
+    class_<monotype_t, std::shared_ptr<monotype_t>, bases<type_t> >("Monotype", init<std::string>())
         .def("__repr__", &backend::repr<monotype_t>);
+    class_<polytype_t, std::shared_ptr<polytype_t>, bases<type_t> >("Polytype", no_init)
+        .def("__init__", make_constructor(make_polytype))
+        .def("__repr__", &backend::repr<polytype_t>);
     class_<int32_mt, std::shared_ptr<int32_mt>, bases<monotype_t, type_t> >("Int32", init<>())
         .def("__repr__", &backend::repr<int32_mt>);
     class_<int64_mt, std::shared_ptr<int64_mt>, bases<monotype_t, type_t> >("Int64", init<>())
