@@ -1,141 +1,161 @@
 #pragma once
 #include "operators.hpp"
 
+template<typename a>
 struct fn_op_add {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_add(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_sub {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_sub(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_mul {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_mul(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_div {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_div(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_mod {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_mod(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_lshift {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_lshift(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_rshift {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_rshift(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_or {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_or(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_xor {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_xor(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_and {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_and(l, r);
     }
 };
 
+template<typename a>
 struct fn_cmp_eq {
-    template<typename a>
+    typedef bool result_type;
     __host__ __device__ bool operator()(const a &l, const a &r) {
         return cmp_eq(l, r);
     }
 };
 
+template<typename a>
 struct fn_cmp_ne {
-    template<typename a>
+    typedef bool result_type;
     __host__ __device__ bool operator()(const a &l, a r) {
         return cmp_ne(l, r);
     }
 };
 
+template<typename a>
 struct fn_cmp_lt {
-    template<typename a>
+    typedef bool result_type;
     __host__ __device__ bool operator()(const a &l, const a &r) {
         return cmp_lt(l, r);
     }
 };
 
+template<typename a>
 struct fn_cmp_le {
-    template<typename a>
+    typedef bool result_type;
     __host__ __device__ bool operator()(a l, const a &r) {
         return cmp_le(l, r);
     }
 };
 
+template<typename a>
 struct fn_cmp_gt {
-    template<typename a>
+    typedef bool result_type;
     __host__ __device__ bool operator()(const a &l, a r) {
         return cmp_gt(l, r);
     }
 };
 
+template<typename a>
 struct fn_cmp_ge {
-    template<typename a>
+    typedef bool result_type;
     __host__ __device__ bool operator()(const a &l, const a &r) {
         return cmp_ge(l, r);
     }
 };
 
+template<typename a>
 struct fn_op_invert {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &i) {
         return op_invert(i);
     }
 };
 
+template<typename a>
 struct fn_op_pos {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &i) {
         return op_pos(i);
     }
 };
 
+template<typename a>
 struct fn_op_neg {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &i) {
         return op_neg(i);
     }
 };
 
+template<typename a>
 struct fn_op_not {
-    template<typename a>
+    typedef a result_type;
     __host__ __device__ a operator()(const a &i) {
         return op_not(i);
     }
