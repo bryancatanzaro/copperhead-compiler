@@ -1,6 +1,9 @@
 #pragma once
 #include <stack>
 #include "node.hpp"
+#include "expression.hpp"
+#include "statement.hpp"
+#include "cppnode.hpp"
 #include "type.hpp"
 #include "ctype.hpp"
 

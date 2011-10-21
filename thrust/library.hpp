@@ -32,13 +32,13 @@ std::vector<const char*> thrust_fn_names = {
 
 std::shared_ptr<library> get_thrust() {
     std::map<ident, fn_info> exported_fns;
-    fn_info blank;
     for(auto i = detail::thrust_fn_names.begin();
         i != detail::thrust_fn_names.end();
         i++) {
         exported_fns.insert(std::pair<ident, fn_info>(
                        ident(std::string(*i), iteration_structure::parallel),
-                       blank));
+                       //XXX Need to put real types in
+                       fn_info(std::make_shared<void_mt>())));
 
     }
     //XXX HACK.  NEED boost::filesystem path manipulation

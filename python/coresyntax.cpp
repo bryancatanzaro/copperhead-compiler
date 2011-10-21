@@ -9,7 +9,6 @@
 #include "../expression.hpp"
 #include "../py_printer.hpp"
 #include "../repr_printer.hpp"
-#include "../compiler.hpp"
 #include "../cuda_printer.hpp"
 
 #include "wrappers.hpp"
@@ -82,15 +81,6 @@ static std::shared_ptr<T> make_from_list(list vals) {
 }
 
 
-std::string compile(std::shared_ptr<compiler> &c,
-                    std::shared_ptr<suite_wrap> &s) {
-    std::shared_ptr<suite> rewritten = c->operator()(*s);
-    std::string entry_point = c->entry_point();
-    std::ostringstream os;
-    cuda_printer p(entry_point, c->reg(), os);
-    p(*rewritten);
-    return os.str();
-}
 
 BOOST_PYTHON_MODULE(coresyntax) {
     class_<node, std::shared_ptr<node>, boost::noncopyable>("Node", no_init)
@@ -172,8 +162,6 @@ BOOST_PYTHON_MODULE(coresyntax) {
         .def("__str__", &backend::str<structure_wrap>)
         .def("__repr__", &backend::repr<structure_wrap>);
     
-    class_<compiler, std::shared_ptr<compiler> >("Compiler", init<std::string>())
-        .def("__call__", &compile);
 
    
     

@@ -8,6 +8,57 @@
 
 namespace backend {
 
+namespace detail {
+class type_corresponder
+    : boost::static_visitor<> {
+private:
+    type_t m_working;
+    std::map<std::string, type_t> m_corresponded;
+    type_corresponder(const type_t& input)
+        : m_working(input) {}
+    
+    void operator()(const monotype_t &n) {
+        std::string name = n.name();
+        m_corresponded.insert(name, m_working);
+    }
+
+    void operator()(const polytype_t &n) {
+        //Polytypes are not allowed to be nested;
+        assert(false);
+    }
+
+    void operator()(const sequence_t &n) {
+        //m_working must be a sequence_t or else the typechecking is wrong
+        assert(detail::isinstance<sequence_t>(m_working));
+        sequence_t working_sub = boost::get<sequence_t>(m_working).sub();
+        m_working = working_sub;
+        boost::apply_visitor(*this, n.sub());
+    }
+
+    result_type operator()(const tuple_t &n) {
+        //m_working must be a tuple_t or else the typechecking is wrong
+        assert(detail::isinstance<tuple_t>(m_working));
+        tuple_t working_tuple = boost::get<tuple_t>(m_working);
+        for(auto i = n.begin(),
+                j = working_tuple.begin();
+            i != n.end();
+            ++i, ++j) {
+            m_working = *j;
+            boost::apply_visitor(*this, *i);
+        }
+        
+    }
+
+    result_type operator()(const fn_t &n) {
+        //Not trying to harvest correspondences 
+        return;
+    }
+
+    
+    
+};
+}
+
 
 /*! \p A compiler pass to create function objects for all procedures
  *  except the entry point.
@@ -20,6 +71,37 @@ private:
     std::vector<result_type> m_additionals;
     std::set<std::string> m_fns;
     const registry& m_reg;
+
+
+    typedef std::map<std::string,
+                     std::shared_ptr<type_t> > type_map;
+
+    type_map m_type_map;
+
+    void make_type_map(const apply& n) {
+        m_type_map.clear();
+        const name& fn_name = n.fn();
+        //If function name is not a polytype, the type map should be empty
+        if (!detail::isinstance<polytype_t>(n.type()))
+            return;
+        const polytype_t& fn_polytype = boost::get<const polytype&>(n.type());
+        //Polytype must contain a function type
+        assert(detail::isinstance<fn_t>(fn_polytype.monotype()));
+        const fn_t& fn_monotype = boost::get<const fn_t&>(fn_polytype.monotype());
+        const tuple_t& fn_arg_t = fn_monotype.args();
+        //Function type results should be a monotype
+        assert(detail::isinstance<monotype_t>(fn_monotype.result()));
+        const monotype_t& fn_result_t = boost::get<const monotype_t&>(fn_monotype.result());
+        
+    }
+
+    std::shared_ptr<expression> instantiate_fn(const name&) {
+        const type_t& fn_type; 
+            //  std::shared_ptr<literal>(
+            //              new literal(detail::fnize_id(id) + "()")));
+
+    }
+    
 public:
     /*! \param entry_point The name of the entry point procedure
         \param reg The registry of functions the compiler knows about
@@ -59,8 +141,7 @@ public:
                             boost::apply_visitor(*this, *n_arg)));
                 } else {
                     n_arg_list.push_back(
-                        std::shared_ptr<literal>(
-                            new literal(detail::fnize_id(id) + "()")));
+                        instantiate_fn(n_name));
                 }
             }
         }

@@ -113,6 +113,7 @@ BOOST_PYTHON_MODULE(coretypes) {
     class_<fn_t, std::shared_ptr<fn_t>, bases<monotype_t, type_t> >("Fn", init<std::shared_ptr<tuple_t>, std::shared_ptr<type_t> >())
         .def("__repr__", &backend::repr<fn_t>);
     implicitly_convertible<std::shared_ptr<backend::monotype_t>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::polytype_t>, std::shared_ptr<backend::type_t> >();
     implicitly_convertible<std::shared_ptr<backend::int32_mt>, std::shared_ptr<backend::type_t> >();
     implicitly_convertible<std::shared_ptr<backend::int64_mt>, std::shared_ptr<backend::type_t> >();
     implicitly_convertible<std::shared_ptr<backend::uint32_mt>, std::shared_ptr<backend::type_t> >();
