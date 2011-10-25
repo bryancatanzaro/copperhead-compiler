@@ -20,6 +20,9 @@ class float64_mt;
 class bool_mt;
 class void_mt;
 
+class var_t;
+class vartuple_t;
+
 namespace detail {
 typedef boost::variant<
     monotype_t &,
@@ -34,7 +37,9 @@ typedef boost::variant<
     float32_mt &,
     float64_mt &,
     bool_mt &,
-    void_mt &
+    void_mt &,
+    var_t &,
+    vartuple_t &
     > type_base;
 
 struct make_type_base_visitor

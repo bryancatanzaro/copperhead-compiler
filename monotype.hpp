@@ -24,9 +24,26 @@ public:
     monotype_t(Derived& self,
                const std::string &name) :
         type_t(self), m_name(name) {}
+
+    template<typename Derived>
+    monotype_t(Derived& self,
+               const std::string &name,
+               std::vector<std::shared_ptr<type_t> > &&params)
+        : type_t(self), m_name(name), m_params(std::move(params)) {}
     
     const std::string& name(void) const {
         return m_name;
+    }
+
+    typedef decltype(boost::make_indirect_iterator(m_params.cbegin())) const_iterator;
+    const_iterator begin() const {
+        return m_params.begin();
+    }
+    const_iterator end() const {
+        return m_params.end();
+    }
+    int size() const {
+        return m_params.size();
     }
 
 };
@@ -84,58 +101,70 @@ struct void_mt :
 class sequence_t :
         public monotype_t
 {
-private:
-    std::shared_ptr<type_t> m_sub;
 public:
     inline sequence_t(const std::shared_ptr<type_t> &sub)
-        : monotype_t(*this, "Seq"), m_sub(sub)
+        : monotype_t(*this,
+                     "Seq",
+                     std::vector<std::shared_ptr<type_t> >{sub})
         {}
     const type_t& sub() const {
-        return *m_sub;
+        return *m_params[0];
     }
 };
 
 class tuple_t :
         public monotype_t
 {
-private:
-    std::vector<std::shared_ptr<type_t> > m_sub;
 public:
     inline tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
-        : monotype_t(*this, "Tuple"), m_sub(std::move(sub))
-        {}
-    typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
-    const_iterator begin() const {
-        return boost::make_indirect_iterator(m_sub.cbegin());
-    }
-
-    const_iterator end() const {
-        return boost::make_indirect_iterator(m_sub.cend());
-    }
-
-    int size() const {
-        return m_sub.size();
-    }
-    
+        : monotype_t(*this, "Tuple", std::move(sub))
+        {}    
 };
 
 class fn_t :
         public monotype_t
 {
-private:
-    const std::shared_ptr<tuple_t> m_args;
-    const std::shared_ptr<type_t> m_result;
 public:
     inline fn_t(const std::shared_ptr<tuple_t> args,
                 const std::shared_ptr<type_t> result)
-        : monotype_t(*this, "Fn"), m_args(args), m_result(result)
+        : monotype_t(*this,
+                     "Fn",
+                     std::vector<std::shared_ptr<type_t> >{args, result})
         {}
     inline const tuple_t& args() const {
-        return *m_args;
+        return *std::static_pointer_cast<tuple_t>(m_params[0]);
     }
     inline const type_t& result() const {
-        return *m_result;
+        return *m_params[1];
     }
 };
+
+class var_t
+    : public monotype_t
+{
+public:
+    inline var_t(const std::shared_ptr<monotype_t> sub)
+        : monotype_t(*this,
+                     "Var",
+                     std::vector<std::shared_ptr<type_t> >{sub}) {}
+    inline const monotype_t& sub() const {
+        return *std::static_pointer_cast<monotype_t>(m_params[0]);
+    }
+};
+
+class vartuple_t
+    : public monotype_t
+{
+public:
+    inline vartuple_t(const std::shared_ptr<monotype_t> sub)
+        : monotype_t(*this,
+                     "Vartuple",
+                     std::vector<std::shared_ptr<type_t> >{sub}) {}
+    inline const monotype_t& sub() const {
+        return *std::static_pointer_cast<monotype_t>(m_params[0]);
+    }
+};
+        
+
 
 }

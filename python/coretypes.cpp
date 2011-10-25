@@ -112,6 +112,10 @@ BOOST_PYTHON_MODULE(coretypes) {
         .def("__repr__", &backend::repr<tuple_t>);
     class_<fn_t, std::shared_ptr<fn_t>, bases<monotype_t, type_t> >("Fn", init<std::shared_ptr<tuple_t>, std::shared_ptr<type_t> >())
         .def("__repr__", &backend::repr<fn_t>);
+    class_<var_t, std::shared_ptr<var_t>, bases<monotype_t, type_t> >("Var", init<std::shared_ptr<monotype_t> >())
+        .def("__repr__", &backend::repr<var_t>);
+    class_<vartuple_t, std::shared_ptr<vartuple_t>, bases<monotype_t, type_t> >("Vartuple", init<std::shared_ptr<monotype_t> >())
+        .def("__repr__", &backend::repr<vartuple_t>);
     implicitly_convertible<std::shared_ptr<backend::monotype_t>, std::shared_ptr<backend::type_t> >();
     implicitly_convertible<std::shared_ptr<backend::polytype_t>, std::shared_ptr<backend::type_t> >();
     implicitly_convertible<std::shared_ptr<backend::int32_mt>, std::shared_ptr<backend::type_t> >();
@@ -132,10 +136,12 @@ BOOST_PYTHON_MODULE(coretypes) {
     implicitly_convertible<std::shared_ptr<backend::bool_mt>, std::shared_ptr<backend::monotype_t> >();
     implicitly_convertible<std::shared_ptr<backend::void_mt>, std::shared_ptr<backend::monotype_t> >();
     implicitly_convertible<std::shared_ptr<backend::sequence_t>, std::shared_ptr<backend::monotype_t> >();
-    implicitly_convertible<std::shared_ptr<backend::sequence_t>, std::shared_ptr<backend::type_t> >();
     implicitly_convertible<std::shared_ptr<backend::tuple_t>, std::shared_ptr<backend::type_t> >();
     implicitly_convertible<std::shared_ptr<backend::tuple_t>, std::shared_ptr<backend::monotype_t> >();
     implicitly_convertible<std::shared_ptr<backend::fn_t>, std::shared_ptr<backend::type_t> >();
     implicitly_convertible<std::shared_ptr<backend::fn_t>, std::shared_ptr<backend::monotype_t> >();
-    
+    implicitly_convertible<std::shared_ptr<backend::var_t>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::var_t>, std::shared_ptr<backend::monotype_t> >();
+    implicitly_convertible<std::shared_ptr<backend::vartuple_t>, std::shared_ptr<backend::type_t> >();
+    implicitly_convertible<std::shared_ptr<backend::vartuple_t>, std::shared_ptr<backend::monotype_t> >();
 }
