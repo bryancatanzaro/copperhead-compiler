@@ -118,7 +118,13 @@ class tuple_t :
 public:
     inline tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
         : monotype_t(*this, "Tuple", std::move(sub))
-        {}    
+        {}
+    template<typename Derived>
+    inline tuple_t(Derived& self,
+                   const std::string& name,
+                   std::vector<std::shared_ptr<type_t> > && sub)
+        : monotype_t(self, name, std::move(sub))
+        {}
 };
 
 class fn_t :
@@ -153,13 +159,13 @@ public:
 };
 
 class vartuple_t
-    : public monotype_t
+    : public tuple_t
 {
 public:
     inline vartuple_t(const std::shared_ptr<monotype_t> sub)
-        : monotype_t(*this,
-                     "Vartuple",
-                     std::vector<std::shared_ptr<type_t> >{sub}) {}
+        : tuple_t(*this,
+                  "Vartuple",
+                  std::vector<std::shared_ptr<type_t> >{sub}) {}
     inline const monotype_t& sub() const {
         return *std::static_pointer_cast<monotype_t>(m_params[0]);
     }
