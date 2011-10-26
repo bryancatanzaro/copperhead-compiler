@@ -8,6 +8,7 @@
 
 #include "type_printer.hpp"
 
+
 namespace backend {
 
 namespace detail {
@@ -73,6 +74,11 @@ public:
     }
 
     void operator()(const fn_t &n) {
+        if (detail::isinstance<polytype_t>(*m_working)) {
+            m_working = get_type_ptr(
+                std::static_pointer_cast<polytype_t>(
+                    m_working)->monotype());
+        }
         assert(detail::isinstance<fn_t>(*m_working));
         const fn_t& working_fn = boost::get<const fn_t&>(*m_working);
         m_working = get_type_ptr(working_fn.args());
@@ -111,9 +117,10 @@ private:
     type_map m_type_map;
 
     void make_type_map(const apply& n) {
-        std::cout << "Making type map" << std::endl;
         m_type_map.clear();
         const name& fn_name = n.fn();
+        std::cout << "Making type map for applying fn: " << fn_name.id() << std::endl;
+
         //If function name is not a polytype, the type map should be empty
         if (!detail::isinstance<polytype_t>(fn_name.type()))
             return;
@@ -130,7 +137,12 @@ private:
         }
         std::shared_ptr<tuple_t> arg_t =
             std::make_shared<tuple_t>(std::move(arg_types));
+        repr_type_printer rp(std::cout);
+        boost::apply_visitor(rp, *arg_t);
+        std::cout << std::endl;
         detail::type_corresponder tc(arg_t, m_type_map);
+        boost::apply_visitor(rp, fn_arg_t);
+        std::cout << std::endl;
         boost::apply_visitor(tc, fn_arg_t);
         
     }
@@ -166,6 +178,7 @@ public:
 
     result_type operator()(const apply &n) {
         make_type_map(n);
+        std::cout << "Done making type map" << std::endl;
         std::vector<std::shared_ptr<expression> > n_arg_list;
         const tuple& n_args = n.args();
         
@@ -173,12 +186,24 @@ public:
         if (detail::isinstance<fn_t>(n.fn().type())) {
             fn_type = std::static_pointer_cast<fn_t>(
                 get_type_ptr(n.fn().type()));
-        } else {
-            //Must be a polytype_t(fn_t)
-            assert(detail::isinstance<polytype_t>(n.fn().type()));
-            const polytype_t& pt = boost::get<const polytype_t&>(n.fn().type());
-            fn_type = std::static_pointer_cast<fn_t>(
-                get_type_ptr(pt.monotype()));
+        } else{
+            //XXX Special case map -- to be removed if we add variadic types
+            //n.fn() must be a name
+            assert(detail::isinstance<name>(n.fn()));
+            const name& fn_name = boost::get<const name&>(n.fn());
+            if (fn_name.id() == "map") {
+                int arity;
+
+                
+                return get_node_ptr(n);
+            } else {
+            
+                //Must be a polytype_t(fn_t)
+                assert(detail::isinstance<polytype_t>(n.fn().type()));
+                const polytype_t& pt = boost::get<const polytype_t&>(n.fn().type());
+                fn_type = std::static_pointer_cast<fn_t>(
+                    get_type_ptr(pt.monotype()));
+            }
         }
         const tuple_t& args_type = fn_type->args();
         auto arg_type = args_type.begin();
@@ -208,6 +233,7 @@ public:
         }
         auto n_fn = std::static_pointer_cast<name>(this->copier::operator()(n.fn()));
         auto new_args = std::shared_ptr<tuple>(new tuple(std::move(n_arg_list)));
+        std::cout << "Done rewriting apply" << std::endl;
         return std::shared_ptr<apply>(new apply(n_fn, new_args));
     }
     
@@ -230,6 +256,7 @@ public:
         auto n_proc = std::static_pointer_cast<procedure>(this->copier::operator()(n));
         if (n_proc->id().id() != m_entry_point) {
             //Add result_type declaration
+            assert(detail::isinstance<ctype::fn_t>(n.ctype()));
             const ctype::fn_t& n_t = boost::get<const ctype::fn_t&>(
                 n.ctype());
             const ctype::type_t& r_t = n_t.result();
