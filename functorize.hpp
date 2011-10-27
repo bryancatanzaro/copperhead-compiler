@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <set>
+#include <sstream>
 #include "copier.hpp"
 #include "utility/isinstance.hpp"
 #include "utility/markers.hpp"
@@ -75,9 +76,8 @@ public:
 
     void operator()(const fn_t &n) {
         if (detail::isinstance<polytype_t>(*m_working)) {
-            m_working = get_type_ptr(
-                std::static_pointer_cast<polytype_t>(
-                    m_working)->monotype());
+            //If the fn type is a polytype, we can't harvest any correspondence
+            return;
         }
         assert(detail::isinstance<fn_t>(*m_working));
         const fn_t& working_fn = boost::get<const fn_t&>(*m_working);
@@ -177,6 +177,9 @@ public:
     using copier::operator();
 
     result_type operator()(const apply &n) {
+        
+
+        
         make_type_map(n);
         std::cout << "Done making type map" << std::endl;
         std::vector<std::shared_ptr<expression> > n_arg_list;
@@ -187,23 +190,11 @@ public:
             fn_type = std::static_pointer_cast<fn_t>(
                 get_type_ptr(n.fn().type()));
         } else{
-            //XXX Special case map -- to be removed if we add variadic types
-            //n.fn() must be a name
-            assert(detail::isinstance<name>(n.fn()));
-            const name& fn_name = boost::get<const name&>(n.fn());
-            if (fn_name.id() == "map") {
-                int arity;
-
-                
-                return get_node_ptr(n);
-            } else {
-            
-                //Must be a polytype_t(fn_t)
-                assert(detail::isinstance<polytype_t>(n.fn().type()));
-                const polytype_t& pt = boost::get<const polytype_t&>(n.fn().type());
-                fn_type = std::static_pointer_cast<fn_t>(
-                    get_type_ptr(pt.monotype()));
-            }
+            //Must be a polytype_t(fn_t)
+            assert(detail::isinstance<polytype_t>(n.fn().type()));
+            const polytype_t& pt = boost::get<const polytype_t&>(n.fn().type());
+            fn_type = std::static_pointer_cast<fn_t>(
+                get_type_ptr(pt.monotype()));
         }
         const tuple_t& args_type = fn_type->args();
         auto arg_type = args_type.begin();

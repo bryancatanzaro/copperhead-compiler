@@ -3,9 +3,11 @@ import coretypes
 import compiler
 
 a_t = coretypes.Monotype("a")
+bin_op_mt = coretypes.Fn(coretypes.Tuple([a_t, a_t]),
+                         a_t)
+
 bin_op_t = coretypes.Polytype([a_t],
-                              coretypes.Fn(coretypes.Tuple([a_t, a_t]),
-                                           a_t))
+                              bin_op_mt)
 un_op_t = coretypes.Polytype([a_t],
                              coretypes.Fn(coretypes.Tuple([a_t]),
                                           a_t))
@@ -31,7 +33,14 @@ op_and.type = bin_op_t
 op_xor = Name('op_xor')
 op_xor.type = bin_op_t
 
+
 int32_t = coretypes.Int32()
+
+zero_l = Literal('0')
+zero_l.type = int32_t
+
+one_l = Literal('1')
+one_l.type = int32_t
 
 delta_arg_types = coretypes.Tuple([int32_t, int32_t, int32_t])
 flag_name = Name('_flag')
@@ -42,7 +51,7 @@ ones_before_name.type = int32_t
 zeros_after_name.type = int32_t
 cond = Apply(cmp_eq,
              Tuple([flag_name,
-                    Literal('0')]))
+                    zero_l]))
 delta_result = Name('result')
 delta_result.type = int32_t
 then_suite = Suite([Bind(delta_result,
@@ -77,7 +86,7 @@ e1_name = Name('e1')
 e1_name.type = int32_t
 e1_bind = Bind(e1_name,
                Apply(op_and,
-                     Tuple([e0_name, Literal('1')])))
+                     Tuple([e0_name, one_l])))
 lambda0_suite = Suite([e0_bind,
                        e1_bind,
                        Return(e1_name)])
@@ -99,7 +108,7 @@ l1_e0_name.type = int32_t
 l1_e0_bind = Bind(l1_e0_name,
                   Apply(op_xor,
                         Tuple([f_name,
-                               Literal('1')])))
+                               one_l])))
 lambda1_suite = Suite([l1_e0_bind,
                        Return(l1_e0_name)])
 
@@ -128,40 +137,105 @@ zeros_name = Name('_zeros')
 zeros_name.type = seq_int32_t
 offsets_name = Name('_offsets')
 offsets_name.type = seq_int32_t
+
+a0_t = coretypes.Monotype('a0')
+a1_t = coretypes.Monotype('a1')
+a2_t = coretypes.Monotype('a2')
+b_t = coretypes.Monotype('b')
+
+unary_op_mt = coretypes.Fn(coretypes.Tuple([a0_t]),
+                           b_t)
+binary_op_mt = coretypes.Fn(coretypes.Tuple([a0_t, a1_t]),
+                            b_t)
+trinary_op_mt = coretypes.Fn(coretypes.Tuple([a0_t, a1_t, a2_t]),
+                             b_t)
+seq_b_t = coretypes.Sequence(b_t)
+                           
+
+map1_name = Name('map1')
+map1_type = coretypes.Polytype([a0_t, b_t],
+                               coretypes.Fn(coretypes.Tuple([unary_op_mt, coretypes.Sequence(a0_t)]), seq_b_t))
+map1_name.type = map1_type
+                                             
+                                                                
+map2_name = Name('map2')
+map2_type = coretypes.Polytype([a0_t, a1_t, b_t],
+                               coretypes.Fn(coretypes.Tuple([binary_op_mt, coretypes.Sequence(a0_t), coretypes.Sequence(a1_t)]), seq_b_t))
+map2_name.type = map2_type
+
+map3_name = Name('map3')
+map3_type = coretypes.Polytype([a0_t, a1_t, a2_t, b_t],
+                               coretypes.Fn(coretypes.Tuple([trinary_op_mt, coretypes.Sequence(a0_t), coretypes.Sequence(a1_t), coretypes.Sequence(a2_t)]), seq_b_t))
+map3_name.type = map3_type
+
+scan_name = Name('scan')
+rscan_name = Name('rscan')
+indices_name = Name('indices')
+permute_name = Name('permute')
+
+seq_a_t = coretypes.Sequence(a_t)
+
+scan_type = coretypes.Polytype([a_t],
+                               coretypes.Fn(coretypes.Tuple([bin_op_mt,
+                                                            seq_a_t]),
+                                            seq_a_t))
+scan_name.type = scan_type
+rscan_name.type = scan_type
+
+seq_int_t = coretypes.Sequence(coretypes.Int32())
+
+indices_type = coretypes.Polytype([a_t],
+                                  coretypes.Fn(coretypes.Tuple([seq_a_t]),
+                                               seq_int_t))
+indices_name.type = indices_type
+
+permute_type = coretypes.Polytype([a_t],
+                                  coretypes.Fn(coretypes.Tuple([seq_a_t,
+                                                                seq_int_t]),
+                                               seq_a_t))
+permute_name.type = permute_type
+            
+        
+
+lsb_lambda0_closure = Closure(Tuple([lsb_name]),
+                              lambda0_name)
+lsb_lambda0_closure.type = coretypes.Fn(coretypes.Tuple([int32_t]),
+                              int32_t)
+
 flags_bind = Bind(flags_name,
-                  Apply(Name('map'),
-                        Tuple([Closure(Tuple([lsb_name]),
-                                       lambda0_name),
+                  Apply(map1_name,
+                        Tuple([lsb_lambda0_closure,
                                A_name])))
 ones_bind = Bind(ones_name,
-                 Apply(Name('scan'),
-                       Tuple([Name('op_add'), flags_name])))
+                 Apply(scan_name,
+                       Tuple([op_add, flags_name])))
 rs_e0_name = Name('e0')
 rs_e0_name.type = seq_int32_t
 rs_e0_bind = Bind(rs_e0_name,
-                  Apply(Name('map'),
+                  Apply(map1_name,
                         Tuple([lambda1_name,
                                flags_name])))
+
 zeros_bind = Bind(zeros_name,
-                  Apply(Name('rscan'),
-                        Tuple([Name('op_add'), rs_e0_name])))
+                  Apply(rscan_name,
+                        Tuple([op_add, rs_e0_name])))
 offsets_bind = Bind(offsets_name,
-                    Apply(Name('map'),
+                    Apply(map3_name,
                           Tuple([delta_name, flags_name, ones_name, zeros_name])))
 rs_e1_name = Name('e1')
 rs_e1_name.type = seq_int32_t
 rs_e1_bind = Bind(rs_e1_name,
-                  Apply(Name('indices'),
+                  Apply(indices_name,
                          Tuple([A_name])))
 rs_e2_name = Name('e2')
 rs_e2_name.type = seq_int32_t
 rs_e2_bind = Bind(rs_e2_name,
-                  Apply(Name('map'),
+                  Apply(map2_name,
                          Tuple([op_add, offsets_name, rs_e1_name])))
 rs_result_name = Name('result')
 rs_result_name.type = seq_int32_t
 rs_result_bind = Bind(rs_result_name,
-                      Apply(Name('permute'),
+                      Apply(permute_name,
                              Tuple([A_name, rs_e2_name])))
                                    
                                    

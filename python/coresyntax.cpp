@@ -124,7 +124,8 @@ BOOST_PYTHON_MODULE(coresyntax) {
         .def("args", &closure_wrap::p_args)
         .def("body", &closure_wrap::p_body)
         .def("__str__", &backend::str<closure_wrap>)
-        .def("__repr__", &backend::repr<closure_wrap>);
+        .def("__repr__", &backend::repr<closure_wrap>)
+        .add_property("type", &closure_wrap::p_type, &closure_wrap::set_type);
     class_<statement, std::shared_ptr<statement>, bases<node>, boost::noncopyable>("Statement", no_init)
         .def("__str__", &backend::str_apply<statement>)
         .def("__repr__", &backend::repr_apply<statement>);

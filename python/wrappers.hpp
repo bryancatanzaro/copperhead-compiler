@@ -127,6 +127,14 @@ public:
         return m_body;
     }
 
+    inline const std::shared_ptr<type_t> p_type(void) const {
+        return m_type;
+    }
+
+    inline void set_type(std::shared_ptr<type_t> type) {
+        m_type = type;
+    }
+
 };
 
 class tuple_wrap
