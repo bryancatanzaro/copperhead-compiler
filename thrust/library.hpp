@@ -18,7 +18,8 @@ namespace backend {
 namespace detail {
 std::vector<const char*> thrust_fn_names = {
     "adjacent_difference",
-    "map",
+    "map1", "map2", "map3", "map4", "map5",
+    "map6", "map7", "map8", "map9", "map10",
     "scan",
     "rscan",
     "indices",

@@ -10,7 +10,7 @@
 template<typename F,
          typename Seq0>
 transformed_sequence<F, thrust::tuple<Seq0> >
-map(const F& fn,
+map1(const F& fn,
     Seq0& x0) {
     return transformed_sequence<F, thrust::tuple<Seq0> >(fn, thrust::make_tuple(x0));
 }
@@ -19,7 +19,7 @@ template<typename F,
          typename Seq0,
          typename Seq1>
 transformed_sequence<F, thrust::tuple<Seq0, Seq1> >
-map(const F& fn,
+map2(const F& fn,
     Seq0& x0,
     Seq1& x1) {
     return transformed_sequence<F, thrust::tuple<Seq0, Seq1> >(fn, thrust::make_tuple(x0, x1));
@@ -30,7 +30,7 @@ template<typename F,
          typename Seq1,
          typename Seq2>
 transformed_sequence<F, thrust::tuple<Seq0, Seq1, Seq2> >
-map(const F& fn,
+map3(const F& fn,
     Seq0& x0,
     Seq1& x1,
     Seq2& x2) {
@@ -43,7 +43,7 @@ template<typename F,
          typename Seq2,
          typename Seq3>
 transformed_sequence<F, thrust::tuple<Seq0, Seq1, Seq2, Seq3> >
-map(const F& fn,
+map4(const F& fn,
     Seq0& x0,
     Seq1& x1,
     Seq2& x2,

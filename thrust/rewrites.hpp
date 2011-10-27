@@ -22,21 +22,19 @@ private:
         assert(detail::isinstance<apply>(n.rhs()));
         const apply& rhs = boost::get<const apply&>(n.rhs());
         //The rhs must apply a "map"
-        assert(rhs.fn().id() == std::string("map"));
+        std::cout << "This should be a map: " << rhs.fn().id().substr(0, 3) << std::endl;
+        assert(rhs.fn().id().substr(0, 3) == std::string("map"));
         const tuple& ap_args = rhs.args();
         //Map must have arguments
         assert(ap_args.begin() != ap_args.end());
         auto init = ap_args.begin();
         std::shared_ptr<ctype::type_t> fn_t;
 
-        if (detail::isinstance<literal>(*init)) {
-                    
-            const literal& fn_name = boost::get<const literal&>(
+        if (detail::isinstance<apply>(*init)) {
+            //Function instantiation
+            const apply& fn_inst = boost::get<const apply&>(
             *init);
-            std::string fn_id = fn_name.id();
-            size_t found = fn_id.find_last_not_of("()");
-            assert(found != std::string::npos);
-            fn_id.erase(found + 1);
+            std::string fn_id = fn_inst.fn().id();
             fn_t = std::make_shared<ctype::monotype_t>(fn_id);
         } else {
             //We must be dealing with a closure
@@ -132,7 +130,16 @@ private:
 public:
     thrust_rewriter() :
         m_lut{
-        {std::string("map"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map1"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map2"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map3"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map4"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map5"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map6"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map7"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map8"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map9"), &backend::thrust_rewriter::map_rewrite},
+        {std::string("map10"), &backend::thrust_rewriter::map_rewrite},
         {std::string("indices"), &backend::thrust_rewriter::indices_rewrite}
     } {}
     using copier::operator();
