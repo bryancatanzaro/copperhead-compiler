@@ -166,6 +166,7 @@ public:
 
     inline void operator()(const structure &n) {
         indentation();
+        declared.insert(n.id().id());
         m_os << "struct ";
         m_os << n.id().id();
         m_os << " {" << std::endl;

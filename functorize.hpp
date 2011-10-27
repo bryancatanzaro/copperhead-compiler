@@ -6,6 +6,7 @@
 #include "utility/isinstance.hpp"
 #include "utility/markers.hpp"
 #include "import/library.hpp"
+#include "type_convert.hpp"
 
 #include "type_printer.hpp"
 
@@ -40,10 +41,6 @@ public:
     
     void operator()(const monotype_t &n) {
         std::string id = n.name();
-        repr_type_printer tp(std::cout);
-        std::cout << "Correspondence found " << id << ": ";
-        boost::apply_visitor(tp, *m_working);
-        std::cout << std::endl;
         m_corresponded.insert(std::make_pair(id, m_working));
     }
 
@@ -119,7 +116,6 @@ private:
     void make_type_map(const apply& n) {
         m_type_map.clear();
         const name& fn_name = n.fn();
-        std::cout << "Making type map for applying fn: " << fn_name.id() << std::endl;
 
         //If function name is not a polytype, the type map should be empty
         if (!detail::isinstance<polytype_t>(fn_name.type()))
@@ -137,12 +133,7 @@ private:
         }
         std::shared_ptr<tuple_t> arg_t =
             std::make_shared<tuple_t>(std::move(arg_types));
-        repr_type_printer rp(std::cout);
-        boost::apply_visitor(rp, *arg_t);
-        std::cout << std::endl;
         detail::type_corresponder tc(arg_t, m_type_map);
-        boost::apply_visitor(rp, fn_arg_t);
-        std::cout << std::endl;
         boost::apply_visitor(tc, fn_arg_t);
         
     }
@@ -150,9 +141,58 @@ private:
     std::shared_ptr<expression> instantiate_fn(const name& n,
         const type_t& t) {
         std::string id = n.id();
-        //const type_t& fn_type; 
-        return std::shared_ptr<literal>(
-            new literal(detail::fnize_id(id) + "()"));
+        const type_t& n_t = n.type();
+        if (!detail::isinstance<polytype_t>(n_t)) {
+            //The function is monomorphic. Instantiate a functor.
+            return std::make_shared<apply>(
+                std::make_shared<name>(detail::fnize_id(id)),
+                std::make_shared<tuple>(std::vector<std::shared_ptr<expression> >{}));
+        }
+        //Use already populated type map to instantiate the
+        //Polymorphic functor with the types it needs in situ
+
+        //The function type is polymorphic
+        //Find the monomorphic type
+        const polytype_t& n_pt = boost::get<const polytype_t&>(n_t);
+        const type_t& n_mt = n_pt.monotype();
+        
+        //First, create a type map relating the types of the
+        //polymorphic function being instantiated to the
+        //types in the apply which is instantiating this function.
+        type_map fn_to_apl;
+        detail::type_corresponder tc(get_type_ptr(t), fn_to_apl);
+        boost::apply_visitor(tc, n_mt);
+
+        std::vector<std::shared_ptr<type_t> > instantiated_types;
+        for(auto i = n_pt.begin();
+            i != n_pt.end();
+            i++) {
+            std::string fn_t_name = i->name();
+            //The name of this type should be in the type map
+            assert(fn_to_apl.find(fn_t_name)!=fn_to_apl.end());
+            std::shared_ptr<type_t> apl_t = fn_to_apl.find(fn_t_name)->second;
+            //The value in the type map should be a monotype
+            assert(detail::isinstance<monotype_t>(*apl_t));
+            const monotype_t& apl_mt = boost::get<const monotype_t&>(*apl_t);
+            //This monotype must exist in the apply type map
+            assert(m_type_map.find(apl_mt.name())!=m_type_map.end());
+            instantiated_types.push_back(
+                m_type_map.find(apl_mt.name())->second);
+        }
+        std::vector<std::shared_ptr<ctype::type_t> > instantiated_ctypes;
+        detail::cu_to_c ctc;
+        for(auto i = instantiated_types.begin();
+            i != instantiated_types.end();
+            i++) {
+            instantiated_ctypes.push_back(
+                boost::apply_visitor(ctc, **i));
+        }
+        return std::make_shared<apply>(
+            std::make_shared<templated_name>(detail::fnize_id(id),
+                                             std::make_shared<ctype::tuple_t>(std::move(instantiated_ctypes)),
+                                             get_type_ptr(n.type()),
+                                             get_ctype_ptr(n.ctype())),
+            std::make_shared<tuple>(std::vector<std::shared_ptr<expression> >{}));
 
     }
     
@@ -177,11 +217,11 @@ public:
     using copier::operator();
 
     result_type operator()(const apply &n) {
-        
+        //If the function we're applying is polymorphic,
+        //Figure out what types it's being instantiated with
+        make_type_map(n);
 
         
-        make_type_map(n);
-        std::cout << "Done making type map" << std::endl;
         std::vector<std::shared_ptr<expression> > n_arg_list;
         const tuple& n_args = n.args();
         
@@ -217,6 +257,7 @@ public:
                         std::static_pointer_cast<expression>(
                             boost::apply_visitor(*this, *n_arg)));
                 } else {
+                    //We've found a function to instantiate
                     n_arg_list.push_back(
                         instantiate_fn(n_name, *arg_type));
                 }
@@ -224,7 +265,6 @@ public:
         }
         auto n_fn = std::static_pointer_cast<name>(this->copier::operator()(n.fn()));
         auto new_args = std::shared_ptr<tuple>(new tuple(std::move(n_arg_list)));
-        std::cout << "Done rewriting apply" << std::endl;
         return std::shared_ptr<apply>(new apply(n_fn, new_args));
     }
     

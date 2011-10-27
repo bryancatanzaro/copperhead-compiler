@@ -30,7 +30,8 @@ public:
                const std::string &name,
                std::vector<std::shared_ptr<type_t> > &&params)
         : type_t(self), m_name(name), m_params(std::move(params)) {}
-    
+
+    //XXX Should this be id() to be consistent?
     const std::string& name(void) const {
         return m_name;
     }

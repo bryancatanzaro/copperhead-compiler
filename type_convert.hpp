@@ -15,9 +15,7 @@ class cu_to_c
 {
 public:
     result_type operator()(const monotype_t& mt) {
-        assert(false);
-        return result_type();
-        
+        return result_type(new ctype::monotype_t(mt.name()));        
     }
     result_type operator()(const sequence_t & st) {
         result_type sub = boost::apply_visitor(*this, st.sub());
@@ -39,9 +37,16 @@ public:
         result_type fn_result(new ctype::fn_t(args, result));
         return fn_result;
     }
-    //XXX Need polytypes!
-    result_type operator()(const polytype_t&) {
-        return result_type(new ctype::void_mt());
+    //XXX Need polytypes! This code is probably not right.
+    result_type operator()(const polytype_t& p) {
+        std::vector<result_type> subs;
+        for(auto i = p.begin();
+            i != p.end();
+            i++) {
+            subs.push_back(boost::apply_visitor(*this, *i));
+        }
+        result_type base = boost::apply_visitor(*this, p.monotype());
+        return result_type(new ctype::templated_t(base, std::move(subs)));
     }
     result_type operator()(const int32_mt&) {
         return result_type(new ctype::int32_mt());
