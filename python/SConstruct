@@ -1,16 +1,37 @@
 import os
+import inspect
 
-env = Environment()
-platform = env['PLATFORM']
+# try to import an environment first
+try:
+    Import('env')
+except:
+    exec open("../build/build-env.py")
+    env = Environment()
 
 if platform == 'darwin':
-    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -I/Users/catanzar/boost_1_47_0 -g")
-else:
-    env.Append(CCFLAGS = "-std=c++0x -Wall -I/usr/include/python2.7 -g")
+    env.Append(CPPPATH = "/Users/catanzar/boost_1_47_0")
+    env.Append(LIBPATH="/Users/catanzar/boost/boost_1_47_0/stage/lib")
+    env.Append(LINKFLAGS="-F/System/Library/Frameworks/ -framework Python")
 
-for x in ['coresyntax.cpp', 'coretypes.cpp', 'compiler.cpp']:
+#XXX Don't hard code this
+env.Append(CPPPATH = "/usr/include/python2.7")
+env.Append(CPPPATH = "/usr/lib/pymodules/python2.7/numpy/core/include")    
+env.Append(LIBS = ['boost_python'])
+
+cppenv = env.Clone()
+cudaenv = env.Clone()
+
+cppenv.Append(CCFLAGS = "-std=c++0x -Wall -Os")
+
+cudaenv.Append(CPPPATH = "../cudata")
+cudaenv.Append(CPPPATH = "../prelude")
+cudaenv.Append(NVCCFLAGS = '-arch=sm_20')
+cudaenv.Append(LIBS = ['cudart'])
+
+for x in Glob('*.cpp'):
     basename, extension = os.path.splitext(str(x))
-    if platform == 'darwin':
-        env.SharedLibrary(target=basename, source=x, LIBPATH=['/Users/catanzar/boost_1_47_0/stage/lib'], LIBS=['boost_python'], SHLIBPREFIX='', SHLIBSUFFIX='.so', LINKFLAGS='-F/System/Library/Frameworks/ -framework Python')
-    else:
-        env.SharedLibrary(target=basename, source=x, LIBS=['boost_python'], SHLIBPREFIX='')
+    cppenv.SharedLibrary(target=basename, source=x, SHLIBPREFIX='', SHLIBSUFFIX='.so')
+
+for x in Glob('*.cu'):
+    basename, extension = os.path.splitext(str(x))
+    cudaenv.SharedLibrary(target=basename, source=x, SHLIBPREFIX='', SHLIBSUFFIX='.so')
