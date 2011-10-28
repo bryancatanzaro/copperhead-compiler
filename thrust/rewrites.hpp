@@ -34,8 +34,26 @@ private:
             //Function instantiation
             const apply& fn_inst = boost::get<const apply&>(
             *init);
-            std::string fn_id = fn_inst.fn().id();
-            fn_t = std::make_shared<ctype::monotype_t>(fn_id);
+            if (detail::isinstance<templated_name>(fn_inst.fn())) {
+                const templated_name& tn =
+                    boost::get<const templated_name&>(fn_inst.fn());
+                const ctype::tuple_t& tt =
+                    tn.template_types();
+                std::vector<std::shared_ptr<ctype::type_t> > ttc;
+                for(auto i = tt.begin();
+                    i != tt.end();
+                    i++) {
+                    ttc.push_back(get_ctype_ptr(*i));
+                }
+                std::shared_ptr<ctype::type_t> base =
+                    std::make_shared<ctype::monotype_t>(tn.id());
+                fn_t = std::make_shared<ctype::templated_t>(
+                    base, std::move(ttc));
+            } else {
+                assert(detail::isinstance<name>(fn_inst.fn()));
+                std::string fn_id = fn_inst.fn().id();
+                fn_t = std::make_shared<ctype::monotype_t>(fn_id);
+            }
         } else {
             //We must be dealing with a closure
             assert(detail::isinstance<closure>(*init));
