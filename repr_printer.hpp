@@ -17,7 +17,7 @@ public:
     inline void operator()(const name &n) {
         name("Name", n.id());
     }
-
+    
     inline void operator()(const literal &n) {
         name("Literal", n.id());
     }
@@ -26,6 +26,15 @@ public:
         m_os << "Tuple";
         open();
         list(n);
+        close();
+    }
+
+    inline void operator()(const bind &n) {
+        m_os << "Bind";
+        open();
+        boost::apply_visitor(*this, n.lhs());
+        sep();
+        boost::apply_visitor(*this, n.rhs());
         close();
     }
 

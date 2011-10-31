@@ -22,7 +22,6 @@ private:
         assert(detail::isinstance<apply>(n.rhs()));
         const apply& rhs = boost::get<const apply&>(n.rhs());
         //The rhs must apply a "map"
-        std::cout << "This should be a map: " << rhs.fn().id().substr(0, 3) << std::endl;
         assert(rhs.fn().id().substr(0, 3) == std::string("map"));
         const tuple& ap_args = rhs.args();
         //Map must have arguments

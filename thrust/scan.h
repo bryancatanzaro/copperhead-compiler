@@ -5,11 +5,10 @@
 #include <thrust/device_vector.h>
 #include <thrust/iterator/reverse_iterator.h>
 
-//XXX should look at F::result_type
 template<typename F, typename Seq>
-boost::shared_ptr<cuarray<typename Seq::value_type> >
+boost::shared_ptr<cuarray<typename F::result_type> >
 scan(const F& fn, Seq& x) {
-    typedef typename Seq::value_type T;
+    typedef typename F::result_type T;
     boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
     thrust::inclusive_scan(x.begin(),
@@ -19,12 +18,10 @@ scan(const F& fn, Seq& x) {
     return result_ary;
 }
 
-//XXX should look at F::result_type
-//Need to make operator structs monomorphic to do this
 template<typename F, typename Seq>
-boost::shared_ptr<cuarray<typename Seq::value_type> >
+boost::shared_ptr<cuarray<typename F::result_type> >
 rscan(const F& fn, Seq& x) {
-    typedef typename Seq::value_type T;
+    typedef typename F::result_type T;
     typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
     iterator_type drbegin(x.end());
     iterator_type drend(x.begin());

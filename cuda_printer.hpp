@@ -20,11 +20,12 @@ private:
     const std::string& entry;
     environment<std::string> declared;
     ctype::ctype_printer tp;
+    bool m_in_rhs;
 public:
     inline cuda_printer(const std::string &entry_point,
                         const registry& globals,
                         std::ostream &os)
-        : py_printer(os), entry(entry_point), tp(os) {
+        : py_printer(os), entry(entry_point), tp(os), m_in_rhs(false) {
         const std::map<ident, fn_info>& fns = globals.fns();
         for(auto i = fns.cbegin();
             i != fns.cend();
@@ -32,12 +33,13 @@ public:
             declared.insert(std::get<0>(i->first));
         }
         declared.insert(detail::mark_generated_id(entry_point));
+        
     }
     
     using backend::py_printer::operator();
 
     inline void operator()(const backend::name &n) {
-        if (!declared.exists(n.id())) {
+        if ((!declared.exists(n.id())) && !m_in_rhs) {
             boost::apply_visitor(tp, n.ctype());
             m_os << " ";
             declared.insert(n.id());
@@ -116,10 +118,13 @@ public:
         m_os << ";";
     }
     inline void operator()(const bind &n) {
+        m_in_rhs = false;
         boost::apply_visitor(*this, n.lhs());
         m_os << " = ";
+        m_in_rhs = true;
         boost::apply_visitor(*this, n.rhs());
         m_os << ";";
+        m_in_rhs = false;
     }
     inline void operator()(const call &n) {
         const literal& fn = n.sub().fn();

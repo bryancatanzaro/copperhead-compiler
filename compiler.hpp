@@ -53,25 +53,18 @@ public:
         
         type_convert type_converter;
         auto type_converted = apply(type_converter, n);
-        std::cout << "Type converted" << std::endl;
         functorize functorizer(m_entry_point, m_registry);
         auto functorized = apply(functorizer, type_converted);
-        std::cout << "Functorized" << std::endl;
         thrust_rewriter thrustizer;
         auto thrust_rewritten = apply(thrustizer, functorized);
-        std::cout << "Thrust rewritten" << std::endl;
         allocate allocator(m_entry_point);
         auto allocated = apply(allocator, thrust_rewritten);
-        std::cout << "Allocated" << std::endl;
         typedefify typedefifier;
         auto typedefified = apply(typedefifier, allocated);
-        std::cout << "Typedefified" << std::endl;
         wrap wrapper(m_entry_point);
         auto wrapped = apply(wrapper, typedefified);
-        std::cout << "Wrapped" << std::endl;
         bpl_wrap bpl_wrapper(m_entry_point, m_registry);
         auto bpl_wrapped = apply(bpl_wrapper, wrapped);
-        std::cout << "BPL wrapped" << std::endl;
         return bpl_wrapped;
     }
     const std::string& entry_point() const {

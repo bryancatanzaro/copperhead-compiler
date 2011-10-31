@@ -15,13 +15,19 @@ namespace backend {
 typedef std::tuple<const std::string, const iteration_structure> ident;
 
 class fn_info {
-    std::shared_ptr<type_t> m_type;
+    const std::shared_ptr<type_t> m_type;
+    const std::shared_ptr<phase_t> m_phase;
 public:
-    fn_info(std::shared_ptr<type_t> type)
-        : m_type(type) {}
+    fn_info(std::shared_ptr<type_t> type,
+            std::shared_ptr<phase_t> phase)
+        : m_type(type), m_phase(phase) {}
 
     const type_t& type() const {
         return *m_type;
+    }
+
+    const phase_t& phase() const {
+        return *m_phase;
     }
     //shared_ptr<type> m_type;
     //shared_ptr<phase> m_phase;
