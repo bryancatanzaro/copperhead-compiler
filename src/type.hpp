@@ -45,9 +45,7 @@ typedef boost::variant<
 struct make_type_base_visitor
     : boost::static_visitor<type_base>
 {
-    make_type_base_visitor(void *p)
-        : ptr(p)
-        {}
+    make_type_base_visitor(void *p);
     template<typename Derived>
     type_base operator()(const Derived &) const {
         // use of std::ref disambiguates variant's copy constructor dispatch
@@ -56,9 +54,7 @@ struct make_type_base_visitor
     void *ptr;
 };
 
-type_base make_type_base(void *ptr, const type_base &other) {
-    return boost::apply_visitor(make_type_base_visitor(ptr), other);
-}
+type_base make_type_base(void *ptr, const type_base &other); 
 
 }
 
@@ -73,11 +69,7 @@ public:
         : super_t(std::ref(self)) //use of std::ref disambiguates variant's copy constructor dispatch
         {}
 
-    type_t(const type_t &other)
-        : super_t(detail::make_type_base(this, other))
-        {}
-
-
+    type_t(const type_t &other);
 };
 
 }

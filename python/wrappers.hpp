@@ -1,7 +1,7 @@
 #pragma once
-#include "../expression.hpp"
-#include "../statement.hpp"
-#include "../cppnode.hpp"
+#include "../src/expression.hpp"
+#include "../src/statement.hpp"
+#include "../src/cppnode.hpp"
 
 namespace backend {
 

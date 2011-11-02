@@ -1,33 +1,13 @@
-#pragma once
-#include <memory>
-#include <vector>
-#include <map>
-#include <cstdlib>
-#include "../import/library.hpp"
-#include "../import/paths.hpp"
-#include "../type.hpp"
-#include "../monotype.hpp"
-#include "../polytype.hpp"
+#include "decl.hpp"
 
-
-#define PRELUDE_PATH "PRELUDE_PATH"
-#define PRELUDE_FILE "prelude.hpp"
-
-#define GCC_VERSION (__GNUC__ * 10000                 \
-                     + __GNUC_MINOR__ * 100           \
-                     + __GNUC_PATCHLEVEL__)
-      
-#if GCC_VERSION < 40600
-#define nullptr NULL
-#endif
 
 namespace backend {
 
 namespace detail {
 
-ident make_scalar(std::string &in) {
-    return ident{in, iteration_structure::scalar};
-}
+typedef std::tuple<const char*, fn_info> named_info;
+
+namespace impl {
 
 std::shared_ptr<monotype_t> t_a =
     std::make_shared<monotype_t>("a");
@@ -62,7 +42,6 @@ std::shared_ptr<type_t> un_op_t =
                     t_a}),
             t_a));
 
-typedef std::tuple<const char*, fn_info> named_info;
 
 std::shared_ptr<phase_t> bin_phase_t =
     std::make_shared<phase_t>(
@@ -118,6 +97,8 @@ cpp_support_fns = {
     named_info{"wrap_cuarray", nullary_info}
 };
 
+}
+
 void load_scalars(
     std::map<ident, fn_info>& fns,
     const std::vector<named_info>& names) {
@@ -136,9 +117,9 @@ void load_scalars(
 
 std::shared_ptr<library> get_builtins() {
     std::map<ident, fn_info> fns;
-    detail::load_scalars(fns, detail::unary_scalar_operators);
-    detail::load_scalars(fns, detail::binary_scalar_operators);
-    detail::load_scalars(fns, detail::cpp_support_fns);
+    detail::load_scalars(fns, detail::impl::unary_scalar_operators);
+    detail::load_scalars(fns, detail::impl::binary_scalar_operators);
+    detail::load_scalars(fns, detail::impl::cpp_support_fns);
     std::string path(detail::get_path(PRELUDE_PATH));
     std::set<std::string> include_paths;
     if (path.length() > 0) {

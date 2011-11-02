@@ -11,15 +11,7 @@
 
 namespace backend {
 namespace detail {
-
-const char* get_path(const char* env_name) {
-    char* path = getenv(env_name);
-    if (path != nullptr) {
-        return path;
-    } else {
-        return "";
-    }
-}
+const char* get_path(const char* env_name);
 
 }
 }

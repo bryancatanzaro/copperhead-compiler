@@ -7,7 +7,7 @@
 #include <map>
 #include <set>
 #include <ostream>
-#include "../prelude/phase.h"
+#include "../prelude/phase.hpp"
 
 
 namespace backend {
