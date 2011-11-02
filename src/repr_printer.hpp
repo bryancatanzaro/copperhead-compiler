@@ -1,4 +1,9 @@
 #pragma once
+#include <sstream>
+#include "node.hpp"
+#include "expression.hpp"
+#include "statement.hpp"
+#include "cppnode.hpp"
 
 namespace backend
 {
@@ -7,128 +12,60 @@ class repr_printer
     : public no_op_visitor<>
 {
 public:
-    inline repr_printer(std::ostream &os)
-        : m_os(os)
-        {}
+    repr_printer(std::ostream &os);
 
-    // XXX why do we have to use 'using' to make the base class's overloads visible?
     using backend::no_op_visitor<>::operator();
 
-    inline void operator()(const name &n) {
-        name("Name", n.id());
-    }
+    void operator()(const name &n);
     
-    inline void operator()(const literal &n) {
-        name("Literal", n.id());
-    }
+    void operator()(const literal &n);
+    
+    void operator()(const tuple &n);
 
-    inline void operator()(const tuple &n) {
-        m_os << "Tuple";
-        open();
-        list(n);
-        close();
-    }
+    void operator()(const bind &n);
 
-    inline void operator()(const bind &n) {
-        m_os << "Bind";
-        open();
-        boost::apply_visitor(*this, n.lhs());
-        sep();
-        boost::apply_visitor(*this, n.rhs());
-        close();
-    }
-
-    inline void operator()(const apply &n) {
-        m_os << "Apply(";
-        (*this)(n.fn());
-        sep();
-        (*this)(n.args());
-        m_os << ")";
-    }
+    void operator()(const apply &n);
     
-    inline void operator()(const lambda &n) {
-        m_os << "Lambda(";
-        (*this)(n.args());
-        sep();
-        boost::apply_visitor(*this, n.body());
-        m_os << ")";
-    }
-    inline void operator()(const closure &n) {
-        m_os << "Closure(";
-        (*this)(n.args());
-        sep();
-        boost::apply_visitor(*this, n.body());
-        m_os << ")";
-    }
+    void operator()(const lambda &n);
     
-    inline void operator()(const ret &n) {
-        m_os << "Return(";
-        boost::apply_visitor(*this, n.val());
-        m_os << ")";
-    }
-    inline void operator()(const procedure &n) {
-        m_os << "Procedure(";
-        (*this)(n.id());
-        sep();
-        (*this)(n.args());
-        sep();
-        (*this)(n.stmts());
-        m_os << ")";
-        
-    }
-    inline void operator()(const suite &n) {
-        m_os << "Suite(";
-        list(n);
-        m_os << ")";
-    }
-    inline void operator()(const include &n) {
-        m_os << "Include(";
-        boost::apply_visitor(*this, n.id());
-        m_os << ")";
-    }
-
-    inline void operator()(const typedefn &n) {
-        m_os << "Typedef()";
-    }
+    void operator()(const closure &n);
     
-    inline void operator()(const conditional &n) {
-        m_os << "Conditional(";
-        boost::apply_visitor(*this, n.cond());
-        m_os << ", ";
-        boost::apply_visitor(*this, n.then());
-        m_os << ", ";
-        boost::apply_visitor(*this, n.orelse());
-        m_os << ")";
-    }
+    void operator()(const ret &n);
     
-    inline void operator()(const std::string &s) {
-        m_os << s;
-    }
+    void operator()(const procedure &n);
+    
+    void operator()(const suite &n);
+    
+    void operator()(const include &n);
+    
+    void operator()(const typedefn &n);
+    
+    void operator()(const conditional &n);
+    
+    void operator()(const std::string &s);
+    
     template<typename T>
-        inline void operator()(const std::vector<T> &v) {
+        void operator()(const std::vector<T> &v) {
         list(v);
     }
 private:
-    inline void sep(void) const {
-        m_os << ", ";
-    }
-    inline void open(void) const {
-        m_os << "(";
-    }
-    inline void close(void) const {
-        m_os << ")";
-    }
+    void sep(void) const;
+    
+    void open(void) const;
+    
+    void close(void) const;
+    
     template<typename Value>
-        inline void name(const std::string &n,
-                         const Value &val) {
+    void print_name(const std::string &n,
+                    const Value &val) {
         m_os << n;
         open();
         (*this)(val);
         close();
     }
     template<typename Iterable>
-    inline void list(const Iterable &l,
-                     const std::string sep = ", ") {
+    void list(const Iterable &l,
+              const std::string sep = ", ") {
         for(auto i = l.begin();
             i != l.end();
             i++) {
