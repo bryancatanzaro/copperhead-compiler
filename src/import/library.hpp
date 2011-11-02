@@ -8,7 +8,7 @@
 #include <set>
 #include <ostream>
 #include "../prelude/phase.hpp"
-
+#include "../type.hpp"
 
 namespace backend {
 
