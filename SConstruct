@@ -10,7 +10,7 @@ except:
     env = Environment()
 
 #XXX Don't hard code this    
-if platform == 'darwin':
+if env['PLATFORM'] == 'darwin':
     env.Append(CPPPATH = "/Users/catanzar/boost_1_47_0")
     env.Append(LIBPATH="/Users/catanzar/boost_1_47_0/stage/lib")
     env.Append(LINKFLAGS="-F/System/Library/Frameworks/ -framework Python")

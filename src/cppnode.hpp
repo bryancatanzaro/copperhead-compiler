@@ -16,17 +16,9 @@ protected:
     std::shared_ptr<suite> m_stmts;
 public:
     structure(const std::shared_ptr<name> &name,
-              const std::shared_ptr<suite> &stmts)
-        : statement(*this),
-          m_id(name),
-          m_stmts(stmts)
-        {}
-    inline const name& id(void) const {
-        return *m_id;
-    }
-    inline const suite& stmts(void) const {
-        return *m_stmts;
-    }
+              const std::shared_ptr<suite> &stmts);
+    const name& id(void) const;
+    const suite& stmts(void) const;
 };
 
 class templated_name
@@ -37,15 +29,11 @@ protected:
 public:
     templated_name(const std::string &id,
                    const std::shared_ptr<ctype::tuple_t> &template_types,
-                   const std::shared_ptr<type_t> type =
+                   const std::shared_ptr<type_t>& type =
                    std::shared_ptr<type_t>(new void_mt()),
-                   const std::shared_ptr<ctype::type_t> ctype =
-                   std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
-        : name(*this, id, type, ctype),
-          m_template_types(template_types) {}
-    const ctype::tuple_t& template_types() const {
-        return *m_template_types;
-    }
+                   const std::shared_ptr<ctype::type_t>& ctype =
+                   std::shared_ptr<ctype::type_t>(new ctype::void_mt()));
+    const ctype::tuple_t& template_types() const;
 };
 
 class include
@@ -58,19 +46,10 @@ protected:
 public:
     include(const std::shared_ptr<literal> &id,
             const char open = '\"',
-            const char close = '\"') : statement(*this),
-                                       m_id(id),
-                                       m_open(open),
-                                       m_close(close) {}
-    const literal& id() const {
-        return *m_id;
-    }
-    const char& open() const {
-        return m_open;
-    }
-    const char& close() const {
-        return m_close;
-    }
+            const char close = '\"');
+    const literal& id() const;
+    const char& open() const;
+    const char& close() const;
 };
 
 class typedefn
@@ -81,16 +60,9 @@ protected:
     const std::shared_ptr<ctype::type_t> m_rename;
 public:
     typedefn(const std::shared_ptr<ctype::type_t> origin,
-             const std::shared_ptr<ctype::type_t> rename)
-        : statement(*this),
-          m_origin(origin),
-          m_rename(rename) {}
-    const ctype::type_t& origin() const {
-        return *m_origin;
-    }
-    const ctype::type_t& rename() const {
-        return *m_rename;
-    }
+             const std::shared_ptr<ctype::type_t> rename);
+    const ctype::type_t& origin() const;
+    const ctype::type_t& rename() const;
 };
 
 }

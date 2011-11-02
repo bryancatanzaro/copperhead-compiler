@@ -22,8 +22,8 @@ def get_cuda_paths():
     inc_path = '/usr/local/cuda/include'
   else:
     raise ValueError, 'Error: unknown OS.  Where is nvcc installed?'
-   
-  if platform.machine()[-2:] == '64':
+  
+  if platform.system() != 'Darwin' and platform.machine()[-2:] == '64':
     lib_path += '64'
 
   # override with environement variables

@@ -9,6 +9,7 @@
 #include "type.hpp"
 #include "monotype.hpp"
 #include "ctype.hpp"
+
 namespace backend {
 
 
@@ -28,12 +29,8 @@ protected:
         : node(self), m_type(type), m_ctype(ctype)
         {}
 public:
-    const type_t& type(void) const {
-        return *m_type;
-    }
-    const ctype::type_t& ctype(void) const {
-        return *m_ctype;
-    }
+    const type_t& type(void) const;
+    const ctype::type_t& ctype(void) const;
 };
 
 class literal
@@ -55,12 +52,9 @@ public:
             std::shared_ptr<type_t> type =
             std::shared_ptr<type_t>(new void_mt()),
             std::shared_ptr<ctype::type_t> ctype =
-            std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
-        : expression(*this, type, ctype), m_val(val)
-        {}
-    const std::string& id(void) const {
-        return m_val;
-    }
+            std::shared_ptr<ctype::type_t>(new ctype::void_mt()));
+    
+    const std::string& id(void) const;
 
 };
 
@@ -72,9 +66,8 @@ public:
          std::shared_ptr<type_t> type =
          std::shared_ptr<type_t>(new void_mt()),
          std::shared_ptr<ctype::type_t> ctype =
-         std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
-        : literal(*this, val, type, ctype)
-        {}
+         std::shared_ptr<ctype::type_t>(new ctype::void_mt()));
+    
     template<typename Derived>
     name(Derived& self, const std::string &val,
          std::shared_ptr<type_t> type,
@@ -90,24 +83,16 @@ public:
           std::shared_ptr<type_t> type =
           std::shared_ptr<type_t>(new void_mt()),
           std::shared_ptr<ctype::type_t> ctype =
-          std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
-        : expression(*this, type, ctype),
-          m_values(std::move(values))
-        {}
+          std::shared_ptr<ctype::type_t>(new ctype::void_mt()));
 protected:
     const std::vector<std::shared_ptr<expression> > m_values;
 public:
     typedef decltype(boost::make_indirect_iterator(m_values.cbegin())) const_iterator;
-    const_iterator begin() const {
-        return boost::make_indirect_iterator(m_values.cbegin());
-    }
+    const_iterator begin() const;
 
-    const_iterator end() const {
-        return boost::make_indirect_iterator(m_values.cend());
-    }
-    int arity() const {
-        return m_values.size();
-    }
+    const_iterator end() const;
+    
+    int arity() const;
 };
 
 class apply
@@ -118,16 +103,11 @@ protected:
     const std::shared_ptr<tuple> m_args;
 public:
     apply(const std::shared_ptr<name> &fn,
-          const std::shared_ptr<tuple> &args)
-        : expression(*this),
-          m_fn(fn), m_args(args)
-        {}
-    inline const name &fn(void) const {
-        return *m_fn;
-    }
-    inline const tuple &args(void) const {
-        return *m_args;
-    }
+          const std::shared_ptr<tuple> &args);
+    
+    const name &fn(void) const;
+    
+    const tuple &args(void) const;
 };
 
 class lambda
@@ -142,16 +122,11 @@ public:
            std::shared_ptr<type_t> type =
            std::shared_ptr<type_t>(new void_mt()),
            std::shared_ptr<ctype::type_t> ctype =
-           std::shared_ptr<ctype::type_t>(new ctype::void_mt()))
-        : expression(*this, type, ctype),
-          m_args(args), m_body(body)
-        {}
-    inline const tuple &args(void) const {
-        return *m_args;
-    }
-    inline const expression &body(void) const {
-        return *m_body;
-    }
+           std::shared_ptr<ctype::type_t>(new ctype::void_mt()));
+    
+    const tuple &args(void) const;
+    
+    const expression &body(void) const;
 };
 
 class closure
@@ -168,15 +143,9 @@ public:
             std::shared_ptr<type_t>(new void_mt()),
             std::shared_ptr<ctype::type_t> ctype =
             std::shared_ptr<ctype::type_t>(new ctype::void_mt())
-            )
-        : expression(*this, type, ctype), m_args(args), m_body(body)
-        {}
-    inline const tuple &args(void) const {
-        return *m_args;
-    }
-    inline const expression &body(void) const {
-        return *m_body;
-    }
+        );
+    const tuple &args(void) const;
+    const expression &body(void) const;
 };
 
 

@@ -11,14 +11,6 @@ enum struct iteration_structure {
     independent
 };
 
-//XXX
-//Some compilers require this, others don't
-bool operator<(iteration_structure a, iteration_structure b) {
-    return (int)a < (int)b;
-}
-
-
-
 enum struct completion {
     invariant,
     local,
@@ -42,12 +34,17 @@ public:
         
 }
 
+//XXX Some compilers require this, others don't
+bool operator<(backend::iteration_structure a, backend::iteration_structure b);
+
+//To make iteration_structure enums print
 std::ostream& operator<<(std::ostream& strm,
                          const backend::iteration_structure& is);
 
-//To make completions print
+//To make completion enums print
 std::ostream& operator<<(std::ostream& strm,
                          const backend::completion& cn);
 
+//To make phase_t structs print
 std::ostream& operator<<(std::ostream& strm,
                          const backend::phase_t& ct);

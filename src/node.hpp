@@ -61,9 +61,7 @@ typedef boost::variant<
 struct make_node_base_visitor
     : boost::static_visitor<node_base>
 {
-    make_node_base_visitor(void *p)
-        : ptr(p)
-        {}
+    make_node_base_visitor(void *p);
 
     template<typename Derived>
     node_base operator()(const Derived &) const {
@@ -74,9 +72,7 @@ struct make_node_base_visitor
     void* ptr;
 };
 
-node_base make_node_base(void *ptr, const node_base &other) {
-    return boost::apply_visitor(make_node_base_visitor(ptr), other);
-}
+node_base make_node_base(void *ptr, const node_base &other);
 
 } // end detail
 
@@ -104,26 +100,11 @@ protected:
         }
 
     //copy constructor requires special handling
-    node(const node &other)
-        : super_t(detail::make_node_base(this, other))
-        {
+    node(const node &other);
 #ifdef DEBUG
-            id = ++counter;
-            std::cout << "Copying node[" << id << "] from ";
-            detail::inspect(other);
-            std::cout << std::endl;
-#endif
-        }
-#ifdef DEBUG
-    ~node() {
-        std::cout << "Destroying node[" << id << "]" << std::endl;
-    }
+    ~node();
 #endif
 };
-
-#ifdef DEBUG
-int node::counter = 0;
-#endif
 
 template<typename ResultType = void>
 struct no_op_visitor
@@ -132,13 +113,6 @@ struct no_op_visitor
     inline ResultType operator()(const node &) const {
         return ResultType();
     }
-};
-
-template<>
-struct no_op_visitor<void>
-    : boost::static_visitor<>
-{
-    inline void operator()(const node &) const {}
 };
 
 }

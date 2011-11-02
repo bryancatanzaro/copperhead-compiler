@@ -2,7 +2,6 @@
 
 namespace backend {
 
-
 phase_t::phase_t(std::vector<completion>&& args, const completion& result)
     : m_args(args), m_result(result) {}
 
@@ -19,6 +18,14 @@ completion phase_t::result() const {
 }
 
 }
+
+//XXX
+//Some compilers require this, others don't
+bool operator<(backend::iteration_structure a, backend::iteration_structure b) {
+    return (int)a < (int)b;
+}
+
+
 //To make iteration_structures print
 std::ostream& operator<<(std::ostream& strm,
                          const backend::iteration_structure& is) {
