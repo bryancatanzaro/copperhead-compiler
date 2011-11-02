@@ -10,7 +10,7 @@
 #include "../monotype.hpp"
 #define PRELUDE_PATH "PRELUDE_PATH"
 #define THRUST_PATH "THRUST_PATH"
-#define THRUST_FILE "thrust.hpp"
+#define THRUST_FILE "thrust.h"
 
 
 
