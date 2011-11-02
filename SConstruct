@@ -15,6 +15,7 @@ if env['PLATFORM'] == 'darwin':
     env.Append(LIBPATH="/Users/catanzar/boost_1_47_0/stage/lib")
     env.Append(LINKFLAGS="-F/System/Library/Frameworks/ -framework Python")
 
+env.Append(CPPPATH = "inc")
 env.Append(CPPPATH = "/usr/include/python2.7")
 env.Append(LIBS = ['boost_python'])
 

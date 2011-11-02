@@ -1,8 +1,8 @@
 #include <boost/python.hpp>
 
-#include "../src/compiler.hpp"
+#include "compiler.hpp"
 #include "wrappers.hpp"
-#include "../src/cuda_printer.hpp"
+#include "cuda_printer.hpp"
 
 namespace backend {
 template<class T>

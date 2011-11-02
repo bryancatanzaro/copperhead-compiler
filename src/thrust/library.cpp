@@ -1,4 +1,4 @@
-#include "library.hpp"
+#include "thrust/library.hpp"
 
 namespace backend {
 

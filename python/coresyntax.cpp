@@ -5,11 +5,11 @@
 #include <boost/variant.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/return_value_policy.hpp>
-#include "../src/node.hpp"
-#include "../src/expression.hpp"
-#include "../src/py_printer.hpp"
-#include "../src/repr_printer.hpp"
-#include "../src/cuda_printer.hpp"
+#include "node.hpp"
+#include "expression.hpp"
+#include "py_printer.hpp"
+#include "repr_printer.hpp"
+#include "cuda_printer.hpp"
 
 #include "wrappers.hpp"
 
