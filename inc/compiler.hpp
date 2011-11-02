@@ -12,7 +12,7 @@
 #include "wrap.hpp"
 #include "bpl_wrap.hpp"
 #include <iostream>
-#include "thrust/library.hpp"
+#include "thrust/decl.hpp"
 #include "prelude/decl.hpp"
 #include "cuda_printer.hpp"
 #include "typedefify.hpp"

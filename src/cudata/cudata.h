@@ -4,7 +4,7 @@
 #include <boost/python/make_constructor.hpp>
 #include <vector>
 
-#include "../prelude/stored_sequence.h"
+#include "../../library/prelude/stored_sequence.h"
 
 #include <numpy/arrayobject.h>
 #include <iostream>
