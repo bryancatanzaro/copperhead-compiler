@@ -203,7 +203,7 @@ def Environment():
   # XXX we shouldn't have to link against cudart unless we're using the
   #     cuda runtime, but cudafe inserts some dependencies when compiling .cu files
   # XXX ideally this gets handled in nvcc.py if possible
-  env.Append(LIBS = 'cudart')
+  #env.Append(LIBS = 'cudart')
 
   if env['backend'] == 'ocelot':
     if os.name == 'posix':

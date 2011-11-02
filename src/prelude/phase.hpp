@@ -11,6 +11,11 @@ enum struct iteration_structure {
     independent
 };
 
+//XXX
+//Some compilers require this, others don't
+bool operator<(iteration_structure a, iteration_structure b) {
+    return (int)a < (int)b;
+}
 
 
 

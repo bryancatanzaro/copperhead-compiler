@@ -9,21 +9,25 @@ except:
     exec open(os.path.join('build', "build-env.py"))
     env = Environment()
 
-
 #XXX Don't hard code this    
 if platform == 'darwin':
     env.Append(CPPPATH = "/Users/catanzar/boost_1_47_0")
-    env.Append(LIBPATH="/Users/catanzar/boost/boost_1_47_0/stage/lib")
+    env.Append(LIBPATH="/Users/catanzar/boost_1_47_0/stage/lib")
     env.Append(LINKFLAGS="-F/System/Library/Frameworks/ -framework Python")
 
 env.Append(CPPPATH = "/usr/include/python2.7")
-env.Append(CPPPATH = "/usr/lib/pymodules/python2.7/numpy/core/include")    
 env.Append(LIBS = ['boost_python'])
 
 cppenv = env.Clone()
 cudaenv = env.Clone()
 
 cppenv.Append(CCFLAGS = "-std=c++0x -Wall -Os")
+if env['PLATFORM'] == 'darwin':
+    cudaenv.Append(CPPPATH = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/numpy/core/include")
+else:
+    cudaenv.Append(CPPPATH = "/usr/lib/pymodules/python2.7/numpy/core/include")    
+
+
 
 cudaenv.Append(CPPPATH = "src/cudata")
 cudaenv.Append(CPPPATH = "src/prelude")
