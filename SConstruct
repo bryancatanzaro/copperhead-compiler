@@ -25,10 +25,9 @@ cudaenv = env.Clone()
 
 cppenv.Append(CCFLAGS = "-std=c++0x -Wall -Os")
 
-cudaenv.Append(CPPPATH = "../cudata")
-cudaenv.Append(CPPPATH = "../prelude")
+cudaenv.Append(CPPPATH = "src/cudata")
+cudaenv.Append(CPPPATH = "src/prelude")
 cudaenv.Append(NVCCFLAGS = '-arch=sm_20')
-cudaenv.Append(LIBS = ['cudart'])
 
 
 object_files = []
