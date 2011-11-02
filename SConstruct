@@ -17,11 +17,14 @@ if env['PLATFORM'] == 'darwin':
 
 env.Append(CPPPATH = "inc")
 env.Append(CPPPATH = "/usr/include/python2.7")
-env.Append(LIBS = ['boost_python'])
 
 cppenv = env.Clone()
 cudaenv = env.Clone()
 
+cppenv.Append(LIBS = ['boost_python'])
+cudaenv.Append(LIBS = ['boost_python'])
+
+env.Append(CCFLAGS = "-std=c++0x -Wall -Os")
 cppenv.Append(CCFLAGS = "-std=c++0x -Wall -Os")
 if env['PLATFORM'] == 'darwin':
     cudaenv.Append(CPPPATH = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/numpy/core/include")
@@ -60,3 +63,7 @@ for x in Glob('python/*.cpp'):
 for x in Glob('python/*.cu'):
     basename, extension = os.path.splitext(str(x))
     cudaenv.SharedLibrary(target=basename, source=x, SHLIBPREFIX='', SHLIBSUFFIX='.so')
+
+for x in Glob('tests/*.cpp'):
+    basename, extension = os.path.splitext(str(x))
+    env.Program(target=basename, source=[x]+objects)
