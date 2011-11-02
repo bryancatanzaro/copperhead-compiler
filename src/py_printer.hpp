@@ -28,145 +28,60 @@ class py_printer
     : public no_op_visitor<>
 {
 public:
-    inline py_printer(std::ostream &os)
-        : m_os(os), indent_level(0), indent_atom("    "),
-          current_indent("")
-        {}
-// XXX why do we have to use 'using' to make the base class's overloads visible?
-    //using backend::no_op_visitor<>::operator();
-
-    inline void operator()(const literal &n) {
-        m_os << n.id();
-    }
-
-    inline void operator()(const tuple &n) {
-        open();
-        detail::list(*this, n);
-        close();
-    }
-
-    inline void operator()(const apply &n) {
-        (*this)(n.fn());
-        (*this)(n.args());
-    }
+    py_printer(std::ostream &os);
     
-    inline void operator()(const lambda &n) {
-        m_os << "lambda ";
-        detail::list(*this, n.args());
-        m_os << ": ";
-        boost::apply_visitor(*this, n.body());
-    }
-    inline void operator()(const closure &n) {
-        m_os << "closure([";
-        detail::list(*this, n.args());
-        m_os << "], ";
-        boost::apply_visitor(*this, n.body());
-        m_os << ")";
-    }
-    inline void operator()(const conditional &n) {
-        m_os << "if ";
-        boost::apply_visitor(*this, n.cond());
-        m_os << ":" << std::endl;
-        indent();
-        boost::apply_visitor(*this, n.then());
-        dedent();
-        indentation();
-        m_os << "else:" << std::endl;
-        indent();
-        boost::apply_visitor(*this, n.orelse());
-        dedent();
-    }
-    inline void operator()(const ret &n) {
-        m_os << "return ";
-        boost::apply_visitor(*this, n.val());
-    }
-    inline void operator()(const bind &n) {
-        boost::apply_visitor(*this, n.lhs());
-        m_os << " = ";
-        boost::apply_visitor(*this, n.rhs());
-    }
-    inline void operator()(const call & n) {
-        boost::apply_visitor(*this, n.sub());
-    }
-    inline void operator()(const procedure &n) {
-        m_os << "def ";
-        (*this)(n.id());
-        (*this)(n.args());
-        m_os << ":" << std::endl;
-        indent();
-        (*this)(n.stmts());
-        dedent();
-        
-    }
-    inline void operator()(const suite &n) {
-        for(auto i = n.begin();
-            i != n.end();
-            i++) {
-            indentation();
-            boost::apply_visitor(*this, *i);
-            m_os << std::endl;
-        }
-    }
+    void operator()(const literal &n);
 
-    inline void operator()(const structure &n) {
-        indentation();
-        m_os << "class ";
-        (*this)(n.id());
-        m_os << ":" << std::endl;
-        indent();
-        (*this)(n.stmts());
-        dedent();
-    }
-    inline void operator()(const include &n) {
-        //No #include statement in python
-        assert(false);
-    }
+    void operator()(const tuple &n);
 
-    inline void operator()(const typedefn &n) {
-        //No typedef statement in python
-        assert(false);
-    }
+    void operator()(const apply &n);
     
-    inline void operator()(const std::string &s) {
-        m_os << s;
-    }
+    void operator()(const lambda &n);
+    
+    void operator()(const closure &n);
+    
+    void operator()(const conditional &n);
+    
+    void operator()(const ret &n);
+    
+    void operator()(const bind &n);
+    
+    void operator()(const call & n);
+    
+    void operator()(const procedure &n);
+    
+    void operator()(const suite &n);
+
+    void operator()(const structure &n);
+    
+    void operator()(const include &n);
+
+    void operator()(const typedefn &n);
+    
+    void operator()(const std::string &s);
+    
     template<typename T>
-        inline void operator()(const std::vector<T> &v) {
+        void operator()(const std::vector<T> &v) const {
         detail::list(this, v);
     }
 
-    inline void sep(void) const {
-        m_os << ", ";
-    }
-    inline void open(void) const {
-        m_os << "(";
-    }
-    inline void close(void) const {
-        m_os << ")";
-    }
+    void sep(void) const;
+    
+    void open(void) const;
+    
+    void close(void) const;
+    
     protected:
 
     std::ostream &m_os;
     int indent_level;
     std::string indent_atom;
     std::string current_indent;
-    inline void indent(int amount=1) {
-        indent_level += amount;
-        assert(indent_level > -1);
-        std::stringstream ss;
-        std::fill_n(std::ostream_iterator<std::string>(ss),
-                    indent_level,
-                    indent_atom);
-        current_indent = ss.str();
-    }
-    inline void dedent() {
-        indent(-1);
-    }
-    inline void indentation() {
-        m_os << current_indent;
-    }
+    void indent(int amount=1);
     
+    void dedent();
     
+    void indentation();
 };
 
 
