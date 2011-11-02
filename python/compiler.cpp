@@ -14,6 +14,7 @@ T* get_pointer(std::shared_ptr<T> const &p) {
 std::string compile(std::shared_ptr<compiler> &c,
                     std::shared_ptr<suite_wrap> &s) {
     std::shared_ptr<suite> rewritten = c->operator()(*s);
+    std::cout << "Done compiling" << std::endl;
     std::string entry_point = c->entry_point();
     std::ostringstream os;
     backend::cuda_printer p(entry_point, c->reg(), os);

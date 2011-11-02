@@ -77,7 +77,6 @@ def getCFLAGS(mode, backend, warn, warnings_as_errors, CC):
   elif mode == 'debug':
     # turn on debug mode
     result.append(gCompilerOptions[CC]['debug'])
-    result.append('-DTHRUST_DEBUG')
 
   # generate omp code
   if backend == 'omp':
@@ -102,6 +101,8 @@ def getCXXFLAGS(mode, backend, warn, warnings_as_errors, CXX):
   elif mode == 'debug':
     # turn on debug mode
     result.append(gCompilerOptions[CXX]['debug'])
+    result.append('-DTRACE')
+
   # enable exception handling
   result.append(gCompilerOptions[CXX]['exception_handling'])
 
