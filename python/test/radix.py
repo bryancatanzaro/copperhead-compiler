@@ -22,7 +22,7 @@ op_add.type = bin_op_t
 cmp_eq = Name('cmp_eq')
 cmp_eq.type = coretypes.Polytype([a_t],
                                  coretypes.Fn(coretypes.Tuple([a_t, a_t]),
-                                              coretypes.Bool()))
+                                              coretypes.Bool))
 
 op_rshift = Name('op_rshift')
 op_rshift.type = bin_op_t
@@ -34,7 +34,7 @@ op_xor = Name('op_xor')
 op_xor.type = bin_op_t
 
 
-int32_t = coretypes.Int32()
+int32_t = coretypes.Int32
 
 zero_l = Literal('0')
 zero_l.type = int32_t
@@ -182,7 +182,7 @@ scan_type = coretypes.Polytype([a_t],
 scan_name.type = scan_type
 rscan_name.type = scan_type
 
-seq_int_t = coretypes.Sequence(coretypes.Int32())
+seq_int_t = coretypes.Sequence(coretypes.Int32)
 
 indices_type = coretypes.Polytype([a_t],
                                   coretypes.Fn(coretypes.Tuple([seq_a_t]),

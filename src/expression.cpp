@@ -11,8 +11,8 @@ const ctype::type_t& expression::ctype(void) const {
     return *m_ctype;
 }
 literal::literal(const std::string& val,
-                 std::shared_ptr<type_t> type,
-                 std::shared_ptr<ctype::type_t> ctype)
+                 const std::shared_ptr<type_t>& type,
+                 const std::shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype), m_val(val) {}
 
 const std::string& literal::id(void) const {
@@ -20,14 +20,14 @@ const std::string& literal::id(void) const {
 }
 
 name::name(const std::string &val,
-         std::shared_ptr<type_t> type,
-         std::shared_ptr<ctype::type_t> ctype)
+         const std::shared_ptr<type_t>& type,
+         const std::shared_ptr<ctype::type_t>& ctype)
         : literal(*this, val, type, ctype)
         {}
 
 tuple::tuple(std::vector<std::shared_ptr<expression> > &&values,
-             std::shared_ptr<type_t> type,
-             std::shared_ptr<ctype::type_t> ctype)
+             const std::shared_ptr<type_t>& type,
+             const std::shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype),
       m_values(std::move(values)) {}
 
@@ -58,8 +58,8 @@ const tuple& apply::args(void) const {
 
 lambda::lambda(const std::shared_ptr<tuple> &args,
                const std::shared_ptr<expression> &body,
-               std::shared_ptr<type_t> type,
-               std::shared_ptr<ctype::type_t> ctype)
+               const std::shared_ptr<type_t>& type,
+               const std::shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype),
       m_args(args), m_body(body) {}
 
@@ -72,8 +72,8 @@ const expression& lambda::body(void) const {
 
 closure::closure(const std::shared_ptr<tuple> &args,
                  const std::shared_ptr<expression> &body,
-                 std::shared_ptr<type_t> type,
-                 std::shared_ptr<ctype::type_t> ctype)
+                 const std::shared_ptr<type_t>& type,
+                 const std::shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype), m_args(args), m_body(body) {}
 
 const tuple& closure::args(void) const {

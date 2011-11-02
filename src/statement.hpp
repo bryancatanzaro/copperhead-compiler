@@ -63,10 +63,8 @@ public:
     procedure(const std::shared_ptr<name> &id,
               const std::shared_ptr<tuple> &args,
               const std::shared_ptr<suite> &stmts,
-              const std::shared_ptr<type_t> &type =
-              std::shared_ptr<type_t>(new void_mt()),
-              const std::shared_ptr<ctype::type_t> &ctype =
-              std::shared_ptr<ctype::type_t>(new ctype::void_mt()),
+              const std::shared_ptr<type_t> &type = void_mt,
+              const std::shared_ptr<ctype::type_t> &ctype = ctype::void_mt,
               const std::string &place =
               "__device__");
 protected:

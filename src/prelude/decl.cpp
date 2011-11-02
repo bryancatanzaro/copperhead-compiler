@@ -30,7 +30,7 @@ std::shared_ptr<type_t> bin_cmp_t =
             std::make_shared<tuple_t>(
                 std::vector<std::shared_ptr<type_t> >{
                     t_a, t_a}),
-            std::make_shared<bool_mt>()));
+            bool_mt));
 
 std::shared_ptr<type_t> un_op_t =
      std::make_shared<polytype_t>(
@@ -59,7 +59,7 @@ std::shared_ptr<phase_t> un_phase_t =
 fn_info bin_op_info(bin_op_t, bin_phase_t);
 fn_info bin_cmp_info(bin_cmp_t, bin_phase_t);
 fn_info un_op_info(un_op_t, un_phase_t);
-fn_info nullary_info(std::make_shared<void_mt>(),
+fn_info nullary_info(void_mt,
                      std::make_shared<phase_t>(
                          std::vector<completion>{},
                          completion::invariant));

@@ -15,7 +15,25 @@ class cu_to_c
 {
 public:
     result_type operator()(const monotype_t& mt) {
-        return result_type(new ctype::monotype_t(mt.name()));        
+        if (mt.name() == "Int32") {
+            return ctype::int32_mt;
+        } else if (mt.name() == "Int64") {
+            return ctype::int64_mt;
+        } else if (mt.name() == "Uint32") {
+            return ctype::uint32_mt;
+        } else if (mt.name() == "Uint64") {
+            return ctype::uint64_mt;
+        } else if (mt.name() == "Float32") {
+            return ctype::float32_mt;
+        } else if (mt.name() == "Float64") {
+            return ctype::float64_mt;
+        } else if (mt.name() == "Bool") {
+            return ctype::bool_mt;
+        } else if (mt.name() == "Void") {
+            return ctype::void_mt;
+        } else {
+            return result_type(new ctype::monotype_t(mt.name()));
+        }
     }
     result_type operator()(const sequence_t & st) {
         result_type sub = boost::apply_visitor(*this, st.sub());
@@ -47,30 +65,6 @@ public:
         }
         result_type base = boost::apply_visitor(*this, p.monotype());
         return result_type(new ctype::templated_t(base, std::move(subs)));
-    }
-    result_type operator()(const int32_mt&) {
-        return result_type(new ctype::int32_mt());
-    }
-    result_type operator()(const int64_mt&) {
-        return result_type(new ctype::int64_mt());
-    }
-    result_type operator()(const uint32_mt&) {
-        return result_type(new ctype::uint32_mt());
-    }
-    result_type operator()(const uint64_mt&) {
-        return result_type(new ctype::uint64_mt());
-    }
-    result_type operator()(const float32_mt&) {
-        return result_type(new ctype::float32_mt());
-    }
-    result_type operator()(const float64_mt&) {
-        return result_type(new ctype::float64_mt());
-    }
-    result_type operator()(const bool_mt&) {
-        return result_type(new ctype::bool_mt());
-    }
-    result_type operator()(const void_mt&) {
-        return result_type(new ctype::void_mt());
     }
 };
 }

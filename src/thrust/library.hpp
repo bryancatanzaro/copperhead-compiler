@@ -39,7 +39,7 @@ std::shared_ptr<library> get_thrust() {
         exported_fns.insert(std::pair<ident, fn_info>(
                        ident(std::string(*i), iteration_structure::parallel),
                        //XXX Need to put real types in
-                       fn_info(std::make_shared<void_mt>(),
+                       fn_info(void_mt,
                                std::make_shared<phase_t>(
                                    std::vector<completion>{},
                                    completion::invariant)

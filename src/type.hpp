@@ -11,17 +11,6 @@ class polytype_t;
 class sequence_t;
 class tuple_t;
 class fn_t;
-class int32_mt;
-class int64_mt;
-class uint32_mt;
-class uint64_mt;
-class float32_mt;
-class float64_mt;
-class bool_mt;
-class void_mt;
-
-class var_t;
-class vartuple_t;
 
 namespace detail {
 typedef boost::variant<
@@ -29,17 +18,7 @@ typedef boost::variant<
     polytype_t &,
     sequence_t &,
     tuple_t &,
-    fn_t &,
-    int32_mt &,
-    int64_mt &,
-    uint32_mt &,
-    uint64_mt &,
-    float32_mt &,
-    float64_mt &,
-    bool_mt &,
-    void_mt &,
-    var_t &,
-    vartuple_t &
+    fn_t &
     > type_base;
 
 struct make_type_base_visitor

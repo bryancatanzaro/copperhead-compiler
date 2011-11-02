@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <boost/variant.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <memory>
 #include <iostream>
@@ -13,14 +14,6 @@ class polytype_t;
 class sequence_t;
 class tuple_t;
 class fn_t;
-class int32_mt;
-class int64_mt;
-class uint32_mt;
-class uint64_mt;
-class float32_mt;
-class float64_mt;
-class bool_mt;
-class void_mt;
 class cuarray_t;
 class templated_t;
 
@@ -31,14 +24,6 @@ typedef boost::variant<
     sequence_t &,
     tuple_t &,
     fn_t &,
-    int32_mt &,
-    int64_mt &,
-    uint32_mt &,
-    uint64_mt &,
-    float32_mt &,
-    float64_mt &,
-    bool_mt &,
-    void_mt &,
     cuarray_t &,
     templated_t &
     > type_base;
@@ -46,9 +31,8 @@ typedef boost::variant<
 struct make_type_base_visitor
     : boost::static_visitor<type_base>
 {
-    make_type_base_visitor(void *p)
-        : ptr(p)
-        {}
+    make_type_base_visitor(void *p);
+    
     template<typename Derived>
     type_base operator()(const Derived &) const {
         // use of std::ref disambiguates variant's copy constructor dispatch
@@ -57,9 +41,7 @@ struct make_type_base_visitor
     void *ptr;
 };
 
-type_base make_type_base(void *ptr, const type_base &other) {
-    return boost::apply_visitor(make_type_base_visitor(ptr), other);
-}
+type_base make_type_base(void *ptr, const type_base &other);
 
 }
 
@@ -75,10 +57,7 @@ public:
         : super_t(std::ref(self)) //use of std::ref disambiguates variant's copy constructor dispatch
         {}
 
-    type_t(const type_t &other)
-        : super_t(detail::make_type_base(this, other))
-        {}
-    ~type_t() {}
+    type_t(const type_t &other);
 
 };
 
@@ -89,10 +68,7 @@ protected:
     const std::string m_name;
    
 public:
-    monotype_t(const std::string &name)
-        : type_t(*this),
-          m_name(name)
-        {}
+    monotype_t(const std::string &name);
     
     template<typename Derived>
     monotype_t(Derived &self,
@@ -100,60 +76,19 @@ public:
         : type_t(self),
           m_name(name)
         {}
-    const std::string& name(void) const {
-        return m_name;
-    }
+    
+    const std::string& name(void) const;
 
 };
 
-
-struct int32_mt :
-        public monotype_t
-{
-    int32_mt() : monotype_t(*this, "int") {}
-};
-
-struct int64_mt :
-        public monotype_t
-{
-    int64_mt() : monotype_t(*this, "long") {}
-};
-
-struct uint32_mt :
-        public monotype_t
-{
-    uint32_mt() : monotype_t(*this, "unsigned int") {}
-};
-
-struct uint64_mt :
-        public monotype_t
-{
-    uint64_mt() : monotype_t(*this, "unsigned long") {}
-};
-
-struct float32_mt :
-        public monotype_t
-{
-    float32_mt() : monotype_t(*this, "float") {}
-};
-
-struct float64_mt :
-        public monotype_t
-{
-    float64_mt() : monotype_t(*this, "double") {}
-};
-
-struct bool_mt :
-        public monotype_t
-{
-    bool_mt() : monotype_t(*this, "bool") {}
-};
-
-struct void_mt :
-        public monotype_t
-{
-    void_mt() : monotype_t(*this, "void") {}
-};
+extern std::shared_ptr<monotype_t> int32_mt;
+extern std::shared_ptr<monotype_t> int64_mt;
+extern std::shared_ptr<monotype_t> uint32_mt;
+extern std::shared_ptr<monotype_t> uint64_mt;
+extern std::shared_ptr<monotype_t> float32_mt;
+extern std::shared_ptr<monotype_t> float64_mt;
+extern std::shared_ptr<monotype_t> bool_mt;
+extern std::shared_ptr<monotype_t> void_mt;
 
 class sequence_t :
         public monotype_t
@@ -161,16 +96,13 @@ class sequence_t :
 protected:
     std::shared_ptr<type_t> m_sub;
 public:
-    inline sequence_t(const std::shared_ptr<type_t> &sub)
-        : monotype_t(*this, "stored_sequence"), m_sub(sub) {}
+    sequence_t(const std::shared_ptr<type_t> &sub);
     template<typename Derived>
-    inline sequence_t(Derived &self,
+    sequence_t(Derived &self,
                       const std::string& name,
                       const std::shared_ptr<type_t> &sub) :
         monotype_t(self, name), m_sub(sub) {}
-    const type_t& sub() const {
-        return *m_sub;
-    }
+    const type_t& sub() const;
 };
 
 class tuple_t :
@@ -179,17 +111,11 @@ class tuple_t :
 private:
     std::vector<std::shared_ptr<type_t> > m_sub;
 public:
-    inline tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
-        : monotype_t(*this, "Tuple"), m_sub(std::move(sub))
-        {}
-        typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
-    const_iterator begin() const {
-        return boost::make_indirect_iterator(m_sub.cbegin());
-    }
+    tuple_t(std::vector<std::shared_ptr<type_t> > && sub);
+    typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
+    const_iterator begin() const;
 
-    const_iterator end() const {
-        return boost::make_indirect_iterator(m_sub.cend());
-    }
+    const_iterator end() const;
 };
 
 class fn_t :
@@ -199,29 +125,21 @@ private:
     std::shared_ptr<tuple_t> m_args;
     std::shared_ptr<type_t> m_result;
 public:
-    inline fn_t(const std::shared_ptr<tuple_t> args,
-                const std::shared_ptr<type_t> result)
-        : monotype_t(*this, "Fn"), m_args(args), m_result(result)
-        {}
-    inline const tuple_t& args() const {
-        return *m_args;
-    }
-    inline const type_t& result() const {
-        return *m_result;
-    }
+    fn_t(const std::shared_ptr<tuple_t> args,
+                const std::shared_ptr<type_t> result);
+    const tuple_t& args() const;
+    const type_t& result() const;
 };
 
 class polytype_t :
         public type_t {
-    polytype_t() : type_t(*this) {}
-
+    polytype_t();
 };
 
 class cuarray_t :
         public sequence_t {
 public:
-    cuarray_t(const std::shared_ptr<type_t> sub) :
-        sequence_t(*this, "sp_cuarray_var", sub) {}
+    cuarray_t(const std::shared_ptr<type_t> sub);
 };
 
 class templated_t
@@ -230,22 +148,14 @@ private:
     std::shared_ptr<type_t> m_base;
     std::vector<std::shared_ptr<type_t> > m_sub;
 public:
-    inline templated_t(std::shared_ptr<type_t> base, std::vector<std::shared_ptr<type_t> > && sub)
-        : type_t(*this), m_base(base), m_sub(std::move(sub))
-        {}
+    templated_t(std::shared_ptr<type_t> base, std::vector<std::shared_ptr<type_t> > && sub);
 
-    const type_t& base() const {
-        return *m_base;
-    }
+    const type_t& base() const;
     
     typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
-    const_iterator begin() const {
-        return boost::make_indirect_iterator(m_sub.cbegin());
-    }
+    const_iterator begin() const;
 
-    const_iterator end() const {
-        return boost::make_indirect_iterator(m_sub.cend());
-    }
+    const_iterator end() const;
 };
 
 }
