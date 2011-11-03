@@ -52,14 +52,17 @@ std::ostream& operator<<(std::ostream& strm,
 std::ostream& operator<<(std::ostream& strm,
                          const backend::completion& cn) {
     switch(cn) {
-    case backend::completion::invariant:
-        strm << "invariant";
+    case backend::completion::none:
+        strm << "none";
         break;
     case backend::completion::local:
         strm << "local";
         break;
     case backend::completion::total:
         strm << "total";
+        break;
+    case backend::completion::invariant:
+        strm << "invariant";
         break;
     }
     return strm;

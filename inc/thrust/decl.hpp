@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <cstdlib>
+#include <sstream>
 #include "../import/library.hpp"
 #include "../import/paths.hpp"
 #include "../node.hpp"

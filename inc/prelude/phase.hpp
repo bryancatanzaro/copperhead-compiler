@@ -12,9 +12,10 @@ enum struct iteration_structure {
 };
 
 enum struct completion {
-    invariant,
+    none,
     local,
-    total
+    total,
+    invariant
 };
 
 
