@@ -8,6 +8,7 @@
 #include "../node.hpp"
 #include "../type.hpp"
 #include "../monotype.hpp"
+#include "../polytype.hpp"
 #define PRELUDE_PATH "PRELUDE_PATH"
 #define THRUST_PATH "THRUST_PATH"
 #define THRUST_FILE "thrust.h"
@@ -15,10 +16,6 @@
 
 
 namespace backend {
-
-namespace detail {
-extern std::vector<const char*> thrust_fn_names;
-}
 
 std::shared_ptr<library> get_thrust();
 

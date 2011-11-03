@@ -3,11 +3,11 @@
 
 namespace backend {
 
-namespace detail {
+namespace prelude {
 
 typedef std::tuple<const char*, fn_info> named_info;
 
-namespace impl {
+namespace detail {
 
 std::shared_ptr<monotype_t> t_a =
     std::make_shared<monotype_t>("a");
@@ -117,9 +117,9 @@ void load_scalars(
 
 std::shared_ptr<library> get_builtins() {
     std::map<ident, fn_info> fns;
-    detail::load_scalars(fns, detail::impl::unary_scalar_operators);
-    detail::load_scalars(fns, detail::impl::binary_scalar_operators);
-    detail::load_scalars(fns, detail::impl::cpp_support_fns);
+    prelude::load_scalars(fns, prelude::detail::unary_scalar_operators);
+    prelude::load_scalars(fns, prelude::detail::binary_scalar_operators);
+    prelude::load_scalars(fns, prelude::detail::cpp_support_fns);
     std::string path(detail::get_path(PRELUDE_PATH));
     std::set<std::string> include_paths;
     if (path.length() > 0) {
