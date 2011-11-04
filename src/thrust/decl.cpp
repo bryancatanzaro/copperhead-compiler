@@ -91,18 +91,92 @@ void declare_maps(int max_arity, map<ident, fn_info>& fns) {
                         
 }
 
+void declare_scans(map<ident, fn_info>& fns) {
+    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
+    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
+    shared_ptr<monotype_t> bin_fn_t =
+        make_shared<fn_t>(
+            make_shared<tuple_t>(
+                vector<shared_ptr<type_t> >{t_a, t_a}),
+            t_a);
+    shared_ptr<polytype_t> scan_t =
+        make_shared<polytype_t>(
+            vector<shared_ptr<monotype_t> >{t_a},
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    vector<shared_ptr<type_t> >{bin_fn_t, seq_t_a}),
+                seq_t_a));
+    shared_ptr<phase_t> scan_phase_t =
+        make_shared<phase_t>(
+            vector<completion>{completion::invariant, completion::local},
+            completion::total);
+    
+    fns.insert(pair<ident, fn_info>{
+            ident{"scan", iteration_structure::independent},
+                fn_info(scan_t, scan_phase_t)});
+    fns.insert(pair<ident, fn_info>{
+            ident{"rscan", iteration_structure::independent},
+                fn_info(scan_t, scan_phase_t)});
+}
 
-std::vector<const char*> thrust_fn_names = {
-    "adjacent_difference",
-    "scan",
-    "rscan",
-    "indices",
-    "permute"/*,
-    "exscan",
-    "exrscan"*/
-};
+void declare_permutes(map<ident, fn_info>& fns) {
+    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
+    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
+    shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int32_mt);
+    shared_ptr<polytype_t> permute_t =
+        make_shared<polytype_t>(
+            vector<shared_ptr<monotype_t> >{t_a},
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    vector<shared_ptr<type_t> >{seq_t_a, seq_int}),
+                seq_t_a));
+    shared_ptr<phase_t> permute_phase_t =
+        make_shared<phase_t>(
+            vector<completion>{completion::total, completion::local},
+            completion::total);
+    fns.insert(pair<ident, fn_info>{
+            ident{"permute", iteration_structure::independent},
+                fn_info(permute_t, permute_phase_t)});
+}
 
+void declare_special_sequences(map<ident, fn_info>& fns) {
+    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
+    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
+    shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int32_mt);
+    shared_ptr<polytype_t> indices_t =
+        make_shared<polytype_t>(
+            vector<shared_ptr<monotype_t> >{t_a},
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    vector<shared_ptr<type_t> >{seq_t_a}),
+                seq_int));
+    shared_ptr<phase_t> indices_phase_t =
+        make_shared<phase_t>(
+            vector<completion>{completion::local},
+            completion::local);
+    fns.insert(pair<ident, fn_info>{
+            ident{"indices", iteration_structure::independent},
+                fn_info(indices_t, indices_phase_t)});
+}
 
+void declare_transforms(map<ident, fn_info>& fns) {
+    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
+    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
+    shared_ptr<polytype_t> adj_t =
+        make_shared<polytype_t>(
+            vector<shared_ptr<monotype_t> >{t_a},
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    vector<shared_ptr<type_t> >{seq_t_a}),
+                seq_t_a));
+    shared_ptr<phase_t> adj_phase_t =
+        make_shared<phase_t>(
+            vector<completion>{completion::total},
+            completion::total);
+    fns.insert(pair<ident, fn_info>{
+            ident{"adjacent_difference", iteration_structure::independent},
+                fn_info(adj_t, adj_phase_t)});
+}
 
 
 }
@@ -116,20 +190,10 @@ shared_ptr<library> get_thrust() {
     int max_arity = 10;
     map<ident, fn_info> exported_fns;
     thrust::detail::declare_maps(max_arity, exported_fns);
-    for(auto i = thrust::detail::thrust_fn_names.begin();
-        i != thrust::detail::thrust_fn_names.end();
-        i++) {
-        exported_fns.insert(pair<ident, fn_info>(
-                       ident(string(*i), iteration_structure::parallel),
-                       //XXX Need to put real types in
-                       fn_info(void_mt,
-                               make_shared<phase_t>(
-                                   vector<completion>{},
-                                   completion::invariant)
-
-                           )));
-
-    }
+    thrust::detail::declare_scans(exported_fns);
+    thrust::detail::declare_permutes(exported_fns);
+    thrust::detail::declare_special_sequences(exported_fns);
+    thrust::detail::declare_transforms(exported_fns);
     //XXX HACK.  NEED boost::filesystem path manipulation
     string library_path(string(detail::get_path(PRELUDE_PATH)) +
                              "/../thrust");
