@@ -29,6 +29,15 @@ public:
     const phase_t& phase() const {
         return *m_phase;
     }
+
+    const std::shared_ptr<type_t>& p_type() const {
+        return m_type;
+    }
+
+    const std::shared_ptr<phase_t>& p_phase() const {
+        return m_phase;
+    }
+    
     //shared_ptr<type> m_type;
     //shared_ptr<phase> m_phase;
         

@@ -106,6 +106,8 @@ protected:
 #endif
 };
 
+std::ostream& operator<<(std::ostream& strm, const node& n);
+
 template<typename ResultType = void>
 struct no_op_visitor
     : boost::static_visitor<ResultType>

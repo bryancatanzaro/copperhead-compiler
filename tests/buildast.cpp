@@ -53,16 +53,15 @@ int main(void)
   // the whole program
   shared_ptr<suite> program(new suite(vector<shared_ptr<statement> >{addproc}));
 
+
   // print the representation
-  repr_printer rp(std::cout);
-  rp(*program); std::cout << "\n";
+  std::cout << *program << std::endl;
   
   // compile
   std::string entry("addproc");
   compiler comp(entry);
   shared_ptr<suite> functorized = comp(*program);
-  rp(*program); std::cout << "\n";
-
+ 
   // print the representation
   py_printer pp(std::cout);
   pp(*program); std::cout << "\n";

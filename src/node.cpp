@@ -1,4 +1,6 @@
 #include "node.hpp"
+#include "repr_printer.hpp"
+
 namespace backend {
 namespace detail
 {
@@ -34,12 +36,13 @@ node::~node() {
 int node::counter = 0;
 #endif
 
-template<>
-struct no_op_visitor<void>
-    : boost::static_visitor<>
-{
-    inline void operator()(const node &) const {}
-};
+std::ostream& operator<<(std::ostream& strm,
+                         const node& n) {
+    repr_printer rp(strm);
+    boost::apply_visitor(rp, n);
+    return strm;
+}
+
 
 }
 

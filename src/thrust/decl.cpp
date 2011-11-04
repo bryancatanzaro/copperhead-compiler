@@ -21,7 +21,7 @@ typedef std::tuple<const char*, fn_info> named_info;
 
 void declare_maps(int max_arity, map<ident, fn_info>& fns) {
     vector<string> map_ids;
-    for(int i = 0; i < max_arity; i++) {
+    for(int i = 1; i <= max_arity; i++) {
         stringstream strm;
         strm << "map" << i;
         map_ids.push_back(strm.str());
