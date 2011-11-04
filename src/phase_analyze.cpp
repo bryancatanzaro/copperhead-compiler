@@ -74,6 +74,11 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
 
 void phase_analyze::add_phase_boundary(const name& n) {
     shared_ptr<name> p_n = static_pointer_cast<name>(get_node_ptr(n));
+    shared_ptr<name> p_result =
+        make_shared<name>(
+            detail::complete(n.id()),
+            get_type_ptr(n.type()));
+    
     shared_ptr<tuple_t> pb_args_t =
         make_shared<tuple_t>(vector<shared_ptr<type_t> >{get_type_ptr(n.type())});
     shared_ptr<tuple> pb_args =
@@ -92,8 +97,16 @@ void phase_analyze::add_phase_boundary(const name& n) {
     shared_ptr<apply> pb_apply =
         make_shared<apply>(pb_name, pb_args);
     shared_ptr<bind> result =
-        make_shared<bind>(p_n, pb_apply);
+        make_shared<bind>(p_result, pb_apply);
     m_additionals.push_back(result);
+
+    //Register completion
+    m_completions.insert(
+        pair<string, completion>{p_result->id(), completion::total});
+
+    //Register substitution
+    m_substitutions.insert(
+        pair<string, shared_ptr<name> >{n.id(), p_result});
 }
 
 phase_analyze::result_type phase_analyze::operator()(const apply& n) {
@@ -109,22 +122,36 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
     phase_t::iterator j = fn_phase->begin();
     //The phase type for the function must match the args given to it
     assert(fn_phase->size() == n.args().arity());
+
+    vector<shared_ptr<expression> > new_args;
     
     for(auto i = n.args().begin();
         i != n.args().end();
         i++, j++) {
+        shared_ptr<name> p_i = static_pointer_cast<name>(get_node_ptr(*i));
+        shared_ptr<expression> new_arg = p_i;
         //If we have something other than a name, assume it's invariant
         if (detail::isinstance<name>(*i)) {
             const name& id = detail::up_get<name>(*i);
-            //If completion hasn't been recorded, assume it's invariant
-            if (m_completions.exists(id.id())) {
-                completion arg_completion = m_completions.find(id.id())->second;
-                //Do we need a phase boundary for this argument?
-                if (arg_completion < (*j)) {
-                    add_phase_boundary(id);
+            if (m_substitutions.exists(id.id())) {
+                //Phase boundary already took place, use the complete version
+                //HEURISTIC HAZARD:
+                //This might not always be the right choice
+                new_arg = m_substitutions.find(id.id())->second;
+            } else {        
+                //If completion hasn't been recorded, assume it's invariant
+                if (m_completions.exists(id.id())) {
+                    completion arg_completion =
+                        m_completions.find(id.id())->second;
+                    //Do we need a phase boundary for this argument?
+                    if (arg_completion < (*j)) {
+                        add_phase_boundary(id);
+                        new_arg = m_substitutions.find(id.id())->second;
+                    }
                 }
             } 
-        } 
+        }
+        new_args.push_back(new_arg);
     }
     m_result_completion = fn_phase->result();
     return get_node_ptr(n);
@@ -148,18 +175,27 @@ phase_analyze::result_type phase_analyze::operator()(const ret& n) {
     if (!m_in_entry) {
         return get_node_ptr(n);
     }
+;
     //Returns can only be names
     assert(detail::isinstance<name>(n.val()));
+    shared_ptr<name> new_result =
+        static_pointer_cast<name>(get_node_ptr(n.val()));
     const name& return_name = detail::up_get<name>(n.val());
-    if (m_completions.exists(return_name.id())) {
-        completion result_completion =
-            m_completions.find(return_name.id())->second;
-        //Results must be totally complete!!
-        if (result_completion < completion::total) {
-            add_phase_boundary(return_name);
+    if (m_substitutions.exists(return_name.id())) {
+        //Phase boundary already happened, use complete version
+        new_result = m_substitutions.find(return_name.id())->second;
+    } else {
+        if (m_completions.exists(return_name.id())) {
+            completion result_completion =
+                m_completions.find(return_name.id())->second;
+            //Results must be totally complete!!
+            if (result_completion < completion::total) {
+                add_phase_boundary(return_name);
+                new_result = m_substitutions.find(return_name.id())->second;
+            }
         }
     }
-    return get_node_ptr(n);
+    return make_shared<ret>(new_result);
 }
 
 

@@ -15,5 +15,7 @@ std::string wrap_proc_id(const std::string &in);
 
 std::string typify(const std::string &in);
 
+std::string complete(const std::string &in);
+
 }
 }

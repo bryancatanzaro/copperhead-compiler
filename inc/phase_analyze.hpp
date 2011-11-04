@@ -10,6 +10,7 @@
 #include "utility/isinstance.hpp"
 #include "utility/up_get.hpp"
 #include "utility/snippets.hpp"
+#include "utility/markers.hpp"
 
 namespace backend {
 
@@ -20,6 +21,7 @@ private:
     bool m_in_entry;
     std::map<std::string, std::shared_ptr<phase_t> > m_fns;
     environment<std::string, completion> m_completions;
+    environment<std::string, std::shared_ptr<name> > m_substitutions;
     //Should this be implemented with std::stack<result_type>?
     std::vector<result_type> m_additionals;
     completion m_result_completion;

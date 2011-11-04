@@ -32,5 +32,9 @@ std::string typify(const std::string &in) {
     return "T" + in;
 }
 
+std::string complete(const std::string &in) {
+    return mark_generated_id("comp" + in);
+}
+
 }
 }
