@@ -114,6 +114,7 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
         return get_node_ptr(n);
     }
     const name& fn_name = n.fn();
+
     //If function not declared, assume it can't trigger a phase boundary
     if (m_fns.find(fn_name.id()) == m_fns.end()) {
         return get_node_ptr(n);
