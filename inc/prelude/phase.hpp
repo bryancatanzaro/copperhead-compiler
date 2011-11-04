@@ -29,6 +29,7 @@ public:
     iterator begin() const;
     iterator end() const;
     completion result() const;
+    int size() const;
 };
 
 

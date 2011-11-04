@@ -12,6 +12,7 @@ const std::string wrap();
 const std::string make_remote();
 const std::string boost_python_module();
 const std::string boost_python_def();
+const std::string phase_boundary();
 
 }
 }

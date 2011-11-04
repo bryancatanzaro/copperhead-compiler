@@ -1,12 +1,18 @@
-#include "phase_analysis.hpp"
+#include "phase_analyze.hpp"
 
 using std::string;
 using std::pair;
 using std::shared_ptr;
+using std::make_shared;
+using std::move;
+using std::vector;
+using std::static_pointer_cast;
 
 namespace backend {
 
-phase_analyzer::phase_analyzer(const registry& reg) {
+phase_analyze::phase_analyze(const string& entry_point,
+                             const registry& reg)
+    : m_entry_point(entry_point), m_in_entry(false) {
     for(auto i = reg.fns().cbegin();
         i != reg.fns().cend();
         i++) {
@@ -16,6 +22,144 @@ phase_analyzer::phase_analyzer(const registry& reg) {
         m_fns.insert(pair<string, shared_ptr<phase_t> >{
                 fn_name, info.p_phase()});
     }
+}
+
+phase_analyze::result_type phase_analyze::operator()(const suite& n) {
+    vector<shared_ptr<statement> > stmts;
+    for(auto i = n.begin(); i != n.end(); i++) {
+        auto p = std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i));
+        while(m_additionals.size() > 0) {
+            auto p = std::static_pointer_cast<statement>(m_additionals.back());
+            stmts.push_back(p);
+            m_additionals.pop_back();
+        }
+        stmts.push_back(p);
+        
+    }
+    return make_shared<suite>(move(stmts));
+}
+
+phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
+    if (n.id().id() == m_entry_point) {
+        m_in_entry = true;
+        m_completions.begin_scope();
+        //All inputs to the entry point must be totally formed
+        for(auto i = n.args().begin();
+            i != n.args().end();
+            i++) {
+            //Arguments to procedures must be names
+            assert(detail::isinstance<name>(*i));
+            const name& arg_name = detail::up_get<name>(*i);
+            const std::string& arg_id = arg_name.id();
+            m_completions.insert(pair<string, completion>{arg_id, completion::total});
+        }
+        shared_ptr<suite> stmts =
+            static_pointer_cast<suite>(
+                boost::apply_visitor(*this, n.stmts()));
+        result_type result =
+            make_shared<procedure>(
+                static_pointer_cast<name>(get_node_ptr(n.id())),
+                static_pointer_cast<tuple>(get_node_ptr(n.args())),
+                stmts,
+                get_type_ptr(n.type()),
+                get_ctype_ptr(n.ctype()),
+                n.place());
+        m_in_entry = false;
+        m_completions.end_scope();
+        return result;
+    } else {
+        return get_node_ptr(n);
+    }
+}
+
+void phase_analyze::add_phase_boundary(const name& n) {
+    shared_ptr<name> p_n = static_pointer_cast<name>(get_node_ptr(n));
+    shared_ptr<tuple_t> pb_args_t =
+        make_shared<tuple_t>(vector<shared_ptr<type_t> >{get_type_ptr(n.type())});
+    shared_ptr<tuple> pb_args =
+        make_shared<tuple>(vector<shared_ptr<expression> >{p_n}, pb_args_t);
+    shared_ptr<monotype_t> a_mt = make_shared<monotype_t>("a");
+    shared_ptr<monotype_t> seq_a_mt = make_shared<sequence_t>(a_mt);
+    shared_ptr<type_t> pb_type =
+        make_shared<polytype_t>(
+            vector<shared_ptr<monotype_t> >{a_mt},
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    vector<shared_ptr<type_t> >{seq_a_mt}),
+                seq_a_mt));
+    shared_ptr<name> pb_name =
+        make_shared<name>(detail::phase_boundary(), pb_type);
+    shared_ptr<apply> pb_apply =
+        make_shared<apply>(pb_name, pb_args);
+    shared_ptr<bind> result =
+        make_shared<bind>(p_n, pb_apply);
+    m_additionals.push_back(result);
+}
+
+phase_analyze::result_type phase_analyze::operator()(const apply& n) {
+    if (!m_in_entry) {
+        return get_node_ptr(n);
+    }
+    const name& fn_name = n.fn();
+    //If function not declared, assume it can't trigger a phase boundary
+    if (m_fns.find(fn_name.id()) == m_fns.end()) {
+        return get_node_ptr(n);
+    }
+    shared_ptr<phase_t> fn_phase = m_fns.find(fn_name.id())->second;
+    phase_t::iterator j = fn_phase->begin();
+    //The phase type for the function must match the args given to it
+    assert(fn_phase->size() == n.args().arity());
+    
+    for(auto i = n.args().begin();
+        i != n.args().end();
+        i++, j++) {
+        //If we have something other than a name, assume it's invariant
+        if (detail::isinstance<name>(*i)) {
+            const name& id = detail::up_get<name>(*i);
+            //If completion hasn't been recorded, assume it's invariant
+            if (m_completions.exists(id.id())) {
+                completion arg_completion = m_completions.find(id.id())->second;
+                //Do we need a phase boundary for this argument?
+                if (arg_completion < (*j)) {
+                    add_phase_boundary(id);
+                }
+            } 
+        } 
+    }
+    m_result_completion = fn_phase->result();
+    return get_node_ptr(n);
+}
+
+phase_analyze::result_type phase_analyze::operator()(const bind& n) {
+    if (!m_in_entry) {
+        return get_node_ptr(n);
+    }
+    m_result_completion = completion::invariant;
+    result_type rewritten = this->copier::operator()(n);
+    //Update completion declarations
+    if (detail::isinstance<name>(n.lhs())) {
+        const name& lhs_name = detail::up_get<name>(n.lhs());
+        m_completions.insert(pair<string, completion>{lhs_name.id(), m_result_completion});
+    }
+    return rewritten;
+}
+
+phase_analyze::result_type phase_analyze::operator()(const ret& n) {
+    if (!m_in_entry) {
+        return get_node_ptr(n);
+    }
+    //Returns can only be names
+    assert(detail::isinstance<name>(n.val()));
+    const name& return_name = detail::up_get<name>(n.val());
+    if (m_completions.exists(return_name.id())) {
+        completion result_completion =
+            m_completions.find(return_name.id())->second;
+        //Results must be totally complete!!
+        if (result_completion < completion::total) {
+            add_phase_boundary(return_name);
+        }
+    }
+    return get_node_ptr(n);
 }
 
 

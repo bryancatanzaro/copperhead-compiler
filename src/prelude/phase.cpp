@@ -17,6 +17,10 @@ completion phase_t::result() const {
     return m_result;
 }
 
+int phase_t::size() const {
+    return m_args.size();
+}
+
 }
 
 //XXX

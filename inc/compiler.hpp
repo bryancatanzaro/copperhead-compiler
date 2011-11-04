@@ -16,6 +16,7 @@
 #include "prelude/decl.hpp"
 #include "cuda_printer.hpp"
 #include "typedefify.hpp"
+#include "phase_analyze.hpp"
 
 //XXX We need an interface for libraries to insert compiler passes
 //In lieu of such an interface, this is hard coded.

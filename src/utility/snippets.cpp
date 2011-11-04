@@ -29,5 +29,9 @@ const std::string boost_python_def() {
     return "boost::python::def";
 }
 
+const std::string phase_boundary() {
+    return "phase_boundary";
+}
+
 }
 }

@@ -15,9 +15,15 @@ compiler::compiler(const std::string& entry_point)
 
 }
 std::shared_ptr<suite> compiler::operator()(const suite &n) {
-    cuda_printer cp(m_entry_point, m_registry, std::cout);        
+    cuda_printer cp(m_entry_point, m_registry, std::cout);
+
+    phase_analyze phase_analyzer(m_entry_point, m_registry);
+    auto phase_analyzed = apply(phase_analyzer, n);
+
+    boost::apply_visitor(cp, *phase_analyzed);
+    
     type_convert type_converter;
-    auto type_converted = apply(type_converter, n);
+    auto type_converted = apply(type_converter, phase_analyzed);
 #ifdef TRACE
     std::cout << "Type converted" << std::endl;
 #endif
