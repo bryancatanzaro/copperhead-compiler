@@ -16,3 +16,6 @@ axpy_test.so: axpy_test.cu
 
 radix_sort_iteration.so: radix_sort_iteration.cu
 	nvcc -arch=sm_20 -I/usr/include/python2.7 -I../prelude -I../cudata -I../thrust -I/home/bcatanzaro/thrust -I/Users/catanzar/boost_1_47_0 -I/usr/lib/pymodules/python2.7/numpy/core/include -Xcompiler "-fPIC,-g" -lboost_python -shared -o radix_sort_iteration.so radix_sort_iteration.cu -g
+
+addproc.so: addproc.cu
+	nvcc -arch=sm_20 -I/usr/include/python2.7 -I../library/prelude -I../library/thrust -I../src/cudata  -I/home/bcatanzaro/thrust -I/Users/catanzar/boost_1_47_0 -I/usr/lib/pymodules/python2.7/numpy/core/include -Xcompiler "-fPIC" -lboost_python -shared -o addproc.so addproc.cu

@@ -32,9 +32,10 @@ else:
     cudaenv.Append(CPPPATH = "/usr/lib/pymodules/python2.7/numpy/core/include")    
 
 
-
+cudaenv.Append(LIBS = ['cudart'])
 cudaenv.Append(CPPPATH = "src/cudata")
-cudaenv.Append(CPPPATH = "src/prelude")
+cudaenv.Append(CPPPATH = "library/prelude")
+cudaenv.Append(CPPPATH = "library/thrust")
 cudaenv.Append(NVCCFLAGS = '-arch=sm_20')
 
 
