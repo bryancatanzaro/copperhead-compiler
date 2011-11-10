@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <boost/shared_ptr.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 
 //The private data members of cuarray have to be hidden
 //in order to separate CUDA stuff from the host C++ compiler
@@ -17,18 +18,30 @@
 //boost::python.  Segregating all the data structures which
 //NVCC must see allows this to work.
 template<typename T>
-class cuarray_data;
+class cuarray_impl;
+
+namespace detail {
+template<typename T>
+struct Deleter {
+    void operator()(T *p) {
+            delete p;
+    }
+};
+}
 
 template<typename T>
 class cuarray {
-  private:
-    cuarray_data<T>* m_data;
   public:
+    //Is there a better unique_ptr implementation I can use?
+    boost::interprocess::unique_ptr<cuarray_impl<T> , detail::Deleter<cuarray_impl<T> > > m_impl;
+
     cuarray();
+    ~cuarray();
     cuarray(ssize_t n, bool host=true);
     cuarray(ssize_t n, T*);
-    void retrieve();
-    void exile();
+    cuarray(const cuarray<T>& r);
+    cuarray& operator=(const cuarray<T>& r);
+    void swap(cuarray<T>& r);
 };
 
 typedef boost::variant<cuarray<bool>, cuarray<int>, cuarray<long>, cuarray<float>, cuarray<double> > cuarray_var;
