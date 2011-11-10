@@ -61,10 +61,13 @@ for x in Glob('python/*.cpp'):
     basename, extension = os.path.splitext(str(x))
     cppenv.SharedLibrary(target=basename, source=[x]+objects, SHLIBPREFIX='', SHLIBSUFFIX='.so')
 
-for x in Glob('python/*.cu'):
-    basename, extension = os.path.splitext(str(x))
-    cudaenv.SharedLibrary(target=basename, source=x, SHLIBPREFIX='', SHLIBSUFFIX='.so')
-
 for x in Glob('tests/*.cpp'):
     basename, extension = os.path.splitext(str(x))
     env.Program(target=basename, source=[x]+objects)
+
+#Until we can compile BPL extensions with nvcc on OS X...
+if env['PLATFORM'] != 'darwin':
+    for x in Glob('python/*.cu'):
+        basename, extension = os.path.splitext(str(x))
+        cudaenv.SharedLibrary(target=basename, source=x, SHLIBPREFIX='', SHLIBSUFFIX='.so')
+    

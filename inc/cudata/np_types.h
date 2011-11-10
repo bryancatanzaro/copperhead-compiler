@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Python.h>
 #include <numpy/arrayobject.h>
 
 template<typename T>
