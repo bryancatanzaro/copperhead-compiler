@@ -2,6 +2,8 @@
 #include "../../library/prelude/stored_sequence.h"
 #include "np_types.h"
 
+//This class exists to isolate anything that touches CUDA
+//And make sure the host compiler doesn't need to see it.
 template<typename T>
 class cuarray_impl {
     friend cuarray<T>;

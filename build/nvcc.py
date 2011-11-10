@@ -111,7 +111,7 @@ def generate(env):
   # set the include path, and pass both c compiler flags and c++ compiler flags
   env['NVCCFLAGS'] = SCons.Util.CLVar('')
   env['SHNVCCFLAGS'] = SCons.Util.CLVar('') + ' -shared'
-  
+    
   # 'NVCC Command'
   env['NVCCCOM']   = '$NVCC -o $TARGET -c $NVCCFLAGS $_NVCCWRAPCFLAGS $NVCCWRAPCCFLAGS $_NVCCCOMCOM $SOURCES'
   env['SHNVCCCOM'] = '$SHNVCC -o $TARGET -c $SHNVCCFLAGS $_NVCCWRAPSHCFLAGS $_NVCCWRAPSHCCFLAGS $_NVCCCOMCOM $SOURCES'

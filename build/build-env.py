@@ -81,7 +81,7 @@ def getCFLAGS(mode, backend, warn, warnings_as_errors, CC):
   # generate omp code
   if backend == 'omp':
     result.append(gCompilerOptions[CC]['omp'])
-
+  
   if warn:
     # turn on all warnings
     result.append(gCompilerOptions[CC]['warn_all'])
@@ -105,7 +105,7 @@ def getCXXFLAGS(mode, backend, warn, warnings_as_errors, CXX):
 
   # enable exception handling
   result.append(gCompilerOptions[CXX]['exception_handling'])
-
+  
   # generate omp code
   if backend == 'omp':
     result.append(gCompilerOptions[CXX]['omp'])
@@ -128,6 +128,10 @@ def getNVCCFLAGS(mode, backend, arch):
     # XXX make this work when we've debugged nvcc -G
     #result.append('-G')
     pass
+  # force 64b code on darwin
+  if platform.platform()[:6] == 'Darwin':
+    result.append('-m64')
+
   return result
 
 
@@ -191,6 +195,8 @@ def Environment():
 
   # get NVCC compiler switches
   env.Append(NVCCFLAGS = getNVCCFLAGS(env['mode'], env['backend'], env['arch']))
+
+  env.Append(SHNVCCFLAGS = getNVCCFLAGS(env['mode'], env['backend'], env['arch']))
 
   # get linker switches
   env.Append(LINKFLAGS = getLINKFLAGS(env['mode'], env['backend'], env.subst('$LINK')))

@@ -14,7 +14,7 @@ if env['PLATFORM'] == 'darwin':
     env.Append(CPPPATH = "/Users/catanzar/boost_1_47_0")
     env.Append(LIBPATH="/Users/catanzar/boost_1_47_0/stage/lib")
     env.Append(LINKFLAGS="-F/System/Library/Frameworks/ -framework Python")
-
+    
 env.Append(CPPPATH = "inc")
 env.Append(CPPPATH = "/usr/include/python2.7")
 
@@ -24,8 +24,8 @@ cudaenv = env.Clone()
 cppenv.Append(LIBS = ['boost_python'])
 cudaenv.Append(LIBS = ['boost_python'])
 
-env.Append(CCFLAGS = "-std=c++0x -Wall -Os")
-cppenv.Append(CCFLAGS = "-std=c++0x -Wall -Os")
+env.Append(CCFLAGS = "-std=c++0x -Wall")
+cppenv.Append(CCFLAGS = "-std=c++0x -Wall")
 if env['PLATFORM'] == 'darwin':
     cudaenv.Append(CPPPATH = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/numpy/core/include")
 else:
@@ -36,14 +36,13 @@ cudaenv.Append(LIBS = ['cudart'])
 cudaenv.Append(CPPPATH = "src/cudata")
 cudaenv.Append(CPPPATH = "library/prelude")
 cudaenv.Append(CPPPATH = "library/thrust")
-cudaenv.Append(NVCCFLAGS = '-arch=sm_20')
-
 
 object_files = []
 for root, dirnames, filenames in os.walk(os.path.join(os.curdir,
                                                       "src")):
   for filename in fnmatch.filter(filenames, '*.cpp'):
       object_files.append(os.path.join(root, filename))
+
 
 
 
@@ -56,10 +55,23 @@ for x in object_files:
     #XXX Don't hardcode this!
     objects.append(target + '.os')
     
+#build cudata.os from a CUDA source file
+cudata_source = 'src/cudata/cudata.cu'
+head, tail = os.path.split(cudata_source)
+basename, extension = os.path.splitext(tail)
+target = os.path.join(os.path.join("build", "obj"), os.path.join(head, basename))
+cudaenv.SharedObject(target=target,source=cudata_source)
+cudata_object = [target + '.os']
 
-for x in Glob('python/*.cpp'):
+for x in ['python/compiler.cpp',
+          'python/coresyntax.cpp',
+          'python/coretypes.cpp']:
     basename, extension = os.path.splitext(str(x))
     cppenv.SharedLibrary(target=basename, source=[x]+objects, SHLIBPREFIX='', SHLIBSUFFIX='.so')
+
+for x in ['python/cudata.cpp']:
+    basename, extension = os.path.splitext(str(x))
+    cudaenv.SharedLibrary(target=basename, source=[x]+cudata_object, SHLIBPREFIX='', SHLIBSUFFIX='.so')
 
 for x in Glob('tests/*.cpp'):
     basename, extension = os.path.splitext(str(x))

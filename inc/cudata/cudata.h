@@ -32,9 +32,10 @@ struct Deleter {
 template<typename T>
 class cuarray {
   public:
-    //Is there a better unique_ptr implementation I can use?
+    //Could we hide this better? I don't like making it public
+    //Is there a better (ie, not weird) unique_ptr implementation I can use?
     boost::interprocess::unique_ptr<cuarray_impl<T> , detail::Deleter<cuarray_impl<T> > > m_impl;
-
+  public:
     cuarray();
     ~cuarray();
     cuarray(ssize_t n, bool host=true);
@@ -42,6 +43,7 @@ class cuarray {
     cuarray(const cuarray<T>& r);
     cuarray& operator=(const cuarray<T>& r);
     void swap(cuarray<T>& r);
+    
 };
 
 typedef boost::variant<cuarray<bool>, cuarray<int>, cuarray<long>, cuarray<float>, cuarray<double> > cuarray_var;
