@@ -36,4 +36,5 @@ for x in object_files:
 
 basename = 'build/lib/copperhead'
 
-env.SharedLibrary(target=basename, source=objects)
+libcopperhead = env.SharedLibrary(target=basename, source=objects)
+Return('libcopperhead')
