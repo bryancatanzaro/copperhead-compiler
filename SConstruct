@@ -11,25 +11,25 @@ except:
 
 #XXX Don't hard code this    
 if env['PLATFORM'] == 'darwin':
-    env.Append(CPPPATH = "/Users/catanzar/boost_1_47_0")
+    #env.Append(CPPPATH = "/Users/catanzar/boost_1_47_0")
     env.Append(LIBPATH="/Users/catanzar/boost_1_47_0/stage/lib")
-    env.Append(LINKFLAGS="-F/System/Library/Frameworks/ -framework Python")
+    #env.Append(LINKFLAGS="-F/System/Library/Frameworks/ -framework Python")
     
 env.Append(CPPPATH = "inc")
-env.Append(CPPPATH = "/usr/include/python2.7")
+#env.Append(CPPPATH = "/usr/include/python2.7")
 
 cppenv = env.Clone()
 cudaenv = env.Clone()
 
-cppenv.Append(LIBS = ['boost_python'])
-cudaenv.Append(LIBS = ['boost_python'])
+#cppenv.Append(LIBS = ['boost_python'])
+#cudaenv.Append(LIBS = ['boost_python'])
 
 env.Append(CCFLAGS = "-std=c++0x -Wall")
 cppenv.Append(CCFLAGS = "-std=c++0x -Wall")
-if env['PLATFORM'] == 'darwin':
-    cudaenv.Append(CPPPATH = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/numpy/core/include")
-else:
-    cudaenv.Append(CPPPATH = "/usr/lib/pymodules/python2.7/numpy/core/include")    
+#if env['PLATFORM'] == 'darwin':
+#    cudaenv.Append(CPPPATH = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/numpy/core/include")
+#else:
+#    cudaenv.Append(CPPPATH = "/usr/lib/pymodules/python2.7/numpy/core/include")    
 
 
 cudaenv.Append(LIBS = ['cudart'])
@@ -61,20 +61,25 @@ head, tail = os.path.split(cudata_source)
 basename, extension = os.path.splitext(tail)
 target = os.path.join(os.path.join("build", "obj"), os.path.join(head, basename))
 cudaenv.SharedObject(target=target,source=cudata_source)
-cudata_object = [target + '.os']
+objects.append(target + '.os')
 
-for x in ['python/compiler.cpp',
-          'python/coresyntax.cpp',
-          'python/coretypes.cpp']:
-    basename, extension = os.path.splitext(str(x))
-    cppenv.SharedLibrary(target=basename, source=[x]+objects, SHLIBPREFIX='', SHLIBSUFFIX='.so')
+cudaenv.SharedLibrary(target='build/lib/libcopperhead', source = objects)
 
-for x in ['python/cudata.cpp']:
-    basename, extension = os.path.splitext(str(x))
-    cudaenv.SharedLibrary(target=basename, source=[x]+cudata_object, SHLIBPREFIX='', SHLIBSUFFIX='.so')
 
-for x in Glob('tests/*.cpp'):
-    basename, extension = os.path.splitext(str(x))
-    env.Program(target=basename, source=[x]+objects)
+# #XXX This links all the objects together all the time. Big binary bloat
+# #We need something smarter
+# for x in ['python/compiler.cpp',
+#           'python/coresyntax.cpp',
+#           'python/coretypes.cpp']:
+#     basename, extension = os.path.splitext(str(x))
+#     cppenv.SharedLibrary(target=basename, source=[x]+objects, SHLIBPREFIX='', SHLIBSUFFIX='.so')
+
+# for x in ['python/cudata.cpp']:
+#     basename, extension = os.path.splitext(str(x))
+#     cudaenv.SharedLibrary(target=basename, source=[x]+cudata_object, SHLIBPREFIX='', SHLIBSUFFIX='.so')
+
+# for x in Glob('tests/*.cpp'):
+#     basename, extension = os.path.splitext(str(x))
+#     env.Program(target=basename, source=[x]+objects)
 
     

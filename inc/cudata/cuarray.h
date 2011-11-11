@@ -1,6 +1,6 @@
 #pragma once
 #include "../../library/prelude/stored_sequence.h"
-#include "np_types.h"
+//#include "np_types.h"
 
 //This class exists to isolate anything that touches CUDA
 //And make sure the host compiler doesn't need to see it.
@@ -187,13 +187,40 @@ stored_sequence<T> get_local_w(boost::shared_ptr<cuarray<T> > &in) {
 };
 
 
+const char* bool_n = "bool";
+const char* int_n = "int";
+const char* long_n = "long";
+const char* float_n = "float";
+const char* double_n = "double";
+
+const char* name_this_type(bool) {
+    return bool_n;
+}
+
+const char* name_this_type(int) {
+    return int_n;
+}
+
+const char* name_this_type(long) {
+    return long_n;
+}
+
+const char* name_this_type(float) {
+    return float_n;
+}
+
+const char* name_this_type(double) {
+    return double_n;
+}
+
 
 struct repr_cuarray_printer :
     public boost::static_visitor<std::string> {
     template<typename T>
     std::string operator()(cuarray<T>& in) {
         std::ostringstream os;
-        os << "cuarray<" << np_type<T>::name << ">(";
+        T ex = 0;
+        os << "cuarray<" << name_this_type(ex) << ">(";
         stored_sequence<T> m_h = in.m_impl->get_local_r();
         for(int i = 0; i < m_h.size(); i++) {
             os << m_h[i];
