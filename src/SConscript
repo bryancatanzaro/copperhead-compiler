@@ -1,0 +1,40 @@
+import os
+import inspect
+import fnmatch
+
+# try to import an environment first
+try:
+    Import('env')
+except:
+    env = Environment()
+env = env.Clone()
+
+#XXX Don't hard code this    
+if env['PLATFORM'] == 'darwin':
+    env.Append(CPPPATH = ["/Users/catanzar/boost_1_47_0"])
+parent, current = os.path.split(os.path.abspath(os.curdir))
+env.Append(CPPPATH = [os.path.join(parent, "inc")])
+env.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-O3'])
+
+#Parallelize the build maximally
+#Perhaps we want this not to override the user's wishes?...
+import multiprocessing
+n_jobs = multiprocessing.cpu_count()
+SetOption('num_jobs', n_jobs)
+
+def recursive_glob(pattern):
+    files = Glob(pattern)
+    if files:
+        files += recursive_glob("*/"+pattern)
+    return files
+
+object_files = recursive_glob('*.cpp')
+
+objects = []
+for x in object_files:
+    objects.append(env.SharedObject(x))
+
+basename = 'stage/copperhead'
+
+libcopperhead = env.SharedLibrary(target=basename, source=objects)
+Return('libcopperhead')
