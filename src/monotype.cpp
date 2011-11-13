@@ -39,7 +39,9 @@ sequence_t::sequence_t(const std::shared_ptr<type_t> &sub)
 const type_t& sequence_t::sub() const {
     return *m_params[0];
 }
-
+const std::shared_ptr<type_t> sequence_t::p_sub() const {
+    return m_params[0];
+}
 tuple_t::tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
     : monotype_t(*this, "Tuple", std::move(sub)) {}
 

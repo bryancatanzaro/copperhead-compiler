@@ -34,7 +34,7 @@ class cuarray {
   public:
     //Could we hide this better? I don't like making it public
     //Is there a better (ie, not weird) unique_ptr implementation I can use?
-    boost::interprocess::unique_ptr<cuarray_impl<T> , detail::Deleter<cuarray_impl<T> > > m_impl;
+    boost::interprocess::unique_ptr<cuarray_impl<T>, detail::Deleter<cuarray_impl<T> > > m_impl;
   public:
     cuarray();
     ~cuarray();
