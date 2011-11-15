@@ -68,6 +68,9 @@ public:
                    std::vector<std::shared_ptr<type_t> > && sub)
         : monotype_t(self, name, std::move(sub))
         {}
+    typedef decltype(m_params.cbegin()) const_ptr_iterator;
+    const_ptr_iterator p_begin() const;
+    const_ptr_iterator p_end() const;
 };
 
 class fn_t :

@@ -45,6 +45,13 @@ const std::shared_ptr<type_t> sequence_t::p_sub() const {
 tuple_t::tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
     : monotype_t(*this, "Tuple", std::move(sub)) {}
 
+tuple_t::const_ptr_iterator tuple_t::p_begin() const {
+    return m_params.cbegin();
+}
+tuple_t::const_ptr_iterator tuple_t::p_end() const {
+    return m_params.cend();
+}
+
 fn_t::fn_t(const std::shared_ptr<tuple_t> args,
            const std::shared_ptr<type_t> result)
     : monotype_t(*this,
