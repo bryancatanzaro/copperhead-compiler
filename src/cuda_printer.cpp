@@ -139,6 +139,7 @@ void cuda_printer::operator()(const procedure &n) {
     (*this)(n.id());
     (*this)(n.args());
     if (n.stmts().size() > 0) {
+        //This procedure has a body
         m_os << " {" << std::endl;
         indent();
         (*this)(n.stmts());
@@ -146,6 +147,7 @@ void cuda_printer::operator()(const procedure &n) {
         indentation();
         m_os << "}" << std::endl;
     } else {
+        //This procedure is just a stub
         m_os << ';' << std::endl;
     }
     declared.end_scope();
