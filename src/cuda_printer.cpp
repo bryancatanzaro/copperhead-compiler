@@ -138,12 +138,16 @@ void cuda_printer::operator()(const procedure &n) {
     }
     (*this)(n.id());
     (*this)(n.args());
-    m_os << " {" << std::endl;
-    indent();
-    (*this)(n.stmts());
-    dedent();
-    indentation();
-    m_os << "}" << std::endl;
+    if (n.stmts().size() > 0) {
+        m_os << " {" << std::endl;
+        indent();
+        (*this)(n.stmts());
+        dedent();
+        indentation();
+        m_os << "}" << std::endl;
+    } else {
+        m_os << ';' << std::endl;
+    }
     declared.end_scope();
 }
 void cuda_printer::operator()(const suite &n) {

@@ -38,6 +38,8 @@ private:
     std::shared_ptr<suite> apply(P& pass, const std::shared_ptr<suite> n) {
         return apply(pass, *n);
     }
+    std::shared_ptr<suite> m_host_code;
+    std::shared_ptr<suite> m_device_code;
 public:
     /*! \param entry_point The name of the outermost function being compiled
      */
@@ -45,6 +47,8 @@ public:
     std::shared_ptr<suite> operator()(const suite &n);
     const std::string& entry_point() const;
     const registry& reg() const;
+    std::shared_ptr<suite> p_host_code() const;
+    std::shared_ptr<suite> p_device_code() const;
 };
 
 }

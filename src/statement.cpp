@@ -90,6 +90,9 @@ suite::const_iterator suite::end() const {
     return boost::make_indirect_iterator(m_stmts.cend());
 }
 
+int suite::size() const {
+    return m_stmts.size();
+}
 
 }
 

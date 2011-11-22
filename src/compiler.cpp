@@ -54,6 +54,8 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
 #endif
     bpl_wrap bpl_wrapper(m_entry_point, m_registry);
     auto bpl_wrapped = apply(bpl_wrapper, wrapped);
+    m_host_code = bpl_wrapper.p_host_code();
+    m_device_code = bpl_wrapper.p_device_code();
 #ifdef TRACE
     std::cout << "BPL Wrapped" << std::endl;
 #endif
@@ -64,6 +66,12 @@ const std::string& compiler::entry_point() const {
 }
 const registry& compiler::reg() const {
     return m_registry;
+}
+std::shared_ptr<suite> compiler::p_host_code() const {
+    return m_host_code;
+}
+std::shared_ptr<suite> compiler::p_device_code() const {
+    return m_device_code;
 }
 
 }
