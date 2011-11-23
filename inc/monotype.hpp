@@ -54,7 +54,7 @@ class sequence_t :
 public:
     sequence_t(const std::shared_ptr<type_t> &sub);
     const type_t& sub() const;
-    const std::shared_ptr<type_t> p_sub() const;
+    std::shared_ptr<type_t> p_sub() const;
 };
 
 class tuple_t :
@@ -81,6 +81,8 @@ public:
                 const std::shared_ptr<type_t> result);
     const tuple_t& args() const;
     const type_t& result() const;
+    std::shared_ptr<tuple_t> p_args() const;
+    std::shared_ptr<type_t> p_result() const;
 };
 
 

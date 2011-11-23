@@ -1,5 +1,11 @@
 #include "expression.hpp"
 
+using std::string;
+using std::shared_ptr;
+using std::move;
+using std::vector;
+
+
 namespace backend {
 
 
@@ -10,24 +16,32 @@ const type_t& expression::type(void) const {
 const ctype::type_t& expression::ctype(void) const {
     return *m_ctype;
 }
-literal::literal(const std::string& val,
-                 const std::shared_ptr<type_t>& type,
-                 const std::shared_ptr<ctype::type_t>& ctype)
+
+shared_ptr<type_t> expression::p_type(void) const {
+    return m_type;
+}
+shared_ptr<ctype::type_t> expression::p_ctype(void) const {
+    return m_ctype;
+}
+
+literal::literal(const string& val,
+                 const shared_ptr<type_t>& type,
+                 const shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype), m_val(val) {}
 
-const std::string& literal::id(void) const {
+const string& literal::id(void) const {
     return m_val;
 }
 
-name::name(const std::string &val,
-         const std::shared_ptr<type_t>& type,
-         const std::shared_ptr<ctype::type_t>& ctype)
+name::name(const string &val,
+         const shared_ptr<type_t>& type,
+         const shared_ptr<ctype::type_t>& ctype)
         : literal(*this, val, type, ctype)
         {}
 
-tuple::tuple(std::vector<std::shared_ptr<expression> > &&values,
-             const std::shared_ptr<type_t>& type,
-             const std::shared_ptr<ctype::type_t>& ctype)
+tuple::tuple(vector<shared_ptr<expression> > &&values,
+             const shared_ptr<type_t>& type,
+             const shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype),
       m_values(std::move(values)) {}
 
@@ -43,8 +57,8 @@ int tuple::arity() const {
     return m_values.size();
 }
 
-apply::apply(const std::shared_ptr<name> &fn,
-             const std::shared_ptr<tuple> &args)
+apply::apply(const shared_ptr<name> &fn,
+             const shared_ptr<tuple> &args)
     : expression(*this),
       m_fn(fn), m_args(args) {}
 
@@ -56,10 +70,10 @@ const tuple& apply::args(void) const {
 }
 
 
-lambda::lambda(const std::shared_ptr<tuple> &args,
-               const std::shared_ptr<expression> &body,
-               const std::shared_ptr<type_t>& type,
-               const std::shared_ptr<ctype::type_t>& ctype)
+lambda::lambda(const shared_ptr<tuple> &args,
+               const shared_ptr<expression> &body,
+               const shared_ptr<type_t>& type,
+               const shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype),
       m_args(args), m_body(body) {}
 
@@ -70,10 +84,10 @@ const expression& lambda::body(void) const {
     return *m_body;
 }
 
-closure::closure(const std::shared_ptr<tuple> &args,
-                 const std::shared_ptr<expression> &body,
-                 const std::shared_ptr<type_t>& type,
-                 const std::shared_ptr<ctype::type_t>& ctype)
+closure::closure(const shared_ptr<tuple> &args,
+                 const shared_ptr<expression> &body,
+                 const shared_ptr<type_t>& type,
+                 const shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype), m_args(args), m_body(body) {}
 
 const tuple& closure::args(void) const {

@@ -29,8 +29,8 @@ copier::result_type copier::operator()(const tuple &n) {
     if (is_match())
         return get_node_ptr(n);
         
-    std::shared_ptr<type_t> t = get_type_ptr(n.type());
-    std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
+    std::shared_ptr<type_t> t = n.p_type();
+    std::shared_ptr<ctype::type_t> ct = n.p_ctype();
         
     return result_type(new tuple(std::move(n_values), t, ct));
 }
@@ -52,8 +52,8 @@ copier::result_type copier::operator()(const lambda &n) {
     update_match(n_body, n.body());
     if (is_match())
         return get_node_ptr(n);
-    std::shared_ptr<type_t> t = get_type_ptr(n.type());
-    std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
+    std::shared_ptr<type_t> t = n.p_type();
+    std::shared_ptr<ctype::type_t> ct = n.p_ctype();
     return result_type(new lambda(n_args, n_body, t, ct));
 }
 copier::result_type copier::operator()(const closure &n) {
@@ -64,8 +64,8 @@ copier::result_type copier::operator()(const closure &n) {
     update_match(n_body, n.body());
     if (is_match())
         return get_node_ptr(n);
-    std::shared_ptr<type_t> t = get_type_ptr(n.type());
-    std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
+    std::shared_ptr<type_t> t = n.p_type();
+    std::shared_ptr<ctype::type_t> ct = n.p_ctype();
     return result_type(new closure(n_args, n_body, t, ct));
 }
 copier::result_type copier::operator()(const conditional &n) {
@@ -116,8 +116,8 @@ copier::result_type copier::operator()(const procedure &n) {
     update_match(n_stmts, n.stmts());
     if (is_match())
         return get_node_ptr(n);
-    std::shared_ptr<type_t> t = get_type_ptr(n.type());
-    std::shared_ptr<ctype::type_t> ct = get_ctype_ptr(n.ctype());
+    std::shared_ptr<type_t> t = n.p_type();
+    std::shared_ptr<ctype::type_t> ct = n.p_ctype();
 
     return result_type(new procedure(n_id, n_args, n_stmts, t, ct));
 }

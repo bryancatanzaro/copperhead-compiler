@@ -61,8 +61,8 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
                 static_pointer_cast<name>(get_node_ptr(n.id())),
                 static_pointer_cast<tuple>(get_node_ptr(n.args())),
                 stmts,
-                get_type_ptr(n.type()),
-                get_ctype_ptr(n.ctype()),
+                n.p_type(),
+                n.p_ctype(),
                 n.place());
         m_in_entry = false;
         m_completions.end_scope();
@@ -77,10 +77,11 @@ void phase_analyze::add_phase_boundary(const name& n) {
     shared_ptr<name> p_result =
         make_shared<name>(
             detail::complete(n.id()),
-            get_type_ptr(n.type()));
+            n.p_type());
     
     shared_ptr<tuple_t> pb_args_t =
-        make_shared<tuple_t>(vector<shared_ptr<type_t> >{get_type_ptr(n.type())});
+        make_shared<tuple_t>(vector<shared_ptr<type_t> >{
+                n.p_type()});
     shared_ptr<tuple> pb_args =
         make_shared<tuple>(vector<shared_ptr<expression> >{p_n}, pb_args_t);
     shared_ptr<monotype_t> a_mt = make_shared<monotype_t>("a");

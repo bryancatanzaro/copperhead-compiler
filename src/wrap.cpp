@@ -33,13 +33,12 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 bool is_node = detail::isinstance<name, node>(*i);
                 assert(is_node);
                     
-                shared_ptr<type_t> t =
-                    get_type_ptr(i->type());
+                shared_ptr<type_t> t = i->p_type();
                     
                 const ctype::sequence_t& arg_c_type =
                     boost::get<const ctype::sequence_t&>(i->ctype());
                 shared_ptr<ctype::type_t> sub_ct =
-                    get_ctype_ptr(arg_c_type.sub());
+                    arg_c_type.p_sub();
                 shared_ptr<ctype::type_t> ct(
                     new ctype::cuarray_t(sub_ct));
                 const name& arg_name =
@@ -84,8 +83,12 @@ wrap::result_type wrap::operator()(const procedure &n) {
         //Derive the new output c type of the wrapper procedure
         const ctype::fn_t& previous_c_t =
             boost::get<const ctype::fn_t&>(n.ctype());
+        std::shared_ptr<ctype::fn_t> p_previous_c_t =
+            static_pointer_cast<ctype::fn_t>(n.p_ctype());
         const ctype::type_t& previous_c_res_t =
             previous_c_t.result();
+        std::shared_ptr<ctype::type_t> p_previous_c_res_t =
+            previous_c_t.p_result();
             
         shared_ptr<ctype::type_t> new_wrap_ct;
         shared_ptr<ctype::type_t> new_ct;
@@ -95,20 +98,20 @@ wrap::result_type wrap::operator()(const procedure &n) {
             i != wrapper_args.end();
             i++) {
             wrap_arg_cts.push_back(
-                get_ctype_ptr((*i)->ctype()));
+                (*i)->p_ctype());
         }
         shared_ptr<ctype::tuple_t> new_wrap_args_ct =
             make_shared<ctype::tuple_t>(move(wrap_arg_cts));
         shared_ptr<ctype::tuple_t> new_args_ct =
             static_pointer_cast<ctype::tuple_t>(
-                get_ctype_ptr(previous_c_t.args()));
+                previous_c_t.p_args());
 
         if (detail::isinstance<ctype::sequence_t, ctype::type_t>(
                 previous_c_res_t)) {
             const ctype::sequence_t& res_seq_t =
                 boost::get<const ctype::sequence_t&>(previous_c_res_t);
             shared_ptr<ctype::type_t> sub_res_t =
-                get_ctype_ptr(res_seq_t.sub());
+                res_seq_t.p_sub();
                 
             shared_ptr<ctype::type_t> new_wrap_res_ct(
                 new ctype::cuarray_t(sub_res_t));
@@ -130,11 +133,10 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 
         } else {
             shared_ptr<ctype::type_t> new_res_ct =
-                get_ctype_ptr(previous_c_res_t);
+                p_previous_c_res_t;
             new_wrap_ct = shared_ptr<ctype::fn_t>(
                 new ctype::fn_t(new_wrap_args_ct, new_res_ct));
-            new_ct = get_ctype_ptr(previous_c_t);
-            new_res_ct = get_ctype_ptr(previous_c_res_t);
+            new_ct = p_previous_c_t;
         }
 
 
@@ -144,9 +146,8 @@ wrap::result_type wrap::operator()(const procedure &n) {
             make_shared<name>(
                 detail::wrap_proc_id(n.id().id()));
 
-        auto t = get_type_ptr(n.type());
-        auto res_t = get_type_ptr(
-            static_pointer_cast<fn_t>(t)->result());
+        auto t = n.p_type();
+        auto res_t = static_pointer_cast<fn_t>(t)->p_result();
             
         shared_ptr<name> result_id =
             make_shared<name>(
@@ -195,7 +196,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
                     get_node_ptr(n.args())),
                 static_pointer_cast<suite>(
                     boost::apply_visitor(*this, n.stmts())),
-                get_type_ptr(n.type()),
+                n.p_type(),
                 new_ct,
                 "");
         m_wrapping = false;
@@ -214,8 +215,8 @@ wrap::result_type wrap::operator()(const ret& n) {
             shared_ptr<name> array_wrapped(
                 new name(
                     detail::wrap_array_id(val.id()),
-                    get_type_ptr(val.type()),
-                    get_ctype_ptr(val.ctype())));
+                    val.p_type(),
+                    val.p_ctype()));
             return result_type(new ret(array_wrapped));
         }
     }

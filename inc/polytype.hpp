@@ -17,6 +17,8 @@ public:
     
     const monotype_t& monotype() const;
 
+    std::shared_ptr<monotype_t> p_monotype() const;
+
     const_iterator begin() const;
 
     const_iterator end() const;

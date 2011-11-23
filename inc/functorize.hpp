@@ -78,7 +78,7 @@ private:
     void make_type_map(const apply& n);
 
     std::shared_ptr<expression> instantiate_fn(const name& n,
-                                               const type_t& t);
+                                               std::shared_ptr<type_t> p_t);
 public:
     /*! \param entry_point The name of the entry point procedure
         \param reg The registry of functions the compiler knows about

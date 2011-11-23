@@ -40,6 +40,10 @@ const type_t& sequence_t::sub() const {
     return *m_sub;
 }
 
+std::shared_ptr<type_t> sequence_t::p_sub() const {
+    return m_sub;
+}
+
 tuple_t::tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
     : monotype_t(*this, "Tuple"), m_sub(std::move(sub)) {}
 
@@ -51,6 +55,14 @@ tuple_t::const_iterator tuple_t::end() const {
     return boost::make_indirect_iterator(m_sub.cend());
 }
 
+tuple_t::const_ptr_iterator tuple_t::p_begin() const {
+    return m_sub.cbegin();
+}
+
+tuple_t::const_ptr_iterator tuple_t::p_end() const {
+    return m_sub.cend();
+}
+
 fn_t::fn_t(const std::shared_ptr<tuple_t> args,
            const std::shared_ptr<type_t> result)
     : monotype_t(*this, "Fn"), m_args(args), m_result(result) {}
@@ -59,6 +71,14 @@ const tuple_t& fn_t::args() const {
 }
 const type_t& fn_t::result() const {
     return *m_result;
+}
+
+std::shared_ptr<tuple_t> fn_t::p_args() const {
+    return m_args;
+}
+
+std::shared_ptr<type_t> fn_t::p_result() const {
+    return m_result;
 }
 
 polytype_t::polytype_t() : type_t(*this) {}
@@ -74,13 +94,25 @@ templated_t::templated_t(std::shared_ptr<type_t> base, std::vector<std::shared_p
 const type_t& templated_t::base() const {
     return *m_base;
 }
-    
+
+std::shared_ptr<type_t> templated_t::p_base() const {
+    return m_base;
+}
+
 templated_t::const_iterator templated_t::begin() const {
     return boost::make_indirect_iterator(m_sub.cbegin());
 }
 
 templated_t::const_iterator templated_t::end() const {
     return boost::make_indirect_iterator(m_sub.cend());
+}
+
+templated_t::const_ptr_iterator templated_t::p_begin() const {
+    return m_sub.cbegin();
+}
+
+templated_t::const_ptr_iterator templated_t::p_end() const {
+    return m_sub.cend();
 }
 
 }

@@ -38,8 +38,8 @@ allocate::result_type allocate::operator()(const procedure &n) {
         shared_ptr<tuple> args =
             static_pointer_cast<tuple>(
                 boost::apply_visitor(*this, n.args()));
-        auto t = get_type_ptr(n.type());
-        auto ct = get_ctype_ptr(n.ctype());
+        auto t = n.p_type();
+        auto ct = n.p_ctype();
         shared_ptr<name> id =
             static_pointer_cast<name>(
                 boost::apply_visitor(*this, n.id()));
@@ -69,7 +69,7 @@ allocate::result_type allocate::operator()(const bind &n) {
         const ctype::sequence_t& pre_lhs_ct =
             boost::get<const ctype::sequence_t&>(pre_lhs.ctype());
         shared_ptr<ctype::type_t> sub_lhs_ct =
-            get_ctype_ptr(pre_lhs_ct.sub());
+            pre_lhs_ct.p_sub();
         shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct =
             make_shared<ctype::tuple_t>(
                 vector<shared_ptr<ctype::type_t> >{sub_lhs_ct});
@@ -84,7 +84,7 @@ allocate::result_type allocate::operator()(const bind &n) {
                         vector<shared_ptr<ctype::type_t> >{
                             sub_lhs_ct})});
         shared_ptr<type_t> result_t =
-            get_type_ptr(pre_lhs.type());
+            pre_lhs.p_type();
         shared_ptr<name> result_name = make_shared<name>(
             detail::wrap_array_id(pre_lhs.id()),
             result_t,

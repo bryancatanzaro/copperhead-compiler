@@ -11,6 +11,10 @@ const monotype_t& polytype_t::monotype() const {
     return *m_monotype;
 }
 
+std::shared_ptr<monotype_t> polytype_t::p_monotype() const {
+    return m_monotype;
+}
+
 polytype_t::const_iterator polytype_t::begin() const {
     return boost::make_indirect_iterator(m_vars.cbegin());
 }

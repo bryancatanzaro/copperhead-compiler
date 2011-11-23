@@ -24,10 +24,10 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(const bind& n) {
             const ctype::tuple_t& tt =
                 tn.template_types();
             std::vector<std::shared_ptr<ctype::type_t> > ttc;
-            for(auto i = tt.begin();
-                i != tt.end();
+            for(auto i = tt.p_begin();
+                i != tt.p_end();
                 i++) {
-                ttc.push_back(get_ctype_ptr(*i));
+                ttc.push_back(*i);
             }
             std::shared_ptr<ctype::type_t> base =
                 std::make_shared<ctype::monotype_t>(tn.id());
@@ -56,7 +56,7 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(const bind& n) {
         for(auto i = close.args().begin();
             i != close.args().end();
             i++) {
-            cts.push_back(get_ctype_ptr(i->ctype()));
+            cts.push_back(i->p_ctype());
         }
         //Can only deal with names in the body of a closure
         assert(detail::isinstance<name>(close.body()));
@@ -93,7 +93,7 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(const bind& n) {
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
     std::shared_ptr<name> n_lhs = std::make_shared<name>(lhs.id(),
-                                                         get_type_ptr(lhs.type()),
+                                                         lhs.p_type(),
                                                          transform_t);
     auto result = std::make_shared<bind>(n_lhs, n_rhs);
     return result;
@@ -122,7 +122,7 @@ thrust_rewriter::result_type thrust_rewriter::indices_rewrite(const bind& n) {
     const name& lhs = boost::get<const name&>(n.lhs());
     std::shared_ptr<name> n_lhs =
         std::make_shared<name>(lhs.id(),
-                               get_type_ptr(lhs.type()),
+                               lhs.p_type(),
                                index_t);
     auto result = std::make_shared<bind>(n_lhs, n_rhs);
     return result;

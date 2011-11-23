@@ -10,16 +10,38 @@
 #include "monotype.hpp"
 #include "ctype.hpp"
 
+/*!
+  \file   expression.hpp
+  \brief  Contains the declarations for all AST expression nodes.
+
+*/
+
+
 namespace backend {
 
 
-
+/*! \p expression is the super class for all AST expression nodes.
+  Every expression bears a type and a ctype.  The type is a Copperhead
+  type describing the interface the expression must have. The ctype
+  is used during implementation to describe the C++ type used to
+  implement the expression node.
+*/
 class expression
     : public node
 {
 protected:
+    //! The Copperhead type of the expression
     std::shared_ptr<type_t> m_type;
+    //! The C++ implementation type of the expression
     std::shared_ptr<ctype::type_t> m_ctype;
+/*! 
+  The constructor is only intended to be called by subtypes.
+  \param self A reference to the subtype object being constructed,
+  necessary for disambiguating the underlying \p variant.
+  \param type The Copperhead type of the expression, defaults to Void
+  \param ctype The C++ type of the expression, defaults to void
+  
+*/
     template<typename Derived>
     expression(Derived &self,
                const std::shared_ptr<type_t>& type = void_mt,
@@ -27,8 +49,14 @@ protected:
         : node(self), m_type(type), m_ctype(ctype)
         {}
 public:
+    //! \return The Copperhead type of the expression
     const type_t& type(void) const;
+    //! \return the C++ implementation type of the expression
     const ctype::type_t& ctype(void) const;
+    //! \return The Copperhead type of the expression
+    std::shared_ptr<type_t> p_type(void) const;
+    //! \return The C++ implementation type of the expression
+    std::shared_ptr<ctype::type_t> p_ctype(void) const;
 };
 
 class literal

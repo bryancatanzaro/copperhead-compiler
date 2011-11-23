@@ -85,8 +85,12 @@ public:
     
     const ctype::type_t& ctype(void) const;
 
-    const std::string& place(void) const;
+    std::shared_ptr<type_t> p_type(void) const;
+
+    std::shared_ptr<ctype::type_t> p_ctype(void) const;
     
+    const std::string& place(void) const;
+
 };
 
 class conditional

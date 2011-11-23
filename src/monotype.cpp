@@ -39,7 +39,7 @@ sequence_t::sequence_t(const std::shared_ptr<type_t> &sub)
 const type_t& sequence_t::sub() const {
     return *m_params[0];
 }
-const std::shared_ptr<type_t> sequence_t::p_sub() const {
+std::shared_ptr<type_t> sequence_t::p_sub() const {
     return m_params[0];
 }
 tuple_t::tuple_t(std::vector<std::shared_ptr<type_t> > && sub)
@@ -63,6 +63,14 @@ const tuple_t& fn_t::args() const {
 }
 const type_t& fn_t::result() const {
         return *m_params[1];
+}
+
+std::shared_ptr<tuple_t> fn_t::p_args() const {
+    return std::static_pointer_cast<tuple_t>(m_params[0]);
+}
+
+std::shared_ptr<type_t> fn_t::p_result() const {
+    return m_params[1];
 }
 
 }

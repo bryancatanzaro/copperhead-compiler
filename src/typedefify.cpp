@@ -38,11 +38,11 @@ typedefify::result_type typedefify::operator()(const bind &n) {
             boost::apply_visitor(*this, n.rhs()));
     std::shared_ptr<name> new_lhs =
         std::make_shared<name>(lhs.id(),
-                               get_type_ptr(lhs.type()),
+                               lhs.p_type(),
                                unique_type);
     m_typedef =
         std::make_shared<typedefn>(
-            get_ctype_ptr(lhs.ctype()),
+            lhs.p_ctype(),
             unique_type);
     return result_type(
         new bind(
@@ -61,7 +61,7 @@ typedefify::result_type typedefify::operator()(const procedure &n) {
                 detail::typify(arg_name.id()));
         std::shared_ptr<typedefn> arg_typedef =
             std::make_shared<typedefn>(
-                get_ctype_ptr(arg_name.ctype()),
+                arg_name.p_ctype(),
                 unique_type);
         stmts.push_back(arg_typedef);
     }
@@ -85,10 +85,8 @@ typedefify::result_type typedefify::operator()(const procedure &n) {
             boost::apply_visitor(*this, args));
     std::shared_ptr<suite> n_stmts =
         std::make_shared<suite>(std::move(stmts));
-    std::shared_ptr<type_t> n_type =
-        get_type_ptr(n.type());
-    std::shared_ptr<ctype::type_t> n_ctype =
-        get_ctype_ptr(n.ctype());
+    std::shared_ptr<type_t> n_type = n.p_type();
+    std::shared_ptr<ctype::type_t> n_ctype = n.p_ctype();
         
         
     return std::make_shared<procedure>(

@@ -103,6 +103,7 @@ public:
                       const std::shared_ptr<type_t> &sub) :
         monotype_t(self, name), m_sub(sub) {}
     const type_t& sub() const;
+    std::shared_ptr<type_t> p_sub() const;
 };
 
 class tuple_t :
@@ -114,8 +115,10 @@ public:
     tuple_t(std::vector<std::shared_ptr<type_t> > && sub);
     typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
     const_iterator begin() const;
-
     const_iterator end() const;
+    typedef decltype(m_sub.cbegin()) const_ptr_iterator;
+    const_ptr_iterator p_begin() const;
+    const_ptr_iterator p_end() const;
 };
 
 class fn_t :
@@ -129,6 +132,8 @@ public:
                 const std::shared_ptr<type_t> result);
     const tuple_t& args() const;
     const type_t& result() const;
+    std::shared_ptr<tuple_t> p_args() const;
+    std::shared_ptr<type_t> p_result() const;
 };
 
 class polytype_t :
@@ -151,11 +156,13 @@ public:
     templated_t(std::shared_ptr<type_t> base, std::vector<std::shared_ptr<type_t> > && sub);
 
     const type_t& base() const;
-    
+    std::shared_ptr<type_t> p_base() const;
     typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
     const_iterator begin() const;
-
     const_iterator end() const;
+    typedef decltype(m_sub.cbegin()) const_ptr_iterator;
+    const_ptr_iterator p_begin() const;
+    const_ptr_iterator p_end() const;
 };
 
 }
