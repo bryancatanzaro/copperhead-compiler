@@ -57,6 +57,14 @@ const ctype::type_t& procedure::ctype(void) const {
     return *m_ctype;
 }
 
+std::shared_ptr<type_t> procedure::p_type(void) const {
+    return m_type;
+}
+
+std::shared_ptr<ctype::type_t> procedure::p_ctype(void) const {
+    return m_ctype;
+}
+
 const std::string& procedure::place(void) const {
     return m_place;
 }
