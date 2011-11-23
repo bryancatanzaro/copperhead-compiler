@@ -4,8 +4,6 @@
 #include "compiler.hpp"
 
 namespace backend {
-/*! \p compiler contains state and methods for compiling programs.
- */
 compiler::compiler(const std::string& entry_point)
     : m_entry_point(entry_point) {
     std::shared_ptr<library> thrust = get_thrust();

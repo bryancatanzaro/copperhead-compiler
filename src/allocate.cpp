@@ -1,9 +1,16 @@
 #include "allocate.hpp"
 
+using std::vector;
+using std::shared_ptr;
+using std::make_shared;
+using std::move;
+using std::string;
+using std::static_pointer_cast;
+
 namespace backend {
 
 
-allocate::allocate(const std::string& entry_point) : m_entry_point(entry_point),
+allocate::allocate(const string& entry_point) : m_entry_point(entry_point),
                                                      m_in_entry(false),
                                                      m_allocations{}
         {}
@@ -11,11 +18,11 @@ allocate::allocate(const std::string& entry_point) : m_entry_point(entry_point),
 allocate::result_type allocate::operator()(const procedure &n) {
     if (n.id().id()  == m_entry_point) {
         m_in_entry = true;
-        std::vector<std::shared_ptr<statement> > statements;
+        vector<shared_ptr<statement> > statements;
         for(auto i = n.stmts().begin();
             i != n.stmts().end();
             i++) {
-            auto new_stmt = std::static_pointer_cast<statement>(
+            auto new_stmt = static_pointer_cast<statement>(
                 boost::apply_visitor(*this, *i));
             if (m_allocations.size() > 0) {
                 for(auto j = m_allocations.begin();
@@ -27,18 +34,17 @@ allocate::result_type allocate::operator()(const procedure &n) {
             }
             statements.push_back(new_stmt);
         }
-        std::shared_ptr<suite> stmts(
-            new suite(std::move(statements)));
-        std::shared_ptr<tuple> args =
-            std::static_pointer_cast<tuple>(
+        shared_ptr<suite> stmts = make_shared<suite>(move(statements));
+        shared_ptr<tuple> args =
+            static_pointer_cast<tuple>(
                 boost::apply_visitor(*this, n.args()));
         auto t = get_type_ptr(n.type());
         auto ct = get_ctype_ptr(n.ctype());
-        std::shared_ptr<name> id =
-            std::static_pointer_cast<name>(
+        shared_ptr<name> id =
+            static_pointer_cast<name>(
                 boost::apply_visitor(*this, n.id()));
-        result_type allocated(
-            new procedure(id, args, stmts, t, ct));
+        result_type allocated = make_shared<procedure>(
+            id, args, stmts, t, ct);
 
         m_in_entry = false;
         return allocated;
@@ -54,6 +60,7 @@ allocate::result_type allocate::operator()(const bind &n) {
         detail::isinstance<apply>(n.rhs())) {
 
         //We can only deal with names on the LHS of a bind
+        //TUPLE FIX
         bool lhs_is_name = detail::isinstance<name>(n.lhs());
         assert(lhs_is_name);
         const name& pre_lhs = boost::get<const name&>(n.lhs());
@@ -61,49 +68,50 @@ allocate::result_type allocate::operator()(const bind &n) {
         //Construct cuarray for result
         const ctype::sequence_t& pre_lhs_ct =
             boost::get<const ctype::sequence_t&>(pre_lhs.ctype());
-        std::shared_ptr<ctype::type_t> sub_lhs_ct =
+        shared_ptr<ctype::type_t> sub_lhs_ct =
             get_ctype_ptr(pre_lhs_ct.sub());
-        std::shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct(
-            new ctype::tuple_t(
-                std::vector<std::shared_ptr<ctype::type_t> >{sub_lhs_ct}));
-        std::shared_ptr<ctype::type_t> result_ct =
-            std::make_shared<ctype::templated_t>(
-                std::make_shared<ctype::monotype_t>(
+        shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct =
+            make_shared<ctype::tuple_t>(
+                vector<shared_ptr<ctype::type_t> >{sub_lhs_ct});
+        shared_ptr<ctype::type_t> result_ct =
+            make_shared<ctype::templated_t>(
+                make_shared<ctype::monotype_t>(
                     "boost::shared_ptr"),
-                std::vector<std::shared_ptr<ctype::type_t> >{
-                    std::make_shared<ctype::templated_t>(
-                        std::make_shared<ctype::monotype_t>(
+                vector<shared_ptr<ctype::type_t> >{
+                    make_shared<ctype::templated_t>(
+                        make_shared<ctype::monotype_t>(
                             "cuarray"),
-                        std::vector<std::shared_ptr<ctype::type_t> >{
+                        vector<shared_ptr<ctype::type_t> >{
                             sub_lhs_ct})});
-        std::shared_ptr<type_t> result_t =
+        shared_ptr<type_t> result_t =
             get_type_ptr(pre_lhs.type());
-        std::shared_ptr<name> result_name(
-            new name(detail::wrap_array_id(pre_lhs.id()),
-                     result_t,
-                     result_ct));
+        shared_ptr<name> result_name = make_shared<name>(
+            detail::wrap_array_id(pre_lhs.id()),
+            result_t,
+            result_ct);
 
-        std::shared_ptr<expression> new_rhs =
-            std::static_pointer_cast<expression>(
+        shared_ptr<expression> new_rhs =
+            static_pointer_cast<expression>(
                 boost::apply_visitor(*this, n.rhs()));
             
-        std::shared_ptr<bind> allocator(
-            new bind(result_name, new_rhs));
+        shared_ptr<bind> allocator = make_shared<bind>(
+            result_name, new_rhs);
         m_allocations.push_back(allocator);
             
 
-        std::shared_ptr<name> new_lhs = std::static_pointer_cast<name>(
+        shared_ptr<name> new_lhs = static_pointer_cast<name>(
             boost::apply_visitor(*this, n.lhs()));
-        std::shared_ptr<templated_name> getter_name(
-            new templated_name(detail::get_remote_w(),
-                               tuple_sub_lhs_ct));
-        std::shared_ptr<tuple> getter_args(
-            new tuple(
-                std::vector<std::shared_ptr<expression> >{result_name}));
-        std::shared_ptr<apply> getter_call(
-            new apply(getter_name, getter_args));
-        std::shared_ptr<bind> retriever(
-            new bind(new_lhs, getter_call));
+        shared_ptr<templated_name> getter_name =
+            make_shared<templated_name>(
+                detail::get_remote_w(),
+                tuple_sub_lhs_ct);
+        shared_ptr<tuple> getter_args =
+            make_shared<tuple>(
+                vector<shared_ptr<expression> >{result_name});
+        shared_ptr<apply> getter_call =
+            make_shared<apply>(getter_name, getter_args);
+        shared_ptr<bind> retriever =
+            make_shared<bind>(new_lhs, getter_call);
         return retriever;
     } else {
         return this->copier::operator()(n);
