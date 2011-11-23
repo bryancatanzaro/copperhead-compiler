@@ -18,6 +18,7 @@ private:
     const std::string& m_entry_point;
     bool m_wrapping;
     std::shared_ptr<procedure> m_wrapper;
+    std::shared_ptr<procedure> m_wrap_decl;
 public:
     wrap(const std::string& entry_point);
     
@@ -28,6 +29,8 @@ public:
     result_type operator()(const ret& n);
     
     result_type operator()(const suite&n);
+
+    std::shared_ptr<procedure> p_wrap_decl() const;
 };
 
 }

@@ -19,8 +19,6 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
 
     phase_analyze phase_analyzer(m_entry_point, m_registry);
     auto phase_analyzed = apply(phase_analyzer, n);
-
-    boost::apply_visitor(cp, *phase_analyzed);
     
     type_convert type_converter;
     auto type_converted = apply(type_converter, phase_analyzed);
@@ -49,17 +47,11 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
 #endif        
     wrap wrapper(m_entry_point);
     auto wrapped = apply(wrapper, typedefified);
+    m_wrap_decl = wrapper.p_wrap_decl();
 #ifdef TRACE
     std::cout << "Wrapped" << std::endl;
 #endif
-    bpl_wrap bpl_wrapper(m_entry_point, m_registry);
-    auto bpl_wrapped = apply(bpl_wrapper, wrapped);
-    m_host_code = bpl_wrapper.p_host_code();
-    m_device_code = bpl_wrapper.p_device_code();
-#ifdef TRACE
-    std::cout << "BPL Wrapped" << std::endl;
-#endif
-    return bpl_wrapped;
+    return wrapped;
 }
 const std::string& compiler::entry_point() const {
     return m_entry_point;
@@ -67,11 +59,8 @@ const std::string& compiler::entry_point() const {
 const registry& compiler::reg() const {
     return m_registry;
 }
-std::shared_ptr<suite> compiler::p_host_code() const {
-    return m_host_code;
-}
-std::shared_ptr<suite> compiler::p_device_code() const {
-    return m_device_code;
+std::shared_ptr<procedure> compiler::p_wrap_decl() const {
+    return m_wrap_decl;
 }
 
 }

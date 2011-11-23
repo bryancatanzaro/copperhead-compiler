@@ -1,5 +1,4 @@
 #pragma once
-#include "../cudata/cudata.h"
 
 #include <thrust/scan.h>
 #include <thrust/device_vector.h>

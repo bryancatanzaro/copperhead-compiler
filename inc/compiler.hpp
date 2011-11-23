@@ -10,7 +10,6 @@
 #include "type_convert.hpp"
 #include "allocate.hpp"
 #include "wrap.hpp"
-#include "bpl_wrap.hpp"
 #include <iostream>
 #include "thrust/decl.hpp"
 #include "prelude/decl.hpp"
@@ -38,8 +37,7 @@ private:
     std::shared_ptr<suite> apply(P& pass, const std::shared_ptr<suite> n) {
         return apply(pass, *n);
     }
-    std::shared_ptr<suite> m_host_code;
-    std::shared_ptr<suite> m_device_code;
+    std::shared_ptr<procedure> m_wrap_decl;
 public:
     /*! \param entry_point The name of the outermost function being compiled
      */
@@ -47,8 +45,7 @@ public:
     std::shared_ptr<suite> operator()(const suite &n);
     const std::string& entry_point() const;
     const registry& reg() const;
-    std::shared_ptr<suite> p_host_code() const;
-    std::shared_ptr<suite> p_device_code() const;
+    std::shared_ptr<procedure> p_wrap_decl() const;
 };
 
 }

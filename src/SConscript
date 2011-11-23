@@ -16,11 +16,11 @@ parent, current = os.path.split(os.path.abspath(os.curdir))
 env.Append(CPPPATH = [os.path.join(parent, "inc")])
 env.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-O3'])
 
-#Parallelize the build maximally
-#Perhaps we want this not to override the user's wishes?...
-import multiprocessing
-n_jobs = multiprocessing.cpu_count()
-SetOption('num_jobs', n_jobs)
+if not GetOption('num_jobs'):
+    #Parallelize the build maximally
+    import multiprocessing
+    n_jobs = multiprocessing.cpu_count()
+    SetOption('num_jobs', n_jobs)
 
 def recursive_glob(pattern):
     files = Glob(pattern)

@@ -1,5 +1,4 @@
 #pragma once
-#include "../cudata/cudata.h"
 
 template<typename SeqX,
          typename SeqI>

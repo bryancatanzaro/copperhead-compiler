@@ -1,5 +1,4 @@
 #pragma once
-#include "../cudata/cudata.h"
 
 #include <thrust/adjacent_difference.h>
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "../cudata/cudata.h"
+#include "cudata.h"
 #include <thrust/copy.h>
 
 template<typename Seq>
