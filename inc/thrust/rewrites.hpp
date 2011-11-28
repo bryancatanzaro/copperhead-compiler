@@ -6,7 +6,7 @@
 #include "../node.hpp"
 #include "../type.hpp"
 #include "../ctype.hpp"
-#include "../copier.hpp"
+#include "../rewriter.hpp"
 #include "../utility/isinstance.hpp"
 #include "../utility/markers.hpp"
 
@@ -15,7 +15,7 @@
 namespace backend {
 
 class thrust_rewriter
-    : public copier {
+    : public rewriter {
 private:
     static result_type map_rewrite(const bind& n);
     
@@ -29,7 +29,7 @@ private:
 public:
     thrust_rewriter();
     
-    using copier::operator();
+    using rewriter::operator();
     
     result_type operator()(const bind& n);
     

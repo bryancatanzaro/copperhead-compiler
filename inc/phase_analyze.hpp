@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 #include "node.hpp"
-#include "copier.hpp"
+#include "rewriter.hpp"
 #include "prelude/phase.hpp"
 #include "environment.hpp"
 #include "import/library.hpp"
@@ -15,7 +15,7 @@
 namespace backend {
 
 class phase_analyze
-    : public copier {
+    : public rewriter {
 private:
     const std::string m_entry_point;
     bool m_in_entry;
@@ -27,7 +27,7 @@ private:
     completion m_result_completion;
     void add_phase_boundary(const name& n);
 public:
-    using copier::operator();
+    using rewriter::operator();
     phase_analyze(const std::string& entry_point, const registry& reg);
     result_type operator()(const suite& n);
     result_type operator()(const procedure& n);

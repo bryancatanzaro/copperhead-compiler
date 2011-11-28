@@ -5,20 +5,20 @@
 #include "utility/isinstance.hpp"
 #include "utility/markers.hpp"
 #include "utility/snippets.hpp"
-#include "copier.hpp"
+#include "rewriter.hpp"
 
 namespace backend {
 
 
 class typedefify
-    : public copier
+    : public rewriter
 {
 private:
     std::shared_ptr<statement> m_typedef;
 public:
     typedefify();
     
-    using copier::operator();
+    using rewriter::operator();
     
     result_type operator()(const suite &n);
     

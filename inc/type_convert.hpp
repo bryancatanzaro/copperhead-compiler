@@ -1,5 +1,5 @@
 #pragma once
-#include "copier.hpp"
+#include "rewriter.hpp"
 #include "type.hpp"
 #include "ctype.hpp"
 #include "type_printer.hpp"
@@ -28,14 +28,14 @@ public:
 }
 
 class type_convert
-    : public copier
+    : public rewriter
 {
 private:
     detail::cu_to_c m_c;
 public:
     type_convert();
 
-    using copier::operator();
+    using rewriter::operator();
 
     result_type operator()(const procedure &p);
     

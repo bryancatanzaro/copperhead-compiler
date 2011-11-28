@@ -7,7 +7,7 @@
 #include "utility/snippets.hpp"
 #include "py_printer.hpp"
 #include "cuda_printer.hpp"
-#include "copier.hpp"
+#include "rewriter.hpp"
 
 /*!
   \file   allocate.hpp
@@ -18,12 +18,18 @@
 
 
 namespace backend {
+/*! 
+  \addtogroup rewriters
+  @{
+ */
 
-/*! \p allocate is a rewrite pass that inserts memory allocation for
-  temporary variables and results.
+
+//! A rewrite pass that inserts memory allocation.
+/*! Temporary variables and results need to have storage explicitly
+  allocated. This rewrite pass makes this explicit in the program text.
 */
 class allocate
-    : public copier
+    : public rewriter
 {
 private:
     const std::string& m_entry_point;
@@ -35,7 +41,8 @@ public:
   \param entry_point The name of the entry point procedure 
 */
     allocate(const std::string& entry_point);
-    using copier::operator();
+    
+    using rewriter::operator();
 
 //! Rewrite rule for \p procedure nodes
 
@@ -44,5 +51,7 @@ public:
 //! Rewrite rule for \p bind nodes
     result_type operator()(const bind &n);
 };
+
+//! @}
 
 }

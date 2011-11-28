@@ -6,13 +6,13 @@
 #include "utility/markers.hpp"
 #include "utility/snippets.hpp"
 #include "py_printer.hpp"
-#include "copier.hpp"
+#include "rewriter.hpp"
 
 namespace backend {
 
 
 class wrap
-    : public copier
+    : public rewriter
 {
 private:
     const std::string& m_entry_point;
@@ -22,7 +22,7 @@ private:
 public:
     wrap(const std::string& entry_point);
     
-    using copier::operator();
+    using rewriter::operator();
 
     result_type operator()(const procedure &n);
 

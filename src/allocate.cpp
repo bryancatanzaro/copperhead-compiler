@@ -49,7 +49,7 @@ allocate::result_type allocate::operator()(const procedure &n) {
         m_in_entry = false;
         return allocated;
     } else {
-        return this->copier::operator()(n);
+        return this->rewriter::operator()(n);
     }
 }
 
@@ -114,7 +114,7 @@ allocate::result_type allocate::operator()(const bind &n) {
             make_shared<bind>(new_lhs, getter_call);
         return retriever;
     } else {
-        return this->copier::operator()(n);
+        return this->rewriter::operator()(n);
     }
 }
 

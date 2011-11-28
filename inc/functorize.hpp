@@ -2,7 +2,7 @@
 #include <string>
 #include <set>
 #include <sstream>
-#include "copier.hpp"
+#include "rewriter.hpp"
 #include "utility/isinstance.hpp"
 #include "utility/markers.hpp"
 #include "import/library.hpp"
@@ -61,7 +61,7 @@ public:
  *  except the entry point.
  */
 class functorize
-    : public copier
+    : public rewriter
 {
 private:
     const std::string& m_entry_point;
@@ -86,7 +86,7 @@ public:
     functorize(const std::string& entry_point,
                const registry& reg);
     
-    using copier::operator();
+    using rewriter::operator();
 
     result_type operator()(const apply &n);
     

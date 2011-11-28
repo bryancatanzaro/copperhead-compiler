@@ -202,7 +202,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
         m_wrapping = false;
         return rewritten;
     } else {
-        return this->copier::operator()(n);
+        return this->rewriter::operator()(n);
     }
         
 }
@@ -220,7 +220,7 @@ wrap::result_type wrap::operator()(const ret& n) {
             return result_type(new ret(array_wrapped));
         }
     }
-    return this->copier::operator()(n);
+    return this->rewriter::operator()(n);
 }
 wrap::result_type wrap::operator()(const suite&n) {
     vector<shared_ptr<statement> > stmts;

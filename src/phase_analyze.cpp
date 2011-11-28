@@ -164,7 +164,7 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
         return get_node_ptr(n);
     }
     m_result_completion = completion::invariant;
-    result_type rewritten = this->copier::operator()(n);
+    result_type rewritten = this->rewriter::operator()(n);
     //Update completion declarations
     if (detail::isinstance<name>(n.lhs())) {
         const name& lhs_name = detail::up_get<name>(n.lhs());

@@ -76,6 +76,14 @@ node_base make_node_base(void *ptr, const node_base &other);
 
 } // end detail
 
+//! \addtogroup nodes
+/*! @{
+ */
+//! The base AST node class
+/*! 
+  All AST nodes derive from this class.
+ */
+
 class node
     : public detail::node_base,
       public std::enable_shared_from_this<node>
@@ -106,7 +114,17 @@ protected:
 #endif
 };
 
+//! Prints AST \p node objects
+/*! 
+  
+  \param strm Output stream to print the node to.
+  \param n The node to be printed.
+  
+  \return Modified stream that has been printed to.
+*/
 std::ostream& operator<<(std::ostream& strm, const node& n);
+
+//! @}
 
 template<typename ResultType = void>
 struct no_op_visitor

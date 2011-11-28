@@ -209,7 +209,7 @@ functorize::result_type functorize::operator()(const apply &n) {
             }
         }
     }
-    auto n_fn = std::static_pointer_cast<name>(this->copier::operator()(n.fn()));
+    auto n_fn = std::static_pointer_cast<name>(this->rewriter::operator()(n.fn()));
     auto new_args = std::shared_ptr<tuple>(new tuple(std::move(n_arg_list)));
     return std::shared_ptr<apply>(new apply(n_fn, new_args));
 }
@@ -230,7 +230,7 @@ functorize::result_type functorize::operator()(const suite &n) {
             std::move(stmts)));
 }
 functorize::result_type functorize::operator()(const procedure &n) {
-    auto n_proc = std::static_pointer_cast<procedure>(this->copier::operator()(n));
+    auto n_proc = std::static_pointer_cast<procedure>(this->rewriter::operator()(n));
     if (n_proc->id().id() != m_entry_point) {
         //Add result_type declaration
         assert(detail::isinstance<ctype::fn_t>(n.ctype()));
@@ -243,13 +243,13 @@ functorize::result_type functorize::operator()(const procedure &n) {
             new typedefn(origin, rename));
 
             
-        std::shared_ptr<tuple> forward_args = std::static_pointer_cast<tuple>(this->copier::operator()(n_proc->args()));
-        std::shared_ptr<name> forward_name = std::static_pointer_cast<name>(this->copier::operator()(n_proc->id()));
+        std::shared_ptr<tuple> forward_args = std::static_pointer_cast<tuple>(this->rewriter::operator()(n_proc->args()));
+        std::shared_ptr<name> forward_name = std::static_pointer_cast<name>(this->rewriter::operator()(n_proc->id()));
         std::shared_ptr<apply> op_call(new apply(forward_name, forward_args));
         std::shared_ptr<ret> op_ret(new ret(op_call));
         std::vector<std::shared_ptr<statement> > op_body_stmts{op_ret};
         std::shared_ptr<suite> op_body(new suite(std::move(op_body_stmts)));
-        auto op_args = std::static_pointer_cast<tuple>(this->copier::operator()(n.args()));
+        auto op_args = std::static_pointer_cast<tuple>(this->rewriter::operator()(n.args()));
         std::shared_ptr<name> op_id(new name(std::string("operator()")));
         std::shared_ptr<procedure> op(
             new procedure(

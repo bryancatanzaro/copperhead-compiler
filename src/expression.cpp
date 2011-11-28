@@ -53,6 +53,14 @@ tuple::const_iterator tuple::end() const {
     return boost::make_indirect_iterator(m_values.cend());
 }
 
+tuple::const_ptr_iterator tuple::p_begin() const {
+    return m_values.cbegin();
+}
+
+tuple::const_ptr_iterator tuple::p_end() const {
+    return m_values.cend();
+}
+
 int tuple::arity() const {
     return m_values.size();
 }
@@ -67,6 +75,14 @@ const name& apply::fn(void) const {
 }
 const tuple& apply::args(void) const {
     return *m_args;
+}
+
+shared_ptr<name> apply::p_fn(void) const {
+    return m_fn;
+}
+
+shared_ptr<tuple> apply::p_args(void) const {
+    return m_args;
 }
 
 
@@ -84,6 +100,14 @@ const expression& lambda::body(void) const {
     return *m_body;
 }
 
+shared_ptr<tuple> lambda::p_args(void) const {
+    return m_args;
+}
+
+shared_ptr<expression> lambda::p_body(void) const {
+    return m_body;
+}
+
 closure::closure(const shared_ptr<tuple> &args,
                  const shared_ptr<expression> &body,
                  const shared_ptr<type_t>& type,
@@ -98,6 +122,13 @@ const expression& closure::body(void) const {
     return *m_body;
 }
 
+shared_ptr<tuple> closure::p_args(void) const {
+    return m_args;
+}
+
+shared_ptr<expression> closure::p_body(void) const {
+    return m_body;
+}
 
 }
     
