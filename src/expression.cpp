@@ -24,20 +24,20 @@ shared_ptr<ctype::type_t> expression::p_ctype(void) const {
     return m_ctype;
 }
 
-literal::literal(const string& val,
-                 const shared_ptr<type_t>& type,
-                 const shared_ptr<ctype::type_t>& ctype)
+literal::literal(const std::string& val,
+                 const std::shared_ptr<type_t>& type,
+                 const std::shared_ptr<ctype::type_t>& ctype)
     : expression(*this, type, ctype), m_val(val) {}
 
 const string& literal::id(void) const {
     return m_val;
 }
 
-name::name(const string &val,
-         const shared_ptr<type_t>& type,
-         const shared_ptr<ctype::type_t>& ctype)
-        : literal(*this, val, type, ctype)
-        {}
+name::name(const std::string &val,
+           const std::shared_ptr<type_t>& type,
+           const std::shared_ptr<ctype::type_t>& ctype)
+    : literal(*this, val, type, ctype)
+{}
 
 tuple::tuple(vector<shared_ptr<expression> > &&values,
              const shared_ptr<type_t>& type,
