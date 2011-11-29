@@ -14,6 +14,17 @@
 
 namespace backend {
 
+/*! 
+  \addtogroup rewriters
+  @{
+ */
+
+//! Rewriter for Thrust calls
+/*! This rewriter performs all rewrites specific to the Thrust library.
+  For example, it makes mapn calls produce a transformed_sequence<>
+  C++ implementation type, or indices produce a counting_sequence
+  C++ implementation type.
+*/
 class thrust_rewriter
     : public rewriter {
 private:
@@ -27,6 +38,7 @@ private:
     
     const fn_map m_lut; 
 public:
+    //! Constructor
     thrust_rewriter();
     
     using rewriter::operator();
@@ -35,6 +47,9 @@ public:
     
 };
 
+/*! 
+  @}
+ */
 
 
 }

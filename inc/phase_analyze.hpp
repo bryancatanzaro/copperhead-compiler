@@ -14,6 +14,18 @@
 
 namespace backend {
 
+/*! 
+  \addtogroup rewriters
+  @{
+ */
+
+//! A rewrite pass that adds phase boundaries
+/*! This rewriter analyzes functions to determine where synchronization
+  points occur, and then inserts phase boundaries to effectuate them.
+
+  It does not do any scheduling to minimize the number of phases, which
+  will be done in a future version.
+*/
 class phase_analyze
     : public rewriter {
 private:
@@ -28,6 +40,12 @@ private:
     void add_phase_boundary(const name& n);
 public:
     using rewriter::operator();
+    //! Constructor
+/*! 
+  
+  \param entry_point The name of the entry_point function
+  \param reg The registry of functions the compiler knows about
+*/
     phase_analyze(const std::string& entry_point, const registry& reg);
     result_type operator()(const suite& n);
     result_type operator()(const procedure& n);
@@ -36,5 +54,9 @@ public:
     result_type operator()(const ret& n);
     
 };
+
+/*! 
+  @}
+ */
 
 }

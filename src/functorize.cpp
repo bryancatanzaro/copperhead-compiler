@@ -8,13 +8,6 @@ type_corresponder::type_corresponder(const std::shared_ptr<type_t>& input,
                                      type_map& corresponded)
     : m_working(input), m_corresponded(corresponded) {}
 
-type_corresponder::iterator type_corresponder::begin() const {
-    return m_corresponded.begin();
-}
-type_corresponder::iterator type_corresponder::end() const {
-    return m_corresponded.end();
-}
-    
 void type_corresponder::operator()(const monotype_t &n) {
     std::string id = n.name();
     m_corresponded.insert(std::make_pair(id, m_working));

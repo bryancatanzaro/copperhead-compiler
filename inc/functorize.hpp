@@ -14,7 +14,10 @@
 namespace backend {
 
 namespace detail {
-
+//! Matches two types
+/*! This class is used to match two Copperhead types, to discover how
+  they are related. This can be used for type propagation
+*/
 class type_corresponder
     : public boost::static_visitor<> {
 private:
@@ -23,32 +26,30 @@ private:
 
     std::shared_ptr<type_t> m_working;
     type_map& m_corresponded;
-    template<typename Type>
-    static inline std::shared_ptr<type_t> get_type_ptr(const Type &n) {
-        return std::const_pointer_cast<type_t>(n.shared_from_this());
-    }
 public:
-    typedef std::map<std::string, std::shared_ptr<type_t> >::const_iterator iterator;
+    //! Constructor
+/*! 
+  
+  \param input Input type to be matched
+  \param corresponded Type map that will be amended with correspondence
+  \return 
+*/
     type_corresponder(const std::shared_ptr<type_t>& input,
                       type_map& corresponded);
-    
-    iterator begin() const;
-    
-    iterator end() const;
-    
+
+    //! Harvest correspondence from a monotype_t
     void operator()(const monotype_t &n);
-
+    //! Harvest correspondence from a polytype_t
     void operator()(const polytype_t &n);
-
+    //! Harvest correspondence from a sequence_t
     void operator()(const sequence_t &n);
-
+    //! Harvest correspondence from a tuple_t
     void operator()(const tuple_t &n);
-
+    //! Harvest correspondence from a fn_t
     void operator()(const fn_t &n);
-
+    //! Don't harvest correspondences from any other types
     template<typename N>
     void operator()(const N &n) {
-        //Don't harvest correspondences from other types
     }
 
     
@@ -56,9 +57,20 @@ public:
 };
 }
 
+/*! 
+\addtogroup rewriters
+@{
+ */
 
-/*! \p A compiler pass to create function objects for all procedures
- *  except the entry point.
+
+//! A rewriter which instantiates function objects for all procedures
+/*!
+  This rewriter creates functor object wrappers for all procedures
+  except the entry point.
+
+  It also instantiates functor objects when appropriate. For polymorphic
+  functors, this requires type propagation to discover what the
+  type variables in the polytype of the functor object should be.
  */
 class functorize
     : public rewriter
@@ -80,6 +92,7 @@ private:
     std::shared_ptr<expression> instantiate_fn(const name& n,
                                                std::shared_ptr<type_t> p_t);
 public:
+    //! Constructor
     /*! \param entry_point The name of the entry point procedure
         \param reg The registry of functions the compiler knows about
      */
@@ -95,5 +108,8 @@ public:
     result_type operator()(const procedure &n);
     
 };
+/*! 
+  @}
+ */
 
 }

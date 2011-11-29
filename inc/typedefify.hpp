@@ -9,23 +9,44 @@
 
 namespace backend {
 
+/*!
+  \addtogroup rewriters
+  @{
+*/
 
+//! A rewrite pass to add typedefs
+/*! Because many compilers do not yet support C++11,
+  we have to add a unique typename for every identifier in the program.
+  For example, the following declaration:
+  \verbatim int _a; \endverbatim
+  becomes
+  \verbatim typedef int T_a;
+T_a _a; \endverbatim
+
+  This allows us to use the type of \p _a elsewhere in the program without
+  having to know exactly what it was instantiated as.
+*/
 class typedefify
     : public rewriter
 {
 private:
     std::shared_ptr<statement> m_typedef;
 public:
+    //! Constructor
     typedefify();
     
     using rewriter::operator();
-    
+    //! Rewrite rule for \p suite nodes
     result_type operator()(const suite &n);
-    
+    //! Rewrite rule for \p bind nodes
     result_type operator()(const bind &n);
-    
+    //! Rewrite rule for \p procedure nodes
     result_type operator()(const procedure &n);
         
 };
+
+/*!
+  @}
+*/
 
 }
