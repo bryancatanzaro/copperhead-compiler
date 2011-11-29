@@ -23,14 +23,21 @@ monotype_t::monotype_t(const std::string &name)
 const std::string& monotype_t::name(void) const {
     return m_name;
 }
-
+//! The instantiated type object representing the Int32 type
 std::shared_ptr<monotype_t> int32_mt = std::make_shared<monotype_t>("int");
+//! The instantiated type object representing the Int64 type
 std::shared_ptr<monotype_t> int64_mt = std::make_shared<monotype_t>("long");
+//! The instantiated type object representing the Uint32 type
 std::shared_ptr<monotype_t> uint32_mt = std::make_shared<monotype_t>("unsigned int");
+//! The instantiated type object representing the Uint64 type
 std::shared_ptr<monotype_t> uint64_mt = std::make_shared<monotype_t>("unsigned long");
+//! The instantiated type object representing the Float32 type
 std::shared_ptr<monotype_t> float32_mt = std::make_shared<monotype_t>("float");
+//! The instantiated type object representing the Float64 type
 std::shared_ptr<monotype_t> float64_mt = std::make_shared<monotype_t>("double");
+//! The instantiated type object representing the Bool type
 std::shared_ptr<monotype_t> bool_mt = std::make_shared<monotype_t>("bool");
+//! The instantiated type object representing the Void type
 std::shared_ptr<monotype_t> void_mt = std::make_shared<monotype_t>("void");
 
 sequence_t::sequence_t(const std::shared_ptr<type_t> &sub)

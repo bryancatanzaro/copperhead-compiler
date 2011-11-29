@@ -81,7 +81,8 @@ node_base make_node_base(void *ptr, const node_base &other);
  */
 //! The base AST node class
 /*! 
-  All AST nodes derive from this class.
+  All AST nodes derive from this class. Not intended to be
+  instantiated directly.
  */
 
 class node
@@ -106,7 +107,7 @@ protected:
             std::cout << std::endl;
 #endif
         }
-
+public:
     //copy constructor requires special handling
     node(const node &other);
 #ifdef DEBUG

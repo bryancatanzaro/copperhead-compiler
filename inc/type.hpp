@@ -37,17 +37,38 @@ type_base make_type_base(void *ptr, const type_base &other);
 
 }
 
+/*! 
+  \addtogroup types
+  @{
+ */
+
+//! Parent for all Copperhead type objects
+/*! Not intended to be instantiated directly 
+*/
 class type_t
     : public detail::type_base
 {
-public:
+protected:
     typedef detail::type_base super_t;
+    //! Constructor from subclass
+/*!   
+  \param self Reference to subclass object under construction
+*/
     template<typename Derived>
     type_t(Derived &self)
         : super_t(std::ref(self)) //use of std::ref disambiguates variant's copy constructor dispatch
         {}
+public:
 
+//! Copy constructor
+/*! 
+  \param other type to copy from
+*/
     type_t(const type_t &other);
 };
+
+/*!
+  @}
+*/
 
 }

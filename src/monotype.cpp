@@ -21,14 +21,21 @@ monotype_t::const_iterator monotype_t::end() const {
 int monotype_t::size() const {
     return m_params.size();
 }
-
+//! The instantiated type object representing the Int32 type
 std::shared_ptr<monotype_t> int32_mt = std::make_shared<monotype_t>("Int32");
+//! The instantiated type object representing the Int64 type
 std::shared_ptr<monotype_t> int64_mt = std::make_shared<monotype_t>("Int64");
+//! The instantiated type object representing the Uint32 type
 std::shared_ptr<monotype_t> uint32_mt = std::make_shared<monotype_t>("Uint32");
+//! The instantiated type object representing the Uint64 type
 std::shared_ptr<monotype_t> uint64_mt = std::make_shared<monotype_t>("Uint64");
+//! The instantiated type object representing the Float32 type
 std::shared_ptr<monotype_t> float32_mt = std::make_shared<monotype_t>("Float32");
+//! The instantiated type object representing the Float64 type
 std::shared_ptr<monotype_t> float64_mt = std::make_shared<monotype_t>("Float64");
+//! The instantiated type object representing the Bool type
 std::shared_ptr<monotype_t> bool_mt = std::make_shared<monotype_t>("Bool");
+//! The instantiated type object representing the Void type
 std::shared_ptr<monotype_t> void_mt = std::make_shared<monotype_t>("Void");
 
 
