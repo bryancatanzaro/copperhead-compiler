@@ -37,4 +37,14 @@ for x in object_files:
 basename = 'stage/copperhead'
 
 libcopperhead = env.StaticLibrary(target=basename, source=objects)
+
+#Make this opt-in to avoid forcing everyone to install Doxygen    
+if 'doc' in COMMAND_LINE_TARGETS:
+    env.Alias('doc', [env.AlwaysBuild(
+                env.Doxygen(
+                    os.path.join(
+                        os.path.pardir,
+                        os.path.join('doc', 'copperhead.dox'))))])
+
+
 Return('libcopperhead')
