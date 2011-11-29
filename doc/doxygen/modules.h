@@ -4,4 +4,5 @@
   \defgroup nodes Abstract Syntax Tree Nodes
   \defgroup types Copperhead Types
   \defgroup ctypes C++ Implementation Types
+  \defgroup utilities Utilities
 */

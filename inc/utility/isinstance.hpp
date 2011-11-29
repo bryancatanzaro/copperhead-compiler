@@ -2,9 +2,15 @@
 #include <boost/type_traits.hpp>
 #include <boost/mpl/logical.hpp>
 
+
 namespace backend {
 namespace detail {
+/*!
+  \addtogroup utilities
+  @{
+*/
 
+//! Used internally to examine types.
 template<typename T>
 class type_checker:
         public boost::static_visitor<>
@@ -26,7 +32,16 @@ public:
 private:
     bool& m_res;
 };
-
+//! Checks if dynamic type is an instance of another type.
+/*! This procedure examines a variant to discover if the dynamic type
+  which the variant currently holds is an instance of another
+  type. Will return true if the variant holds a derived type of the
+  base type.
+  \tparam T Base type.
+  \param v Instance being checked.
+  
+  \return true if v is an instance of T, false otherwise.
+*/
 template<typename T, typename V>
 bool isinstance(const V& v) {
     bool result = false;
@@ -34,5 +49,11 @@ bool isinstance(const V& v) {
     return result;
 }
 
+/*!
+  @}
+*/
+
+
 }
 }
+
