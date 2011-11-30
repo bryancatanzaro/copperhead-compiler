@@ -10,7 +10,7 @@ namespace detail {
 */
 
 
-//! Used internally by \ref backend::utility::up_get
+//! Used internally.
 template<typename T>
 struct type_extractor
     : public boost::static_visitor<const T&>
