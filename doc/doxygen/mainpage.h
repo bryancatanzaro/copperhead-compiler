@@ -9,7 +9,7 @@
    "nodes" that describe the text of a program, as well as a set
    of \ref rewriters "rewriters", each of which transform the program
    in a particular way.  These rewriters can be combined to form a
-   particular compiler, such as \ref backend::compiler "this one",
+   compiler, such as \ref backend::compiler "this one",
    which is used as the compiler for the Python Copperhead runtime.
 
    \section build_sec Building
