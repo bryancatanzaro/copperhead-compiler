@@ -22,15 +22,14 @@
    - C++11 features:
      - R-value references
      - \p auto, \p decltype
-     - initializer lists
      - strongly-typed enums
      - variadic templates
      - \p std::shared_ptr, \p std::make_shared, \p std::tuple
-     
-     Since Visual Studio 10 (11) does (will) not support initializer lists, this
-     code in its current state cannot be compiled by Visual Studio. It
-     has been tested with g++ 4.5.
 
+     This codebase has been tested with g++4.5.  With a little work
+     (to workaround the lack of strongly-typed enums and variadic
+     templates), it should compile with Visual Studio 10.
+     
      To build this code, we provide an SConscript, for use with <a
      href="http://www.scons.org">Scons</a>. It has been built with
      version 2.0.1.
