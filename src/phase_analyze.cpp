@@ -7,6 +7,8 @@ using std::make_shared;
 using std::move;
 using std::vector;
 using std::static_pointer_cast;
+using std::make_pair;
+using backend::utility::make_vector;
 
 namespace backend {
 
@@ -19,8 +21,7 @@ phase_analyze::phase_analyze(const string& entry_point,
         auto id = i->first;
         string fn_name = std::get<0>(id);
         auto info = i->second;
-        m_fns.insert(pair<string, shared_ptr<phase_t> >{
-                fn_name, info.p_phase()});
+        m_fns.insert(make_pair(fn_name, info.p_phase()));
     }
 }
 
@@ -51,7 +52,7 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
             assert(detail::isinstance<name>(*i));
             const name& arg_name = detail::up_get<name>(*i);
             const std::string& arg_id = arg_name.id();
-            m_completions.insert(pair<string, completion>{arg_id, completion::total});
+            m_completions.insert(make_pair(arg_id, completion::total));
         }
         shared_ptr<suite> stmts =
             static_pointer_cast<suite>(
@@ -80,18 +81,20 @@ void phase_analyze::add_phase_boundary(const name& n) {
             n.p_type());
     
     shared_ptr<tuple_t> pb_args_t =
-        make_shared<tuple_t>(vector<shared_ptr<type_t> >{
-                n.p_type()});
+        make_shared<tuple_t>(
+            make_vector<shared_ptr<type_t> >(n.p_type()));
     shared_ptr<tuple> pb_args =
-        make_shared<tuple>(vector<shared_ptr<expression> >{p_n}, pb_args_t);
+        make_shared<tuple>(
+            make_vector<shared_ptr<expression> >(p_n),
+            pb_args_t);
     shared_ptr<monotype_t> a_mt = make_shared<monotype_t>("a");
     shared_ptr<monotype_t> seq_a_mt = make_shared<sequence_t>(a_mt);
     shared_ptr<type_t> pb_type =
         make_shared<polytype_t>(
-            vector<shared_ptr<monotype_t> >{a_mt},
+            make_vector<shared_ptr<monotype_t> >(a_mt),
             make_shared<fn_t>(
                 make_shared<tuple_t>(
-                    vector<shared_ptr<type_t> >{seq_a_mt}),
+                    make_vector<shared_ptr<type_t> >(seq_a_mt)),
                 seq_a_mt));
     shared_ptr<name> pb_name =
         make_shared<name>(detail::phase_boundary(), pb_type);
@@ -103,11 +106,11 @@ void phase_analyze::add_phase_boundary(const name& n) {
 
     //Register completion
     m_completions.insert(
-        pair<string, completion>{p_result->id(), completion::total});
+        make_pair(p_result->id(), completion::total));
 
     //Register substitution
     m_substitutions.insert(
-        pair<string, shared_ptr<name> >{n.id(), p_result});
+        make_pair(n.id(), p_result));
 }
 
 phase_analyze::result_type phase_analyze::operator()(const apply& n) {
@@ -168,7 +171,8 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
     //Update completion declarations
     if (detail::isinstance<name>(n.lhs())) {
         const name& lhs_name = detail::up_get<name>(n.lhs());
-        m_completions.insert(pair<string, completion>{lhs_name.id(), m_result_completion});
+        m_completions.insert(make_pair(lhs_name.id(),
+                                       m_result_completion));
     }
     return rewritten;
 }

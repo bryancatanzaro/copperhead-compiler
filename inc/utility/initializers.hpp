@@ -9,9 +9,10 @@
   initializer lists.
   
 */
-
+#pragma once
 #include <vector>
 #include <map>
+#include <set>
 
 namespace backend {
 namespace utility {
@@ -111,6 +112,57 @@ map_wrapper<K, V> make_map(const K& k, const V& v) {
   This overload is provided mostly for symmetry's sake, for the case
   where you want to make an empty map.
 */
+template<typename K, typename V>
+map_wrapper<K, V> make_map() {
+    return map_wrapper<K, V>();
+}
+
+//! Wrapper for std::set, used to chain insertions
+template<typename V>
+struct set_wrapper
+    : public std::set<V> {
+    set_wrapper<V>&& operator()(const V& val) {
+        insert(val);
+        return std::move(*this);
+    }
+};
+
+//! Convenience function for constructing \p std::set objects
+/*! 
+  \tparam V Type of value for the \p std::set
+  \param v Value for the first object in the set
+  
+  \return A set_wrapper<V> object, which can be used to construct
+  \p std::set objects.
+
+  Use this function as follows:
+  \verbatim make_set<int>(1)(2) \endverbatim
+  This will construct a \p std::set<int> containing 1 and 2.
+  Although this isn't as convenient as using an initializer list,
+  it works in a similar way.  And most importantly, compilers which
+  don't support initializer lists should still compile this.
+
+*/
+template<typename V>
+set_wrapper<V> make_set(const V& v) {
+    return set_wrapper<V>()(v);
+}
+
+//! Convenience function for constructing \p std::set objects
+/*! 
+  \tparam V Type of value for the \p std::set
+  
+  \return An empty set_wrapper<K, V> object.
+
+  This overload is provided mostly for symmetry's sake, for the case
+  where you want to make an empty set.
+*/
+template<typename V>
+set_wrapper<V> make_set() {
+    return set_wrapper<V>();
+}
+
+
 
 /*!
   @}

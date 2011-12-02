@@ -5,7 +5,7 @@ using std::make_shared;
 using std::string;
 using std::static_pointer_cast;
 using std::vector;
-using backend::utility::make_vector
+using backend::utility::make_vector;
 
 
 namespace backend {

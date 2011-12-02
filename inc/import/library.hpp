@@ -7,21 +7,26 @@
 #include <map>
 #include <set>
 #include <ostream>
-#include "../prelude/phase.hpp"
-#include "../type.hpp"
+#include "prelude/phase.hpp"
+#include "type.hpp"
 
 namespace backend {
 
 typedef std::tuple<const std::string, const iteration_structure> ident;
 
 class fn_info {
-    const std::shared_ptr<type_t> m_type;
-    const std::shared_ptr<phase_t> m_phase;
+    std::shared_ptr<type_t> m_type;
+    std::shared_ptr<phase_t> m_phase;
 public:
     fn_info(std::shared_ptr<type_t> type,
             std::shared_ptr<phase_t> phase)
         : m_type(type), m_phase(phase) {}
 
+    fn_info(const fn_info& other) {
+        m_type = other.m_type;
+        m_phase = other.m_phase;
+    }
+    
     const type_t& type() const {
         return *m_type;
     }
@@ -37,11 +42,7 @@ public:
     const std::shared_ptr<phase_t>& p_phase() const {
         return m_phase;
     }
-    
-    //shared_ptr<type> m_type;
-    //shared_ptr<phase> m_phase;
         
-
 };
 
 

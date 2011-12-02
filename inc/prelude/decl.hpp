@@ -3,12 +3,12 @@
 #include <vector>
 #include <map>
 #include <cstdlib>
-#include "../type.hpp"
-#include "../monotype.hpp"
-#include "../polytype.hpp"
-#include "../import/library.hpp"
-#include "../import/paths.hpp"
-
+#include "type.hpp"
+#include "monotype.hpp"
+#include "polytype.hpp"
+#include "import/library.hpp"
+#include "import/paths.hpp"
+#include "utility/initializers.hpp"
 
 #define PRELUDE_PATH "PRELUDE_PATH"
 #define PRELUDE_FILE "prelude.h"
