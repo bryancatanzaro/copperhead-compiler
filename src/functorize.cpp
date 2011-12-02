@@ -1,15 +1,23 @@
 #include "functorize.hpp"
 
+using std::shared_ptr;
+using std::make_shared;
+using std::string;
+using std::static_pointer_cast;
+using std::vector;
+using backend::utility::make_vector
+
+
 namespace backend {
 
 namespace detail {
 
-type_corresponder::type_corresponder(const std::shared_ptr<type_t>& input,
+type_corresponder::type_corresponder(const shared_ptr<type_t>& input,
                                      type_map& corresponded)
     : m_working(input), m_corresponded(corresponded) {}
 
 void type_corresponder::operator()(const monotype_t &n) {
-    std::string id = n.name();
+    string id = n.name();
     m_corresponded.insert(std::make_pair(id, m_working));
 }
 
@@ -21,7 +29,7 @@ void type_corresponder::operator()(const polytype_t &n) {
 void type_corresponder::operator()(const sequence_t &n) {
     //m_working must be a sequence_t or else the typechecking is wrong
     assert(detail::isinstance<sequence_t>(*m_working));
-    m_working = std::static_pointer_cast<sequence_t>(m_working)->p_sub();
+    m_working = static_pointer_cast<sequence_t>(m_working)->p_sub();
     boost::apply_visitor(*this, n.sub());
 }
 
@@ -69,28 +77,29 @@ void functorize::make_type_map(const apply& n) {
     assert(detail::isinstance<fn_t>(fn_polytype.monotype()));
     const fn_t& fn_monotype = boost::get<const fn_t&>(fn_polytype.monotype());
     const tuple_t& fn_arg_t = fn_monotype.args();
-    std::vector<std::shared_ptr<type_t> > arg_types;
+    vector<shared_ptr<type_t> > arg_types;
     for(auto i = n.args().begin();
         i != n.args().end();
         i++) {
         arg_types.push_back(i->p_type());
     }
-    std::shared_ptr<tuple_t> arg_t =
-        std::make_shared<tuple_t>(std::move(arg_types));
+    shared_ptr<tuple_t> arg_t =
+        make_shared<tuple_t>(std::move(arg_types));
     detail::type_corresponder tc(arg_t, m_type_map);
     boost::apply_visitor(tc, fn_arg_t);
         
 }
 
-std::shared_ptr<expression> functorize::instantiate_fn(const name& n,
-                                                       std::shared_ptr<type_t> p_t) {
-    std::string id = n.id();
+shared_ptr<expression> functorize::instantiate_fn(const name& n,
+                                                       shared_ptr<type_t> p_t) {
+    string id = n.id();
     const type_t& n_t = n.type();
     if (!detail::isinstance<polytype_t>(n_t)) {
         //The function is monomorphic. Instantiate a functor.
-        return std::make_shared<apply>(
-            std::make_shared<name>(detail::fnize_id(id)),
-            std::make_shared<tuple>(std::vector<std::shared_ptr<expression> >{}));
+        return make_shared<apply>(
+            make_shared<name>(detail::fnize_id(id)),
+            make_shared<tuple>(
+                make_vector<shared_ptr<expression> >()));
     }
     //Use already populated type map to instantiate the
     //Polymorphic functor with the types it needs in situ
@@ -107,14 +116,14 @@ std::shared_ptr<expression> functorize::instantiate_fn(const name& n,
     detail::type_corresponder tc(p_t, fn_to_apl);
     boost::apply_visitor(tc, n_mt);
 
-    std::vector<std::shared_ptr<type_t> > instantiated_types;
+    vector<shared_ptr<type_t> > instantiated_types;
     for(auto i = n_pt.begin();
         i != n_pt.end();
         i++) {
-        std::string fn_t_name = i->name();
+        string fn_t_name = i->name();
         //The name of this type should be in the type map
         assert(fn_to_apl.find(fn_t_name)!=fn_to_apl.end());
-        std::shared_ptr<type_t> apl_t = fn_to_apl.find(fn_t_name)->second;
+        shared_ptr<type_t> apl_t = fn_to_apl.find(fn_t_name)->second;
         //The value in the type map should be a monotype
         assert(detail::isinstance<monotype_t>(*apl_t));
         const monotype_t& apl_mt = boost::get<const monotype_t&>(*apl_t);
@@ -123,7 +132,7 @@ std::shared_ptr<expression> functorize::instantiate_fn(const name& n,
         instantiated_types.push_back(
             m_type_map.find(apl_mt.name())->second);
     }
-    std::vector<std::shared_ptr<ctype::type_t> > instantiated_ctypes;
+    vector<shared_ptr<ctype::type_t> > instantiated_ctypes;
     detail::cu_to_c ctc;
     for(auto i = instantiated_types.begin();
         i != instantiated_types.end();
@@ -131,24 +140,25 @@ std::shared_ptr<expression> functorize::instantiate_fn(const name& n,
         instantiated_ctypes.push_back(
             boost::apply_visitor(ctc, **i));
     }
-    return std::make_shared<apply>(
-        std::make_shared<templated_name>(detail::fnize_id(id),
-                                         std::make_shared<ctype::tuple_t>(std::move(instantiated_ctypes)),
+    return make_shared<apply>(
+        make_shared<templated_name>(detail::fnize_id(id),
+                                         make_shared<ctype::tuple_t>(std::move(instantiated_ctypes)),
                                          n.p_type(),
                                          n.p_ctype()),
-        std::make_shared<tuple>(std::vector<std::shared_ptr<expression> >{}));
+        make_shared<tuple>(
+            make_vector<shared_ptr<expression> >()));
 
 }
     
-functorize::functorize(const std::string& entry_point,
+functorize::functorize(const string& entry_point,
                        const registry& reg)
-    : m_entry_point(entry_point), m_additionals({}),
+    : m_entry_point(entry_point), m_additionals(make_vector<result_type>()),
       m_reg(reg) {
     for(auto i = reg.fns().cbegin();
         i != reg.fns().cend();
         i++) {
         auto id = i->first;
-        std::string fn_name = std::get<0>(id);
+        string fn_name = std::get<0>(id);
         m_fns.insert(fn_name);
     }
                
@@ -161,18 +171,18 @@ functorize::result_type functorize::operator()(const apply &n) {
     make_type_map(n);
 
         
-    std::vector<std::shared_ptr<expression> > n_arg_list;
+    vector<shared_ptr<expression> > n_arg_list;
     const tuple& n_args = n.args();
         
-    std::shared_ptr<fn_t> fn_type;
+    shared_ptr<fn_t> fn_type;
     if (detail::isinstance<fn_t>(n.fn().type())) {
-        fn_type = std::static_pointer_cast<fn_t>(
+        fn_type = static_pointer_cast<fn_t>(
             n.fn().p_type());
-    } else{
+    } else {
         //Must be a polytype_t(fn_t)
         assert(detail::isinstance<polytype_t>(n.fn().type()));
         const polytype_t& pt = boost::get<const polytype_t&>(n.fn().type());
-        fn_type = std::static_pointer_cast<fn_t>(
+        fn_type = static_pointer_cast<fn_t>(
             pt.p_monotype());
     }
     const tuple_t& args_type = fn_type->args();
@@ -185,15 +195,15 @@ functorize::result_type functorize::operator()(const apply &n) {
             //XXX This might not be necessary when we bind
             //closure objects to identifiers in the program
             n_arg_list.push_back(
-                std::static_pointer_cast<expression>(
+                static_pointer_cast<expression>(
                     boost::apply_visitor(*this, *n_arg)));
         else {
             const name& n_name = boost::get<const name&>(*n_arg);
-            const std::string id = n_name.id();
+            const string id = n_name.id();
             auto found = m_fns.find(id);
             if (found == m_fns.end()) {
                 n_arg_list.push_back(
-                    std::static_pointer_cast<expression>(
+                    static_pointer_cast<expression>(
                         boost::apply_visitor(*this, *n_arg)));
             } else {
                 //We've found a function to instantiate
@@ -202,18 +212,18 @@ functorize::result_type functorize::operator()(const apply &n) {
             }
         }
     }
-    auto n_fn = std::static_pointer_cast<name>(this->rewriter::operator()(n.fn()));
-    auto new_args = std::shared_ptr<tuple>(new tuple(std::move(n_arg_list)));
-    return std::shared_ptr<apply>(new apply(n_fn, new_args));
+    auto n_fn = static_pointer_cast<name>(this->rewriter::operator()(n.fn()));
+    auto new_args = shared_ptr<tuple>(new tuple(std::move(n_arg_list)));
+    return shared_ptr<apply>(new apply(n_fn, new_args));
 }
     
 functorize::result_type functorize::operator()(const suite &n) {
-    std::vector<std::shared_ptr<statement> > stmts;
+    vector<shared_ptr<statement> > stmts;
     for(auto i = n.begin(); i != n.end(); i++) {
-        auto p = std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i));
+        auto p = static_pointer_cast<statement>(boost::apply_visitor(*this, *i));
         stmts.push_back(p);
         while(m_additionals.size() > 0) {
-            auto p = std::static_pointer_cast<statement>(m_additionals.back());
+            auto p = static_pointer_cast<statement>(m_additionals.back());
             stmts.push_back(p);
             m_additionals.pop_back();
         }
@@ -223,35 +233,40 @@ functorize::result_type functorize::operator()(const suite &n) {
             std::move(stmts)));
 }
 functorize::result_type functorize::operator()(const procedure &n) {
-    auto n_proc = std::static_pointer_cast<procedure>(this->rewriter::operator()(n));
+    auto n_proc = static_pointer_cast<procedure>(this->rewriter::operator()(n));
     if (n_proc->id().id() != m_entry_point) {
         //Add result_type declaration
         assert(detail::isinstance<ctype::fn_t>(n.ctype()));
         const ctype::fn_t& n_t = boost::get<const ctype::fn_t&>(
             n.ctype());
-        std::shared_ptr<ctype::type_t> origin = n_t.p_result();
-        std::shared_ptr<ctype::type_t> rename(
+        shared_ptr<ctype::type_t> origin = n_t.p_result();
+        shared_ptr<ctype::type_t> rename(
             new ctype::monotype_t("result_type"));
-        std::shared_ptr<typedefn> res_defn(
+        shared_ptr<typedefn> res_defn(
             new typedefn(origin, rename));
 
             
-        std::shared_ptr<tuple> forward_args = std::static_pointer_cast<tuple>(this->rewriter::operator()(n_proc->args()));
-        std::shared_ptr<name> forward_name = std::static_pointer_cast<name>(this->rewriter::operator()(n_proc->id()));
-        std::shared_ptr<apply> op_call(new apply(forward_name, forward_args));
-        std::shared_ptr<ret> op_ret(new ret(op_call));
-        std::vector<std::shared_ptr<statement> > op_body_stmts{op_ret};
-        std::shared_ptr<suite> op_body(new suite(std::move(op_body_stmts)));
-        auto op_args = std::static_pointer_cast<tuple>(this->rewriter::operator()(n.args()));
-        std::shared_ptr<name> op_id(new name(std::string("operator()")));
-        std::shared_ptr<procedure> op(
+        shared_ptr<tuple> forward_args = static_pointer_cast<tuple>(this->rewriter::operator()(n_proc->args()));
+        shared_ptr<name> forward_name = static_pointer_cast<name>(this->rewriter::operator()(n_proc->id()));
+        shared_ptr<apply> op_call(new apply(forward_name, forward_args));
+        shared_ptr<ret> op_ret(new ret(op_call));
+        vector<shared_ptr<statement> > op_body_stmts =
+            make_vector<shared_ptr<statement> >(op_ret);
+        shared_ptr<suite> op_body(new suite(std::move(op_body_stmts)));
+        auto op_args = static_pointer_cast<tuple>(this->rewriter::operator()(n.args()));
+        shared_ptr<name> op_id(new name(string("operator()")));
+        shared_ptr<procedure> op(
             new procedure(
                 op_id, op_args, op_body,
                 n.p_type(),
                 n.p_ctype()));
-        std::shared_ptr<suite> st_body(new suite(std::vector<std::shared_ptr<statement> >{res_defn, op}));
-        std::shared_ptr<name> st_id(new name(detail::fnize_id(n_proc->id().id())));
-        std::shared_ptr<structure> st(new structure(st_id, st_body));
+        shared_ptr<suite> st_body =
+            make_shared<suite>(
+                make_vector<shared_ptr<statement> >(res_defn)(op));
+        shared_ptr<name> st_id =
+            make_shared<name>(detail::fnize_id(n_proc->id().id()));
+        shared_ptr<structure> st =
+            make_shared<structure>(st_id, st_body);
         m_additionals.push_back(st);
         m_fns.insert(n_proc->id().id());
     }

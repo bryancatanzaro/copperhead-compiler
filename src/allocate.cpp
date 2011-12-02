@@ -6,13 +6,15 @@ using std::make_shared;
 using std::move;
 using std::string;
 using std::static_pointer_cast;
+using backend::utility::make_vector;
+
 
 namespace backend {
 
 
 allocate::allocate(const string& entry_point) : m_entry_point(entry_point),
                                                      m_in_entry(false),
-                                                     m_allocations{}
+                                                m_allocations()
         {}
 
 allocate::result_type allocate::operator()(const procedure &n) {
@@ -72,17 +74,17 @@ allocate::result_type allocate::operator()(const bind &n) {
             pre_lhs_ct.p_sub();
         shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct =
             make_shared<ctype::tuple_t>(
-                vector<shared_ptr<ctype::type_t> >{sub_lhs_ct});
+                make_vector<shared_ptr<ctype::type_t> >(sub_lhs_ct));
         shared_ptr<ctype::type_t> result_ct =
             make_shared<ctype::templated_t>(
                 make_shared<ctype::monotype_t>(
                     "boost::shared_ptr"),
-                vector<shared_ptr<ctype::type_t> >{
+                make_vector<shared_ptr<ctype::type_t> >(
                     make_shared<ctype::templated_t>(
                         make_shared<ctype::monotype_t>(
                             "cuarray"),
-                        vector<shared_ptr<ctype::type_t> >{
-                            sub_lhs_ct})});
+                        make_vector<shared_ptr<ctype::type_t> >(
+                            sub_lhs_ct))));
         shared_ptr<type_t> result_t =
             pre_lhs.p_type();
         shared_ptr<name> result_name = make_shared<name>(
@@ -107,7 +109,7 @@ allocate::result_type allocate::operator()(const bind &n) {
                 tuple_sub_lhs_ct);
         shared_ptr<tuple> getter_args =
             make_shared<tuple>(
-                vector<shared_ptr<expression> >{result_name});
+                make_vector<shared_ptr<expression> >(result_name));
         shared_ptr<apply> getter_call =
             make_shared<apply>(getter_name, getter_args);
         shared_ptr<bind> retriever =

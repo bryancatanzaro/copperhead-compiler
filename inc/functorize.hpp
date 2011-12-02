@@ -5,6 +5,7 @@
 #include "rewriter.hpp"
 #include "utility/isinstance.hpp"
 #include "utility/markers.hpp"
+#include "utility/initializers.hpp"
 #include "import/library.hpp"
 #include "type_convert.hpp"
 
