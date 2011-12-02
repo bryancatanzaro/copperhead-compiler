@@ -64,9 +64,7 @@ public:
     void operator()(const cuarray_t &ct);
     
     void operator()(const polytype_t &pt);
-    
-    void operator()(const templated_t &tt);
-    
+        
     std::ostream &m_os;
 
     void sep() const;

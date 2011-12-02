@@ -121,14 +121,14 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 new ctype::fn_t(new_wrap_args_ct, new_wrap_res_ct));
 
             new_res_ct =
-                make_shared<ctype::templated_t>(
-                    make_shared<ctype::monotype_t>(
-                        "boost::shared_ptr"),
+                make_shared<ctype::polytype_t>(
                     make_vector<shared_ptr<ctype::type_t> >(
-                        make_shared<ctype::templated_t>(
-                            make_shared<ctype::monotype_t>("cuarray"),
+                        make_shared<ctype::polytype_t>(
                             make_vector<shared_ptr<ctype::type_t> >(
-                                sub_res_t))));
+                                sub_res_t),
+                            make_shared<ctype::monotype_t>("cuarray"))),
+                    make_shared<ctype::monotype_t>(
+                        "boost::shared_ptr"));
             new_ct = make_shared<ctype::fn_t>(
                 new_args_ct,
                 new_res_ct);

@@ -45,16 +45,6 @@ public:
         
 };
 
-
-// struct scalar
-//     : public fn_info {
-// public:
-//     scalar(const std::string &name)
-//         : fn_info(name, iteration_structure::scalar) {}
-// };
-
-
-
 struct library {
 private:
     std::map<ident, fn_info> m_fns;

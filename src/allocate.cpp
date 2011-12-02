@@ -76,15 +76,15 @@ allocate::result_type allocate::operator()(const bind &n) {
             make_shared<ctype::tuple_t>(
                 make_vector<shared_ptr<ctype::type_t> >(sub_lhs_ct));
         shared_ptr<ctype::type_t> result_ct =
-            make_shared<ctype::templated_t>(
-                make_shared<ctype::monotype_t>(
-                    "boost::shared_ptr"),
+            make_shared<ctype::polytype_t>(
                 make_vector<shared_ptr<ctype::type_t> >(
-                    make_shared<ctype::templated_t>(
-                        make_shared<ctype::monotype_t>(
-                            "cuarray"),
+                    make_shared<ctype::polytype_t>(
                         make_vector<shared_ptr<ctype::type_t> >(
-                            sub_lhs_ct))));
+                            sub_lhs_ct),
+                        make_shared<ctype::monotype_t>(
+                            "cuarray"))),
+                make_shared<ctype::monotype_t>(
+                    "boost::shared_ptr"));
         shared_ptr<type_t> result_t =
             pre_lhs.p_type();
         shared_ptr<name> result_name = make_shared<name>(

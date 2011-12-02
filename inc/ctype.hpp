@@ -4,6 +4,7 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <memory>
 #include <iostream>
+#include "utility/initializers.hpp"
 
 namespace backend {
 
@@ -15,7 +16,6 @@ class sequence_t;
 class tuple_t;
 class fn_t;
 class cuarray_t;
-class templated_t;
 
 namespace detail {
 typedef boost::variant<
@@ -24,8 +24,7 @@ typedef boost::variant<
     sequence_t &,
     tuple_t &,
     fn_t &,
-    cuarray_t &,
-    templated_t &
+    cuarray_t &
     > type_base;
 
 struct make_type_base_visitor
@@ -84,13 +83,14 @@ class monotype_t :
 {
 protected:
     const std::string m_name;
-   
+    std::vector<std::shared_ptr<type_t> > m_params;
 public:
-    //! Constructor
-/*! 
-  \param name Name of type.
+    //! Basic onstructor
+/*! This constructor is used for simple monotypes with no subtypes.
+  \param name The name of type.
 */
     monotype_t(const std::string &name);
+    
     //! Derived constructor
 /*! To be called during construction of derived object
   
@@ -104,9 +104,39 @@ public:
         : type_t(self),
           m_name(name)
         {}
+
+    //! Derived constructor
+/*! This constructor is instantiated by subclasses during
+ *  construction. It accepts a list of subtypes that define this
+ *  type. For example, Seq(Seq(Int)) is a nested type, and
+ *  constructing it requires defining subtypes.
+ 
+  
+  \param self Reference to derived object being constructed.
+  \param name The name of the type.
+  \param params List of subtypes.
+*/
+    template<typename Derived>
+    monotype_t(Derived& self,
+               const std::string &name,
+               std::vector<std::shared_ptr<type_t> > &&params)
+        : type_t(self), m_name(name), m_params(std::move(params)) {}
+    
     //! Gets name of type.
     const std::string& name(void) const;
-
+    //! Type of iterator to subtypes in this monotype
+    typedef decltype(boost::make_indirect_iterator(m_params.cbegin())) const_iterator;
+    //! Iterator to the beginning of the subtypes contained in this monotype
+    const_iterator begin() const;
+    //! Iterator to the end of the subtypes contained in this monotype
+    const_iterator end() const;
+    typedef decltype(m_params.cbegin()) const_ptr_iterator;
+    //! Gets an iterator to the pointer of the first type held by this tuple
+    const_ptr_iterator p_begin() const;
+    //! Gets an iterator to the pointer of the last type held by this tuple
+    const_ptr_iterator p_end() const;
+    //! Number of subtypes in this monotype. Returns 0 for non-nested types.
+    int size() const;
 };
 
 extern std::shared_ptr<monotype_t> int32_mt;
@@ -123,8 +153,6 @@ extern std::shared_ptr<monotype_t> void_mt;
 class sequence_t :
         public monotype_t
 {
-protected:
-    std::shared_ptr<type_t> m_sub;
 public:
     //! Basic constructor
 /*!   
@@ -142,8 +170,10 @@ public:
     template<typename Derived>
     sequence_t(Derived &self,
                       const std::string& name,
-                      const std::shared_ptr<type_t> &sub) :
-        monotype_t(self, name), m_sub(sub) {}
+                      const std::shared_ptr<type_t>& sub) :
+        monotype_t(self,
+                   name,
+                   utility::make_vector<std::shared_ptr<type_t> >(sub)) {}
     //! Gets the type of the element of the Sequence
     const type_t& sub() const;
     //! Gets a pointer to the type of the element of the Sequence
@@ -154,35 +184,18 @@ public:
 class tuple_t :
         public monotype_t
 {
-private:
-    std::vector<std::shared_ptr<type_t> > m_sub;
 public:
     //! Constructor
 /*! 
   \param sub A vector of types contained in this tuple.
 */
-    tuple_t(std::vector<std::shared_ptr<type_t> > && sub);
-    //! An iterator type over the tuple subtypes
-    typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
-    //! Gets an iterator to the first type held by this tuple
-    const_iterator begin() const;
-    //! Gets an iterator to the last type held by this tuple
-    const_iterator end() const;
-    //! An iterator type over the pointers holding the tuple subtypes
-    typedef decltype(m_sub.cbegin()) const_ptr_iterator;
-    //! Gets an iterator to the pointer of the first type held by this tuple
-    const_ptr_iterator p_begin() const;
-    //! Gets an iterator to the pointer of the last type held by this tuple
-    const_ptr_iterator p_end() const;
+    tuple_t(std::vector<std::shared_ptr<type_t> > && sub);  
 };
 
 //! Function type
 class fn_t :
         public monotype_t
 {
-private:
-    std::shared_ptr<tuple_t> m_args;
-    std::shared_ptr<type_t> m_result;
 public:
     //! Constructor
 /*! 
@@ -190,7 +203,7 @@ public:
   \param result Result type.
 */
     fn_t(const std::shared_ptr<tuple_t> args,
-                const std::shared_ptr<type_t> result);
+         const std::shared_ptr<type_t> result);
     //! Gets the tuple of argument types.
     const tuple_t& args() const;
     //! Gets the result type.
@@ -199,13 +212,6 @@ public:
     std::shared_ptr<tuple_t> p_args() const;
     //! Gets a pointer to the result type.
     std::shared_ptr<type_t> p_result() const;
-};
-
-//! Polymorphic type
-/*! This is currently a stub. */
-class polytype_t :
-        public type_t {
-    polytype_t();
 };
 
 //! Cuarray type
@@ -217,26 +223,46 @@ public:
     cuarray_t(const std::shared_ptr<type_t> sub);
 };
 
-//! Templated type
-/*! This represents a type which is templated by other types.
-  Perhaps this should become the implementation for
-  \ref backend::ctype::polytype_t "polytype_t"
- */
-class templated_t
+//! Polymorphic type
+/* This is translated into C++ templated types.
+
+*/
+class polytype_t
     : public type_t {
 private:
-    std::shared_ptr<type_t> m_base;
-    std::vector<std::shared_ptr<type_t> > m_sub;
-public:
-    templated_t(std::shared_ptr<type_t> base, std::vector<std::shared_ptr<type_t> > && sub);
+    std::vector<std::shared_ptr<type_t> > m_vars;
+    std::shared_ptr<monotype_t> m_monotype;
 
-    const type_t& base() const;
-    std::shared_ptr<type_t> p_base() const;
-    typedef decltype(boost::make_indirect_iterator(m_sub.cbegin())) const_iterator;
+public:
+    //! Constructor
+/*! 
+  
+  \param vars Variables to instantiate type with.  Note that in
+  contrast to the Copperhead \ref backend::polytype_t, the
+  C++ \ref backend::ctype::polytype_t can be nested, which is why this
+  is a \p vector of \ref backend::ctype::type_t rather than
+  a \p vector of \ref backend::ctype::monotype_t.
+  is a vector \param monotype Base type
+  
+  \return 
+*/
+    polytype_t(std::vector<std::shared_ptr<type_t> >&& vars,
+               std::shared_ptr<monotype_t> monotype);
+//! Gets base type
+    const monotype_t& monotype() const;
+    //! Gets \p std::shared_ptr to base type
+    std::shared_ptr<monotype_t> p_monotype() const;
+    //! Type of iterator to type variables
+    typedef decltype(boost::make_indirect_iterator(m_vars.cbegin())) const_iterator;
+    //! Iterator to beginning of type variables
     const_iterator begin() const;
+    //! Iterator to end of type variables
     const_iterator end() const;
-    typedef decltype(m_sub.cbegin()) const_ptr_iterator;
+    //! Type of iterator to std::shared_ptr objects which hold type variables
+    typedef decltype(m_vars.cbegin()) const_ptr_iterator;
+    //! Iterator to beginning of pointers of type variables
     const_ptr_iterator p_begin() const;
+    //! Iterator to end of pointers of type variables
     const_ptr_iterator p_end() const;
 };
 

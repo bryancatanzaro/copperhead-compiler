@@ -63,17 +63,16 @@ void ctype_printer::operator()(const cuarray_t &ct) {
     this->operator()((monotype_t)ct);
     m_need_space.top() = false;
 }
+
 void ctype_printer::operator()(const polytype_t &pt) {
-}
-void ctype_printer::operator()(const templated_t &tt) {
-    boost::apply_visitor(*this, tt.base());
+    boost::apply_visitor(*this, pt.monotype());
     m_os << "<";
     m_need_space.push(false);
-    for(auto i = tt.begin();
-        i != tt.end();
+    for(auto i = pt.begin();
+        i != pt.end();
         i++) {
         boost::apply_visitor(*this, *i);
-        if (std::next(i) != tt.end()) {
+        if (std::next(i) != pt.end()) {
             m_os << ", ";
         }
     }
