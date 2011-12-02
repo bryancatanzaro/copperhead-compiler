@@ -9,7 +9,10 @@ using std::set;
 using std::map;
 using std::string;
 using std::pair;
+using std::make_pair;
 using std::stringstream;
+using backend::utility::make_vector;
+using backend::utility::make_set;
 
 namespace backend {
 
@@ -84,9 +87,9 @@ void declare_maps(int max_arity, map<ident, fn_info>& fns) {
         map_phases.push_back(map_phase);
     }
     for(int i = 0; i < max_arity; i++) {
-        fns.insert(pair<ident, fn_info>{
-                ident{map_ids[i], iteration_structure::independent},
-                    fn_info(map_types[i], map_phases[i])});
+        fns.insert(make_pair(
+                       make_pair(map_ids[i], iteration_structure::independent),
+                       fn_info(map_types[i], map_phases[i])));
     }
                         
 }
@@ -97,26 +100,26 @@ void declare_scans(map<ident, fn_info>& fns) {
     shared_ptr<monotype_t> bin_fn_t =
         make_shared<fn_t>(
             make_shared<tuple_t>(
-                vector<shared_ptr<type_t> >{t_a, t_a}),
+                make_vector<shared_ptr<type_t> >(t_a)(t_a)),
             t_a);
     shared_ptr<polytype_t> scan_t =
         make_shared<polytype_t>(
-            vector<shared_ptr<monotype_t> >{t_a},
+            make_vector<shared_ptr<monotype_t> >(t_a),
             make_shared<fn_t>(
                 make_shared<tuple_t>(
-                    vector<shared_ptr<type_t> >{bin_fn_t, seq_t_a}),
+                    make_vector<shared_ptr<type_t> >(bin_fn_t)(seq_t_a)),
                 seq_t_a));
     shared_ptr<phase_t> scan_phase_t =
         make_shared<phase_t>(
-            vector<completion>{completion::invariant, completion::local},
+            make_vector<completion>(completion::invariant)(completion::local),
             completion::total);
     
-    fns.insert(pair<ident, fn_info>{
-            ident{"scan", iteration_structure::independent},
-                fn_info(scan_t, scan_phase_t)});
-    fns.insert(pair<ident, fn_info>{
-            ident{"rscan", iteration_structure::independent},
-                fn_info(scan_t, scan_phase_t)});
+    fns.insert(make_pair(
+                   make_pair("scan", iteration_structure::independent),
+                   fn_info(scan_t, scan_phase_t)));
+    fns.insert(make_pair(
+                   make_pair("rscan", iteration_structure::independent),
+                   fn_info(scan_t, scan_phase_t)));
 }
 
 void declare_permutes(map<ident, fn_info>& fns) {
@@ -125,18 +128,18 @@ void declare_permutes(map<ident, fn_info>& fns) {
     shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int32_mt);
     shared_ptr<polytype_t> permute_t =
         make_shared<polytype_t>(
-            vector<shared_ptr<monotype_t> >{t_a},
+            make_vector<shared_ptr<monotype_t> >(t_a),
             make_shared<fn_t>(
                 make_shared<tuple_t>(
-                    vector<shared_ptr<type_t> >{seq_t_a, seq_int}),
+                    make_vector<shared_ptr<type_t> >(seq_t_a)(seq_int)),
                 seq_t_a));
     shared_ptr<phase_t> permute_phase_t =
         make_shared<phase_t>(
-            vector<completion>{completion::total, completion::local},
+            make_vector<completion>(completion::total)(completion::local),
             completion::total);
-    fns.insert(pair<ident, fn_info>{
-            ident{"permute", iteration_structure::independent},
-                fn_info(permute_t, permute_phase_t)});
+    fns.insert(make_pair(
+                   make_pair("permute", iteration_structure::independent),
+                   fn_info(permute_t, permute_phase_t)));
 }
 
 void declare_special_sequences(map<ident, fn_info>& fns) {
@@ -145,18 +148,18 @@ void declare_special_sequences(map<ident, fn_info>& fns) {
     shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int32_mt);
     shared_ptr<polytype_t> indices_t =
         make_shared<polytype_t>(
-            vector<shared_ptr<monotype_t> >{t_a},
+            make_vector<shared_ptr<monotype_t> >(t_a),
             make_shared<fn_t>(
                 make_shared<tuple_t>(
-                    vector<shared_ptr<type_t> >{seq_t_a}),
+                    make_vector<shared_ptr<type_t> >(seq_t_a)),
                 seq_int));
     shared_ptr<phase_t> indices_phase_t =
         make_shared<phase_t>(
-            vector<completion>{completion::local},
+            make_vector<completion>(completion::local),
             completion::local);
-    fns.insert(pair<ident, fn_info>{
-            ident{"indices", iteration_structure::independent},
-                fn_info(indices_t, indices_phase_t)});
+    fns.insert(make_pair(
+                   make_pair("indices", iteration_structure::independent),
+                   fn_info(indices_t, indices_phase_t)));
 }
 
 void declare_transforms(map<ident, fn_info>& fns) {
@@ -167,15 +170,15 @@ void declare_transforms(map<ident, fn_info>& fns) {
             vector<shared_ptr<monotype_t> >{t_a},
             make_shared<fn_t>(
                 make_shared<tuple_t>(
-                    vector<shared_ptr<type_t> >{seq_t_a}),
+                    make_vector<shared_ptr<type_t> >(seq_t_a)),
                 seq_t_a));
     shared_ptr<phase_t> adj_phase_t =
         make_shared<phase_t>(
-            vector<completion>{completion::total},
+            make_vector<completion>(completion::total),
             completion::total);
-    fns.insert(pair<ident, fn_info>{
-            ident{"adjacent_difference", iteration_structure::independent},
-                fn_info(adj_t, adj_phase_t)});
+    fns.insert(make_pair(
+                   make_pair("adjacent_difference", iteration_structure::independent),
+                   fn_info(adj_t, adj_phase_t)));
 }
 
 
@@ -207,7 +210,7 @@ shared_ptr<library> get_thrust() {
     }
     return shared_ptr<library>(
         new library(move(exported_fns),
-                    set<string>{string(THRUST_FILE)},
+                    make_set<string>(string(THRUST_FILE)),
                     move(include_paths)));
 }
 

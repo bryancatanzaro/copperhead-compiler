@@ -6,6 +6,7 @@ using std::shared_ptr;
 using std::make_shared;
 using std::static_pointer_cast;
 using std::move;
+using backend::utility::make_vector;
 
 namespace backend {
 
@@ -48,26 +49,27 @@ wrap::result_type wrap::operator()(const procedure &n) {
                              t, ct));
                 wrapper_args.push_back(wrapped_name);
                     
-                shared_ptr<ctype::tuple_t> tuple_sub_ct(
-                    new ctype::tuple_t(
-                        vector<shared_ptr<ctype::type_t> >{
-                            sub_ct}));
-                shared_ptr<templated_name> getter_name(
-                    new templated_name(detail::get_remote_r(),
-                                       tuple_sub_ct));
-                shared_ptr<tuple_t> wrapped_tuple_t(
-                    new tuple_t(
-                        vector<shared_ptr<type_t> >{t}));
-                shared_ptr<ctype::tuple_t> wrapped_tuple_ct(
-                    new ctype::tuple_t(
-                        vector<shared_ptr<ctype::type_t> >{ct}));
-                shared_ptr<tuple> wrapped_name_tuple(
-                    new tuple(
-                        vector<shared_ptr<expression> >{wrapped_name},
-                        wrapped_tuple_t, wrapped_tuple_ct));
-                shared_ptr<apply> getter_apply(
-                    new apply(getter_name,
-                              wrapped_name_tuple));
+                shared_ptr<ctype::tuple_t> tuple_sub_ct =
+                    make_shared<ctype::tuple_t>(
+                        make_vector<shared_ptr<ctype::type_t> >(
+                            sub_ct));
+                shared_ptr<templated_name> getter_name =
+                    make_shared<templated_name>(
+                        detail::get_remote_r(),
+                        tuple_sub_ct);
+                shared_ptr<tuple_t> wrapped_tuple_t =
+                    make_shared<tuple_t>(
+                        make_vector<shared_ptr<type_t> >(t));
+                shared_ptr<ctype::tuple_t> wrapped_tuple_ct =
+                    make_shared<ctype::tuple_t>(
+                        make_vector<shared_ptr<ctype::type_t> >(ct));
+                shared_ptr<tuple> wrapped_name_tuple =
+                    make_shared<tuple>(
+                        make_vector<shared_ptr<expression> >(wrapped_name),
+                        wrapped_tuple_t, wrapped_tuple_ct);
+                shared_ptr<apply> getter_apply =
+                    make_shared<apply>(getter_name,
+                                       wrapped_name_tuple);
                 getter_args.push_back(getter_apply);
             } else {
                 //Fallback
@@ -122,11 +124,11 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 make_shared<ctype::templated_t>(
                     make_shared<ctype::monotype_t>(
                         "boost::shared_ptr"),
-                    vector<shared_ptr<ctype::type_t> >{
+                    make_vector<shared_ptr<ctype::type_t> >(
                         make_shared<ctype::templated_t>(
                             make_shared<ctype::monotype_t>("cuarray"),
-                            vector<shared_ptr<ctype::type_t> >{
-                                sub_res_t})});
+                            make_vector<shared_ptr<ctype::type_t> >(
+                                sub_res_t))));
             new_ct = make_shared<ctype::fn_t>(
                 new_args_ct,
                 new_res_ct);
@@ -134,8 +136,8 @@ wrap::result_type wrap::operator()(const procedure &n) {
         } else {
             shared_ptr<ctype::type_t> new_res_ct =
                 p_previous_c_res_t;
-            new_wrap_ct = shared_ptr<ctype::fn_t>(
-                new ctype::fn_t(new_wrap_args_ct, new_res_ct));
+            new_wrap_ct = make_shared<ctype::fn_t>(
+                new_wrap_args_ct, new_res_ct);
             new_ct = p_previous_c_t;
         }
 
@@ -164,26 +166,27 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 make_shared<apply>(
                     make_shared<name>("wrap_cuarray"),
                     make_shared<tuple>(
-                        vector<shared_ptr<expression> >{
-                            result_id})));
+                        make_vector<shared_ptr<expression> >(
+                            result_id))));
         shared_ptr<suite> wrapper_stmts =
             make_shared<suite>(
-                vector<shared_ptr<statement> >{
-                    make_the_call,
-                        dynamize});
-        shared_ptr<tuple> wrapper_args_tuple(
-            new tuple(move(wrapper_args)));
+                make_vector<shared_ptr<statement> >
+                (make_the_call)
+                (dynamize));
+        shared_ptr<tuple> wrapper_args_tuple =
+            make_shared<tuple>(
+                move(wrapper_args));
         shared_ptr<procedure> completed_wrapper =
             make_shared<procedure>(wrapper_proc_id,
-                                        wrapper_args_tuple,
-                                        wrapper_stmts,
-                                        t, new_wrap_ct, "");
+                                   wrapper_args_tuple,
+                                   wrapper_stmts,
+                                   t, new_wrap_ct, "");
         m_wrapper = completed_wrapper;
         m_wrap_decl =
             make_shared<procedure>(
                 wrapper_proc_id,
                 wrapper_args_tuple,
-                make_shared<suite>(vector<shared_ptr<statement> >{}),
+                make_shared<suite>(make_vector<shared_ptr<statement> >()),
                 t,
                 new_wrap_ct,
                 "");
@@ -212,11 +215,11 @@ wrap::result_type wrap::operator()(const ret& n) {
             boost::get<const name&>(n.val());
         if (detail::isinstance<ctype::sequence_t,
                                ctype::type_t>(val.ctype())) {
-            shared_ptr<name> array_wrapped(
-                new name(
+            shared_ptr<name> array_wrapped =
+                make_shared<name>(
                     detail::wrap_array_id(val.id()),
                     val.p_type(),
-                    val.p_ctype()));
+                    val.p_ctype());
             return result_type(new ret(array_wrapped));
         }
     }
