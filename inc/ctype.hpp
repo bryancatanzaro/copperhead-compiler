@@ -224,9 +224,16 @@ public:
 };
 
 //! Polymorphic type
-/* This is translated into C++ templated types.
-
-*/
+/*! This is translated into C++ templated types.  Note that since C++
+   templated types can (and often are) nested, this type is somewhat
+   different from its analogue Copperhead
+   type \ref backend::polytype_t.  Specifically, instead of accepting
+   a vector of monotypes, it accepts
+   both \ref backend::ctype::monotype_t and backend::ctype::polytype_t
+   objects as type variables.
+   
+   This reflects the less restrictive type system of C++ compared to
+   Copperhead.  */
 class polytype_t
     : public type_t {
 private:
@@ -242,7 +249,8 @@ public:
   C++ \ref backend::ctype::polytype_t can be nested, which is why this
   is a \p vector of \ref backend::ctype::type_t rather than
   a \p vector of \ref backend::ctype::monotype_t.
-  is a vector \param monotype Base type
+
+  \param monotype Base type
   
   \return 
 */
