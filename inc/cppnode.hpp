@@ -22,15 +22,19 @@ class structure
 protected:
     std::shared_ptr<name> m_id;
     std::shared_ptr<suite> m_stmts;
+    const std::vector<std::shared_ptr<ctype::type_t> > m_typevars;
 public:
     //! Constructor
 /*! 
   
   \param name Name of the structure
   \param stmts Statements inside the structure
+  \param typevars Template arguments, if any (optional)
 */
     structure(const std::shared_ptr<name> &name,
-              const std::shared_ptr<suite> &stmts);
+              const std::shared_ptr<suite> &stmts,
+              std::vector<std::shared_ptr<ctype::type_t> > &&typevars =
+              std::vector<std::shared_ptr<ctype::type_t> >());
     //! Gets the name of the structure 
 /*! 
   \return The name of the structure
@@ -41,6 +45,13 @@ public:
   \return The statements inside the structure
 */
     const suite& stmts(void) const;
+
+    //! Iterator type for accessing template arguments
+    typedef decltype(boost::make_indirect_iterator(m_typevars.cbegin())) const_iterator;
+    //! Gets iterator to beginning of template arguments
+    const_iterator begin(void) const;
+    //! Gets iterator to end of template arguments
+    const_iterator end(void) const;
 };
 
 //! A templated name, such as shared_ptr<int>

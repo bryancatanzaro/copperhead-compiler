@@ -22,6 +22,36 @@ private:
     environment<std::string> declared;
     ctype::ctype_printer tp;
     bool m_in_rhs;
+    bool m_in_struct;
+    //! Prints template declarations
+    /*! \tparam I Iterator type to template types
+      \param begin Iterator to beginning of template types.
+      \param end Iterator to end of template types.
+    */
+    template<typename I>
+    void print_template_decl(const I& begin, const I& end) {
+        m_os << "template<";
+        for(auto i = begin;
+            i != end;
+            i++) {
+            m_os << "typename ";
+            boost::apply_visitor(tp, *i);
+            if (std::next(i) != end) {
+                m_os << ", ";
+            }
+        }
+        m_os << ">" << std::endl;
+    }
+    //! Print return type of procedure
+/*! 
+  
+  \param mt Monotype of procedure
+  \param n The procedure node itself
+*/
+    void print_proc_return(const ctype::monotype_t& mt,
+                           const procedure& n);
+
+        
 public:
     cuda_printer(const std::string &entry_point,
                  const registry& globals,

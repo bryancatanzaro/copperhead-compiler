@@ -1,17 +1,30 @@
 #include "cppnode.hpp"
 
+using std::shared_ptr;
+using std::make_shared;
+using std::vector;
+
 namespace backend {
 
 structure::structure(const std::shared_ptr<name> &name,
-                     const std::shared_ptr<suite> &stmts)
+                     const std::shared_ptr<suite> &stmts,
+                     std::vector<shared_ptr<ctype::type_t> >&& typevars)
     : statement(*this),
       m_id(name),
-      m_stmts(stmts) {}
+      m_stmts(stmts),
+      m_typevars(std::move(typevars)) {}
 const name& structure::id(void) const {
     return *m_id;
 }
 const suite& structure::stmts(void) const {
     return *m_stmts;
+}
+structure::const_iterator structure::begin(void) const {
+    return boost::make_indirect_iterator(m_typevars.cbegin());
+}
+
+structure::const_iterator structure::end(void) const {
+    return boost::make_indirect_iterator(m_typevars.cend());
 }
 
 templated_name::templated_name(const std::string &id,

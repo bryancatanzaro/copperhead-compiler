@@ -27,6 +27,12 @@ private:
 
     std::shared_ptr<type_t> m_working;
     type_map& m_corresponded;
+    //! Helper function to find return type of a procedure
+/*! 
+  \param n Procedure to be inspected
+  \return A pointer to the C++ implementation type of the procedure
+*/
+    std::shared_ptr<ctype::type_t> get_return_type(const procedure& n);
 public:
     //! Constructor
 /*! 
