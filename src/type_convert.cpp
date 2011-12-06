@@ -87,5 +87,14 @@ type_convert::result_type type_convert::operator()(const name &p) {
     return result;
 }
 
+type_convert::result_type type_convert::operator()(const literal &p) {
+    shared_ptr<type_t> t = p.p_type();
+        
+    //Yes, I really want to make a ctype from a type. That's the point!
+    shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
+    result_type result(new literal(p.id(), t, ct));
+    return result;
+}
+
 
 }

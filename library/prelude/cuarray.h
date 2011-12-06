@@ -60,6 +60,13 @@ class cuarray_impl {
         clean_local = false;
         return m_d;
     }
+    T* get_view() {
+        retrieve();
+        return m_h.data;
+    }
+    ssize_t get_size() const {
+        return m_h.length;
+    }
 };
 
 template<typename T>
@@ -131,7 +138,15 @@ cuarray<T>& cuarray<T>::operator=(const cuarray<T>& r) {
     return *this;
 }
 
+template<typename T>
+T* cuarray<T>::get_view() {
+    return m_impl->get_view();
+}
 
+template<typename T>
+ssize_t cuarray<T>::get_size() const {
+    return m_impl->get_size();
+}
 
 
 

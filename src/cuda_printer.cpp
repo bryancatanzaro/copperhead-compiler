@@ -43,6 +43,13 @@ void cuda_printer::operator()(const templated_name &n) {
 }
     
 void cuda_printer::operator()(const literal &n) {
+    //If we've calculated a type for this literal, print it.
+    if ((detail::isinstance<ctype::monotype_t>(n.ctype())) &&
+        (detail::up_get<monotype_t>(n.ctype()).name() != "void")) {
+        m_os << "(";
+        boost::apply_visitor(tp, n.ctype());
+        m_os << ")";
+    }
     m_os << n.id();
 }
 
@@ -218,6 +225,8 @@ void cuda_printer::operator()(const structure &n) {
     declared.insert(n.id().id());
     //Do we have a templated struct?
     //If so, print the template declaration
+    std::cout << "Printing struct " << n.id().id() << std::endl;
+    std::cout << "  It has " << n.end() - n.begin() << " template arguments." << std::endl;
     if (n.begin() != n.end()) {
         print_template_decl(n.begin(), n.end());
     }

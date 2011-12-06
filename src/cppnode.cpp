@@ -26,6 +26,13 @@ structure::const_iterator structure::begin(void) const {
 structure::const_iterator structure::end(void) const {
     return boost::make_indirect_iterator(m_typevars.cend());
 }
+structure::const_ptr_iterator structure::p_begin(void) const {
+    return m_typevars.cbegin();
+}
+
+structure::const_ptr_iterator structure::p_end(void) const {
+    return m_typevars.cend();
+}
 
 templated_name::templated_name(const std::string &id,
                                const std::shared_ptr<ctype::tuple_t> &template_types,

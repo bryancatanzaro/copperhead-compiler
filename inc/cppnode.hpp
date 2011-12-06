@@ -52,6 +52,12 @@ public:
     const_iterator begin(void) const;
     //! Gets iterator to end of template arguments
     const_iterator end(void) const;
+    //! Iterator type for accessing pointers to template arguments
+    typedef decltype(m_typevars.cbegin()) const_ptr_iterator;
+    //! Gets iterator to beginning of pointers holding template arguments
+    const_ptr_iterator p_begin(void) const;
+    //! Gets iterator to end of pointers holding template arguments
+    const_ptr_iterator p_end(void) const;
 };
 
 //! A templated name, such as shared_ptr<int>

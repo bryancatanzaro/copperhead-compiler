@@ -56,6 +56,8 @@ public:
     result_type operator()(const procedure &p);
     //! Rewrite rule for \p name nodes
     result_type operator()(const name &p);
+    //! Rewrite rule for \p literal nodes
+    result_type operator()(const literal &p);
 };
 
 /*!
