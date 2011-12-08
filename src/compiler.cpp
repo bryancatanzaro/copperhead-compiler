@@ -25,7 +25,6 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
 #endif
     functorize functorizer(m_entry_point, m_registry);
     auto functorized = apply(functorizer, type_converted);
-    boost::apply_visitor(cp, *functorized);
 #ifdef TRACE
     std::cout << "Functorized" << std::endl;
 #endif

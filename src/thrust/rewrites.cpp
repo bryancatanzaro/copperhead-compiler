@@ -68,14 +68,42 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(const bind& n) {
             i++) {
             cts.push_back(i->p_ctype());
         }
-        //Can only deal with names in the body of a closure
-        assert(detail::isinstance<name>(close.body()));
-
-        const name& body = boost::get<const name&>(close.body());
-        string body_fn = detail::fnize_id(body.id());
+        //By this point, the body of the closure is an
+        //instantiated functor (which must be an apply node)
+        assert(detail::isinstance<apply>(close.body()));
+        const apply& inst_fctor =
+            boost::get<const apply&>(close.body());
+        stringstream os;
+        //It's either a plain name or a templated name
+        if (detail::isinstance<templated_name>(inst_fctor.fn())) {
+            const templated_name& tn =
+                boost::get<const templated_name&>(inst_fctor.fn());
+            os << tn.id() << "<";
+            const ctype::tuple_t& template_types =
+                tn.template_types();
+            for(auto i = template_types.begin();
+                i != template_types.end();
+                i++) {
+                //Template types contain ctype::monotype_t
+                assert(detail::isinstance<ctype::monotype_t>(*i));
+                const ctype::monotype_t& tmt =
+                    boost::get<const ctype::monotype_t&>(*i);
+                os << tmt.name();
+                if (std::next(i) != template_types.end()) {
+                    os << ", ";
+                }
+            }
+            os << "> ";
+        } else {
+            assert(detail::isinstance<name>(inst_fctor.fn()));
+            const name& fnn =
+                boost::get<const name&>(inst_fctor.fn());
+            os << fnn.id();
+        }
+        
         cts.push_back(
             make_shared<ctype::monotype_t>(
-                body_fn));
+                os.str()));
         fn_t = make_shared<ctype::polytype_t>(
             std::move(cts),
             closure_mt);

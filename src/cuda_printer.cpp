@@ -228,8 +228,6 @@ void cuda_printer::operator()(const structure &n) {
     declared.insert(n.id().id());
     //Do we have a templated struct?
     //If so, print the template declaration
-    std::cout << "Printing struct " << n.id().id() << std::endl;
-    std::cout << "  It has " << n.end() - n.begin() << " template arguments." << std::endl;
     if (n.begin() != n.end()) {
         print_template_decl(n.begin(), n.end());
     }
