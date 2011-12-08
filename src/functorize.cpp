@@ -66,6 +66,49 @@ void type_corresponder::operator()(const fn_t &n) {
     boost::apply_visitor(*this, n.result());
 }
 
+type_translator::type_translator(const type_translator::type_map& corresponded)
+    : m_corresponded(corresponded) {}
+
+type_translator::result_type
+type_translator::operator()(const monotype_t& m) const {
+    //Is monotype_t in type map?
+    if(m_corresponded.find(m.name()) != m_corresponded.end()) {
+        return m_corresponded.find(m.name())->second;
+    } else {
+        return result_type(new monotype_t(m.name()));
+    }
+}
+
+type_translator::result_type
+type_translator::operator()(const polytype_t& m) const {
+    //Shouldn't be called
+    assert(false);
+    return void_mt;
+}
+
+type_translator::result_type
+type_translator::operator()(const tuple_t& m) const {
+    vector<shared_ptr<type_t> > subs;
+    for(auto i = m.begin();
+        i != m.end();
+        i++) {
+        subs.push_back(boost::apply_visitor(*this, *i));
+    }
+    return result_type(new tuple_t(move(subs)));
+}
+
+type_translator::result_type
+type_translator::operator()(const sequence_t& m) const {
+    return result_type(new sequence_t(boost::apply_visitor(*this, m.sub())));
+}
+
+type_translator::result_type
+type_translator::operator()(const fn_t& m) const {
+    shared_ptr<tuple_t> new_args = static_pointer_cast<tuple_t>(
+        boost::apply_visitor(*this, m.args()));
+    shared_ptr<type_t> new_result = boost::apply_visitor(*this, m.result());
+    return result_type(new fn_t(new_args, new_result));
+}
 
 }
 
@@ -96,8 +139,10 @@ void functorize::make_type_map(const apply& n) {
         
 }
 
+
+
 shared_ptr<expression> functorize::instantiate_fn(const name& n,
-                                                       shared_ptr<type_t> p_t) {
+                                                  shared_ptr<type_t> p_t) {
     string id = n.id();
     const type_t& n_t = n.type();
     if (!detail::isinstance<polytype_t>(n_t)) {
@@ -130,13 +175,11 @@ shared_ptr<expression> functorize::instantiate_fn(const name& n,
         //The name of this type should be in the type map
         assert(fn_to_apl.find(fn_t_name)!=fn_to_apl.end());
         shared_ptr<type_t> apl_t = fn_to_apl.find(fn_t_name)->second;
-        //The value in the type map should be a monotype
-        assert(detail::isinstance<monotype_t>(*apl_t));
-        const monotype_t& apl_mt = boost::get<const monotype_t&>(*apl_t);
-        //This monotype must exist in the apply type map
-        assert(m_type_map.find(apl_mt.name())!=m_type_map.end());
+        //Instantiate this type with the other type map
         instantiated_types.push_back(
-            m_type_map.find(apl_mt.name())->second);
+            boost::apply_visitor(
+                detail::type_translator(m_type_map),
+                *apl_t));
     }
     vector<shared_ptr<ctype::type_t> > instantiated_ctypes;
     detail::cu_to_c ctc;
@@ -147,10 +190,11 @@ shared_ptr<expression> functorize::instantiate_fn(const name& n,
             boost::apply_visitor(ctc, **i));
     }
     return make_shared<apply>(
-        make_shared<templated_name>(detail::fnize_id(id),
-                                         make_shared<ctype::tuple_t>(move(instantiated_ctypes)),
-                                         n.p_type(),
-                                         n.p_ctype()),
+        make_shared<templated_name>(
+            detail::fnize_id(id),
+            make_shared<ctype::tuple_t>(move(instantiated_ctypes)),
+            n.p_type(),
+            n.p_ctype()),
         make_shared<tuple>(
             make_vector<shared_ptr<expression> >()));
 
@@ -196,14 +240,57 @@ functorize::result_type functorize::operator()(const apply &n) {
     for(auto n_arg = n_args.begin();
         n_arg != n_args.end();
         ++n_arg, ++arg_type) {
-        if (!(detail::isinstance<name>(*n_arg)))
-            //Fallback if we have something other than a name
-            //XXX This might not be necessary when we bind
-            //closure objects to identifiers in the program
+        if (detail::isinstance<closure>(*n_arg)) {
+            const closure& n_closure = boost::get<const closure&>(*n_arg);
+            //Can only close over function names
+            assert(detail::isinstance<name>(n_closure.body()));
+            const name& closed_fn = boost::get<const name&>(n_closure.body());
+            auto found = m_fns.find(closed_fn.id());
+            //Can only close over function names
+            assert(found != m_fns.end());
+
+            //Need to synthesize a new arg type that describes the
+            //type of the closure, not the type of the argument
+
+            //First, make sure the arg type is a function type
+            assert(detail::isinstance<fn_t>(**arg_type));
+            const fn_t& in_situ_fn_t =
+                boost::get<const fn_t&>(**arg_type);
+            const tuple_t& in_situ_fn_args_t =
+                in_situ_fn_t.args();
+            //Build the list of augmented arg types
+            //That include the types from the original fn args
+            //Plus the types of the closed over objects
+            //Starting with the ones that were given
+            vector<shared_ptr<type_t> > augmented_args_t(
+                in_situ_fn_args_t.p_begin(),
+                in_situ_fn_args_t.p_end());
+            //Translate arg types that were closed over, add
+            //to fn arg types.
+            for(auto i = n_closure.args().begin();
+                i != n_closure.args().end();
+                i++) {
+                augmented_args_t.push_back(
+                    boost::apply_visitor(
+                        detail::type_translator(
+                            m_type_map),
+                        i->type()));
+            }
+            shared_ptr<fn_t> augmented_fn_t =
+                make_shared<fn_t>(
+                    make_shared<tuple_t>(
+                        move(augmented_args_t)),
+                    in_situ_fn_t.p_result());
+            
+            shared_ptr<expression> instantiated_fn =
+                instantiate_fn(closed_fn, augmented_fn_t);
             n_arg_list.push_back(
-                static_pointer_cast<expression>(
-                    boost::apply_visitor(*this, *n_arg)));
-        else {
+                make_shared<closure>(
+                    n_closure.p_args(),
+                    instantiated_fn,
+                    n_closure.p_type(),
+                    n_closure.p_ctype()));
+        } else if (detail::isinstance<name>(*n_arg)) {
             const name& n_name = boost::get<const name&>(*n_arg);
             const string id = n_name.id();
             auto found = m_fns.find(id);
@@ -216,6 +303,12 @@ functorize::result_type functorize::operator()(const apply &n) {
                 n_arg_list.push_back(
                     instantiate_fn(n_name, *arg_type));
             }
+
+        } else {
+            //fallback
+            n_arg_list.push_back(
+                static_pointer_cast<expression>(
+                    boost::apply_visitor(*this, *n_arg)));
         }
     }
     auto n_fn = static_pointer_cast<name>(this->rewriter::operator()(n.fn()));

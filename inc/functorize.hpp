@@ -57,11 +57,39 @@ public:
     //! Don't harvest correspondences from any other types
     template<typename N>
     void operator()(const N &n) {
-    }
+    }  
+};
 
+//!Updates types from a type map
+/*! After constructing a type map, we need to translate types with the
+ *  type map.  For example:
+ *
+ *  Let's say we discovered that a -> Int
+ *  Then we need to translate Seq(a) to Seq(Int)
+ */
+class type_translator
+    : public boost::static_visitor<std::shared_ptr<type_t> > {
+private:
+    typedef std::map<std::string,
+                     std::shared_ptr<type_t> > type_map;
     
+    const type_map& m_corresponded;
+public:
+    //! Constructor
+/*! 
+  
+  \param corresponded Type map constructed previously
+*/
+    type_translator(const type_map& corresponded);
+    result_type operator()(const monotype_t &m) const;
+    result_type operator()(const polytype_t &p) const;
+    result_type operator()(const sequence_t &s) const;
+    result_type operator()(const tuple_t &t) const;
+    result_type operator()(const fn_t &f) const;
     
 };
+
+
 }
 
 /*! 

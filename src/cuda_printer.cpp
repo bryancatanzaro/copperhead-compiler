@@ -74,19 +74,22 @@ void cuda_printer::operator()(const closure &n) {
         boost::apply_visitor(tp, i->ctype());
         m_os << ", ";
     }
-    //Can only deal with names in the body of a closure
-    assert(detail::isinstance<name>(n.body()));
-    const name& body = boost::get<const name&>(n.body());
-    string body_fn = detail::fnize_id(body.id());
-    m_os << body_fn << ">(";
+    //functorize has ensured that the body of the
+    //closure is an instantiated functor object.
+    //Disassemble it to get the function type name
+    assert(detail::isinstance<apply>(n.body()));
+    boost::apply_visitor(
+        *this,
+        boost::get<const apply&>(n.body()).fn());
+    m_os << " >(";
     for(auto i = n.args().begin();
         i != n.args().end();
         i++) {
         boost::apply_visitor(*this, *i);
         m_os << ", ";
     }
-       
-    m_os << body_fn << "())";
+    boost::apply_visitor(*this, n.body());
+    m_os << ")";
 }
 void cuda_printer::operator()(const conditional &n) {
     m_os << "if (";
