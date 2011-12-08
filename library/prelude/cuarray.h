@@ -85,12 +85,12 @@ cuarray<T>::cuarray(ssize_t n, bool host) : m_impl(new cuarray_impl<T>()) {
     if (m_impl->clean_local) {
         T* h = new T[n];
         m_impl->m_h = stored_sequence<T>(h, n);
-        m_impl->m_d = stored_sequence<T>(NULL, 0);
+        m_impl->m_d = stored_sequence<T>(NULL, n);
     } else {
         T* d;
         cudaMalloc(&d, sizeof(T) * n);
         m_impl->m_d = stored_sequence<T>(d, n);
-        m_impl->m_h = stored_sequence<T>(NULL, 0);    
+        m_impl->m_h = stored_sequence<T>(NULL, n);    
     }
 }
 
@@ -101,7 +101,7 @@ cuarray<T>::cuarray(ssize_t n, T* h_s) : m_impl(new cuarray_impl<T>()) {
     T* h = new T[n];
     memcpy(h, h_s, sizeof(T) * n);
     m_impl->m_h = stored_sequence<T>(h, n);
-    m_impl->m_d = stored_sequence<T>(NULL, 0);
+    m_impl->m_d = stored_sequence<T>(NULL, n);
 }
     
     /* cuarray(stored_sequence<T> _h, */
@@ -139,6 +139,12 @@ cuarray<T>& cuarray<T>::operator=(const cuarray<T>& r) {
 }
 
 template<typename T>
+T& cuarray<T>::operator[](const ssize_t& i) {
+    m_impl->retrieve();
+    return m_impl->m_h[i];
+}
+
+template<typename T>
 T* cuarray<T>::get_view() {
     return m_impl->get_view();
 }
@@ -160,7 +166,7 @@ template class cuarray<double>;
 
 
 template<typename T>
-stored_sequence<T> get_remote_r(sp_cuarray_var &in) {
+stored_sequence<T> get_remote_r(sp_cuarray_var &in) {    
     return boost::get<cuarray<T> >(*in).m_impl->get_remote_r();
 };
 

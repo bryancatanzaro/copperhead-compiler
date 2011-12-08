@@ -42,6 +42,7 @@ class cuarray {
     cuarray(ssize_t n, T*);
     cuarray(const cuarray<T>& r);
     cuarray& operator=(const cuarray<T>& r);
+    T& operator[](const ssize_t& index);
     void swap(cuarray<T>& r);
     T* get_view();
     ssize_t get_size() const;
