@@ -6,3 +6,4 @@
 #include "map.h"
 #include "indices.h"
 #include "permute.h"
+#include "reduce.h"

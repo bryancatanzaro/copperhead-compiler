@@ -19,7 +19,6 @@ wrap::wrap(const string& entry_point) : m_entry_point(entry_point),
 
 
 wrap::result_type wrap::operator()(const procedure &n) {
-    std::cout << "Wrapping procedure" << std::endl;
     if (n.id().id()  == m_entry_point) {
         m_wrapping = true;
                         
@@ -83,7 +82,6 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 getter_args.push_back(passed);                    
             }
         }
-        std::cout << "  Successfully wrapped arguments" << std::endl;
 
         //Derive the new output c type of the wrapper procedure
         const ctype::fn_t& previous_c_t =
@@ -92,8 +90,6 @@ wrap::result_type wrap::operator()(const procedure &n) {
             static_pointer_cast<ctype::fn_t>(n.p_ctype());
         const ctype::type_t& previous_c_res_t =
             previous_c_t.result();
-        std::shared_ptr<ctype::type_t> p_previous_c_res_t =
-            previous_c_t.p_result();
             
         shared_ptr<ctype::type_t> new_wrap_ct;
         shared_ptr<ctype::type_t> new_ct;
@@ -107,6 +103,11 @@ wrap::result_type wrap::operator()(const procedure &n) {
         }
         shared_ptr<ctype::tuple_t> new_wrap_args_ct =
             make_shared<ctype::tuple_t>(move(wrap_arg_cts));
+        for(auto i = new_wrap_args_ct->p_begin();
+            i != new_wrap_args_ct->p_end();
+            i++) {
+            
+        }
         shared_ptr<ctype::tuple_t> new_args_ct =
             static_pointer_cast<ctype::tuple_t>(
                 previous_c_t.p_args());
@@ -137,21 +138,15 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 new_res_ct);
                 
         } else {
-            shared_ptr<ctype::type_t> new_res_ct =
-                p_previous_c_res_t;
             new_wrap_ct = make_shared<ctype::fn_t>(
-                new_wrap_args_ct, new_res_ct);
+                new_wrap_args_ct, previous_c_t.p_result());
             new_ct = p_previous_c_t;
+            new_res_ct = previous_c_t.p_result();
         }
 
-
-        std::cout << "New wrapper type: ";
-        std::cout << *new_ct << std::endl;
-            
         shared_ptr<name> wrapper_proc_id =
             make_shared<name>(
                 detail::wrap_proc_id(n.id().id()));
-
         auto t = n.p_type();
         auto res_t = static_pointer_cast<fn_t>(t)->p_result();
             
@@ -165,15 +160,22 @@ wrap::result_type wrap::operator()(const procedure &n) {
                     static_pointer_cast<name>(get_node_ptr(n.id())),
                     make_shared<tuple>(
                         move(getter_args))));
-        shared_ptr<ret> dynamize =
-            make_shared<ret>(
-                make_shared<apply>(
-                    make_shared<name>("wrap_cuarray"),
-                    make_shared<tuple>(
-                        make_vector<shared_ptr<expression> >(
-                            result_id))));
-        std::cout << "Make_the_call: " << *make_the_call << std::endl;
-        std::cout << "Dynamize: " << *dynamize << std::endl;
+        shared_ptr<ret> dynamize;
+
+        if (detail::isinstance<ctype::sequence_t, ctype::type_t>(
+                previous_c_res_t)) {
+            dynamize =
+                make_shared<ret>(
+                    make_shared<apply>(
+                        make_shared<name>("wrap_cuarray"),
+                        make_shared<tuple>(
+                            make_vector<shared_ptr<expression> >(
+                                result_id))));
+        } else {
+            dynamize =
+                make_shared<ret>(
+                    result_id);
+        }
         shared_ptr<suite> wrapper_stmts =
             make_shared<suite>(
                 make_vector<shared_ptr<statement> >
@@ -216,7 +218,6 @@ wrap::result_type wrap::operator()(const procedure &n) {
         
 }
 wrap::result_type wrap::operator()(const ret& n) {
-    std::cout << "Wrapping ret" << std::endl;
     if (m_wrapping && detail::isinstance<name, node>(n.val())) {
         const name& val =
             boost::get<const name&>(n.val());
@@ -230,10 +231,12 @@ wrap::result_type wrap::operator()(const ret& n) {
             return result_type(new ret(array_wrapped));
         }
     }
-    return this->rewriter::operator()(n);
+    shared_ptr<ret> rewritten =
+        static_pointer_cast<ret>(this->rewriter::operator()(n));
+    
+    return rewritten;
 }
 wrap::result_type wrap::operator()(const suite&n) {
-    std::cout << "Wrapping suite" << std::endl;
     vector<shared_ptr<statement> > stmts;
     for(auto i = n.begin();
         i != n.end();
