@@ -134,6 +134,8 @@ void functorize::make_type_map(const apply& n) {
     }
     shared_ptr<tuple_t> arg_t =
         make_shared<tuple_t>(move(arg_types));
+
+    
     detail::type_corresponder tc(arg_t, m_type_map);
     boost::apply_visitor(tc, fn_arg_t);
         

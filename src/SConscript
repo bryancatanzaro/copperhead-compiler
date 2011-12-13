@@ -14,7 +14,7 @@ if env['PLATFORM'] == 'darwin':
     env.Append(CPPPATH = ["/Users/catanzar/boost_1_47_0"])
 parent, current = os.path.split(os.path.abspath(os.curdir))
 env.Append(CPPPATH = [os.path.join(parent, "inc")])
-env.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-O3'])
+env.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-g'])
 
 if not GetOption('num_jobs'):
     #Parallelize the build maximally

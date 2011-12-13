@@ -44,7 +44,7 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
     if (n.id().id() == m_entry_point) {
         m_in_entry = true;
         m_completions.begin_scope();
-        //All inputs to the entry point must be totally formed
+        //All inputs to the entry point must be totally or invariantly formed
         for(auto i = n.args().begin();
             i != n.args().end();
             i++) {
@@ -52,7 +52,14 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
             assert(detail::isinstance<name>(*i));
             const name& arg_name = detail::up_get<name>(*i);
             const std::string& arg_id = arg_name.id();
-            m_completions.insert(make_pair(arg_id, completion::total));
+
+            //If the input is typed as a sequence, it's totally formed
+            //Otherwise it's invariantly formed (scalars)
+            if (detail::isinstance<sequence_t>(arg_name.type())) {
+                m_completions.insert(make_pair(arg_id, completion::total));
+            } else {
+                m_completions.insert(make_pair(arg_id, completion::invariant));
+            }
         }
         shared_ptr<suite> stmts =
             static_pointer_cast<suite>(

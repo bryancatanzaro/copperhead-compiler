@@ -50,13 +50,13 @@ shared_ptr<type_t> un_op_t =
 
 shared_ptr<phase_t> bin_phase_t =
     make_shared<phase_t>(
-        make_vector<completion>(completion::invariant)(completion::invariant),
+        make_vector<completion>(completion::none)(completion::none),
         completion::invariant);
 
 shared_ptr<phase_t> un_phase_t =
     make_shared<phase_t>(
         make_vector<completion>(
-            completion::invariant),
+            completion::none),
         completion::invariant);
 
 fn_info bin_op_info(bin_op_t, bin_phase_t);

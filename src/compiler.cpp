@@ -17,6 +17,10 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
 
     phase_analyze phase_analyzer(m_entry_point, m_registry);
     auto phase_analyzed = apply(phase_analyzer, n);
+#ifdef TRACE
+    std::cout << "Phase analyzed" << std::endl;
+    boost::apply_visitor(cp, *phase_analyzed);
+#endif
     
     type_convert type_converter;
     auto type_converted = apply(type_converter, phase_analyzed);
