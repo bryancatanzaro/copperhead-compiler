@@ -103,11 +103,6 @@ wrap::result_type wrap::operator()(const procedure &n) {
         }
         shared_ptr<ctype::tuple_t> new_wrap_args_ct =
             make_shared<ctype::tuple_t>(move(wrap_arg_cts));
-        for(auto i = new_wrap_args_ct->p_begin();
-            i != new_wrap_args_ct->p_end();
-            i++) {
-            
-        }
         shared_ptr<ctype::tuple_t> new_args_ct =
             static_pointer_cast<ctype::tuple_t>(
                 previous_c_t.p_args());
