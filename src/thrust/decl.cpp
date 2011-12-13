@@ -181,10 +181,36 @@ void declare_transforms(map<ident, fn_info>& fns) {
                    fn_info(adj_t, adj_phase_t)));
 }
 
+void declare_reductions(map<ident, fn_info>& fns) {
+    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
+    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
+    shared_ptr<monotype_t> bin_fn_t =
+        make_shared<fn_t>(
+            make_shared<tuple_t>(
+                make_vector<shared_ptr<type_t> >(t_a)(t_a)),
+            t_a);
+    shared_ptr<polytype_t> reduce_t =
+        make_shared<polytype_t>(
+            make_vector<shared_ptr<monotype_t> >(t_a),
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    make_vector<shared_ptr<type_t> >
+                    (bin_fn_t)(seq_t_a)(t_a)),
+                t_a));
+    shared_ptr<phase_t> reduce_phase_t =
+        make_shared<phase_t>(
+            make_vector<completion>
+            (completion::invariant)(completion::local)(completion::local),
+            completion::total);
+    
+    fns.insert(make_pair(
+                   make_pair("reduce", iteration_structure::independent),
+                   fn_info(reduce_t, reduce_phase_t)));
+
 
 }
 
-
+}
 
 }
 
@@ -197,6 +223,7 @@ shared_ptr<library> get_thrust() {
     thrust::detail::declare_permutes(exported_fns);
     thrust::detail::declare_special_sequences(exported_fns);
     thrust::detail::declare_transforms(exported_fns);
+    thrust::detail::declare_reductions(exported_fns);
     //XXX HACK.  NEED boost::filesystem path manipulation
     string library_path(string(detail::get_path(PRELUDE_PATH)) +
                              "/../thrust");

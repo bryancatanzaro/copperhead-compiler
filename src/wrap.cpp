@@ -1,5 +1,7 @@
 #include "wrap.hpp"
 
+#include "cuda_printer.hpp"
+
 using std::string;
 using std::vector;
 using std::shared_ptr;
@@ -17,6 +19,7 @@ wrap::wrap(const string& entry_point) : m_entry_point(entry_point),
 
 
 wrap::result_type wrap::operator()(const procedure &n) {
+    std::cout << "Wrapping procedure" << std::endl;
     if (n.id().id()  == m_entry_point) {
         m_wrapping = true;
                         
@@ -80,7 +83,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 getter_args.push_back(passed);                    
             }
         }
-            
+        std::cout << "  Successfully wrapped arguments" << std::endl;
 
         //Derive the new output c type of the wrapper procedure
         const ctype::fn_t& previous_c_t =
@@ -107,7 +110,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
         shared_ptr<ctype::tuple_t> new_args_ct =
             static_pointer_cast<ctype::tuple_t>(
                 previous_c_t.p_args());
-
+        
         if (detail::isinstance<ctype::sequence_t, ctype::type_t>(
                 previous_c_res_t)) {
             const ctype::sequence_t& res_seq_t =
@@ -142,7 +145,8 @@ wrap::result_type wrap::operator()(const procedure &n) {
         }
 
 
-
+        std::cout << "New wrapper type: ";
+        std::cout << *new_ct << std::endl;
             
         shared_ptr<name> wrapper_proc_id =
             make_shared<name>(
@@ -168,6 +172,8 @@ wrap::result_type wrap::operator()(const procedure &n) {
                     make_shared<tuple>(
                         make_vector<shared_ptr<expression> >(
                             result_id))));
+        std::cout << "Make_the_call: " << *make_the_call << std::endl;
+        std::cout << "Dynamize: " << *dynamize << std::endl;
         shared_ptr<suite> wrapper_stmts =
             make_shared<suite>(
                 make_vector<shared_ptr<statement> >
@@ -210,6 +216,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
         
 }
 wrap::result_type wrap::operator()(const ret& n) {
+    std::cout << "Wrapping ret" << std::endl;
     if (m_wrapping && detail::isinstance<name, node>(n.val())) {
         const name& val =
             boost::get<const name&>(n.val());
@@ -226,6 +233,7 @@ wrap::result_type wrap::operator()(const ret& n) {
     return this->rewriter::operator()(n);
 }
 wrap::result_type wrap::operator()(const suite&n) {
+    std::cout << "Wrapping suite" << std::endl;
     vector<shared_ptr<statement> > stmts;
     for(auto i = n.begin();
         i != n.end();
