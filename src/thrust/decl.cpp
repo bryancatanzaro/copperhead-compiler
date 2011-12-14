@@ -206,7 +206,24 @@ void declare_reductions(map<ident, fn_info>& fns) {
     fns.insert(make_pair(
                    make_pair("reduce", iteration_structure::independent),
                    fn_info(reduce_t, reduce_phase_t)));
-
+    shared_ptr<polytype_t> sum_t =
+        make_shared<polytype_t>(
+            make_vector<shared_ptr<monotype_t> >(t_a),
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    make_vector<shared_ptr<type_t> >
+                    (seq_t_a)),
+                t_a));
+    shared_ptr<phase_t> sum_phase_t =
+        make_shared<phase_t>(
+            make_vector<completion>
+            (completion::local),
+            completion::total);
+                    
+    
+    fns.insert(make_pair(
+                   make_pair("sum", iteration_structure::independent),
+                   fn_info(sum_t, sum_phase_t)));
 
 }
 
