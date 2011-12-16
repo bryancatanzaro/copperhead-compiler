@@ -48,6 +48,7 @@ public:
 struct library {
 private:
     std::map<ident, fn_info> m_fns;
+    std::map<std::string, std::string> m_fn_includes;
     std::set<std::string> m_includes;
     std::set<std::string> m_include_dirs;
     std::set<std::string> m_links;
@@ -55,12 +56,14 @@ private:
 
 public:
     inline library(std::map<ident, fn_info> &&fns,
+                   std::map<std::string, std::string> &&fn_includes=std::map<std::string, std::string>(),
                    std::set<std::string> &&includes=std::set<std::string>(),
                    std::set<std::string> &&include_dirs=std::set<std::string>(),
                    std::set<std::string> &&links=std::set<std::string>(),
                    std::set<std::string> &&link_dirs=std::set<std::string>()
         )
         : m_fns(std::move(fns)),
+          m_fn_includes(std::move(fn_includes)),
           m_includes(std::move(includes)),
           m_include_dirs(std::move(include_dirs)),
           m_links(std::move(links)),
@@ -68,6 +71,9 @@ public:
         {}
     const std::map<ident, fn_info>& fns() const {
         return m_fns;
+    }
+    const std::map<std::string, std::string>& fn_includes() const {
+        return m_fn_includes;
     }
     const std::set<std::string>& includes() const {
         return m_includes;
@@ -87,6 +93,7 @@ public:
 struct registry {
 private:
     std::map<ident, fn_info> m_fns;
+    std::map<std::string, std::string> m_fn_includes;
     std::set<std::string> m_includes;
     std::set<std::string> m_include_dirs;
     std::set<std::string> m_links;
@@ -103,9 +110,14 @@ public:
         m_link_dirs.insert(link_dirs.begin(), link_dirs.end());
         const std::map<ident, fn_info>& fns = l->fns();
         m_fns.insert(fns.begin(), fns.end());
+        const std::map<std::string, std::string>& fn_includes = l->fn_includes();
+        m_fn_includes.insert(fn_includes.begin(), fn_includes.end());
     }
     const std::map<ident, fn_info>& fns() const {
         return m_fns;
+    }
+    const std::map<std::string, std::string>& fn_includes() const {
+        return m_fn_includes;
     }
     const std::set<std::string>& includes() const {
         return m_includes;

@@ -10,6 +10,7 @@ using std::make_pair;
 using std::move;
 using backend::utility::make_vector;
 using backend::utility::make_set;
+using backend::utility::make_map;
 
 namespace backend {
 
@@ -129,6 +130,7 @@ shared_ptr<library> get_builtins() {
     }
     string include(PRELUDE_FILE);
     shared_ptr<library> l(new library(move(fns),
+                                      make_map<string, string>(),
                                       make_set<string>(include),
                                       move(include_paths)));
     return l;

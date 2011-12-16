@@ -13,6 +13,7 @@ using std::make_pair;
 using std::stringstream;
 using backend::utility::make_vector;
 using backend::utility::make_set;
+using backend::utility::make_map;
 
 namespace backend {
 
@@ -22,7 +23,9 @@ namespace detail {
 
 typedef std::tuple<const char*, fn_info> named_info;
 
-void declare_maps(int max_arity, map<ident, fn_info>& fns) {
+void declare_maps(int max_arity,
+                  map<ident, fn_info>& fns,
+                  map<string, string>& fn_includes) {
     vector<string> map_ids;
     for(int i = 1; i <= max_arity; i++) {
         stringstream strm;
@@ -90,11 +93,13 @@ void declare_maps(int max_arity, map<ident, fn_info>& fns) {
         fns.insert(make_pair(
                        make_pair(map_ids[i], iteration_structure::independent),
                        fn_info(map_types[i], map_phases[i])));
+        fn_includes.insert(make_pair(map_ids[i], "map.h"));
     }
                         
 }
 
-void declare_scans(map<ident, fn_info>& fns) {
+void declare_scans(map<ident, fn_info>& fns,
+                   map<string, string>& fn_includes) {
     shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
     shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
     shared_ptr<monotype_t> bin_fn_t =
@@ -120,9 +125,13 @@ void declare_scans(map<ident, fn_info>& fns) {
     fns.insert(make_pair(
                    make_pair("rscan", iteration_structure::independent),
                    fn_info(scan_t, scan_phase_t)));
+    fn_includes.insert(make_pair("scan", "scan.h"));
+    fn_includes.insert(make_pair("rscan", "scan.h"));
+        
 }
 
-void declare_permutes(map<ident, fn_info>& fns) {
+void declare_permutes(map<ident, fn_info>& fns,
+                      map<string, string>& fn_includes) {
     shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
     shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
     shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int32_mt);
@@ -140,9 +149,11 @@ void declare_permutes(map<ident, fn_info>& fns) {
     fns.insert(make_pair(
                    make_pair("permute", iteration_structure::independent),
                    fn_info(permute_t, permute_phase_t)));
+    fn_includes.insert(make_pair("permute", "permute.h"));
 }
 
-void declare_special_sequences(map<ident, fn_info>& fns) {
+void declare_special_sequences(map<ident, fn_info>& fns,
+                               map<string, string>& fn_includes) {
     shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
     shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
     shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int32_mt);
@@ -160,9 +171,11 @@ void declare_special_sequences(map<ident, fn_info>& fns) {
     fns.insert(make_pair(
                    make_pair("indices", iteration_structure::independent),
                    fn_info(indices_t, indices_phase_t)));
+    fn_includes.insert(make_pair("indices", "indices.h"));
 }
 
-void declare_transforms(map<ident, fn_info>& fns) {
+void declare_transforms(map<ident, fn_info>& fns,
+                        map<string, string>& fn_includes) {
     shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
     shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
     shared_ptr<polytype_t> adj_t =
@@ -179,9 +192,11 @@ void declare_transforms(map<ident, fn_info>& fns) {
     fns.insert(make_pair(
                    make_pair("adjacent_difference", iteration_structure::independent),
                    fn_info(adj_t, adj_phase_t)));
+    fn_includes.insert(make_pair("adjacent_difference", "adjacent_difference.h"));
 }
 
-void declare_reductions(map<ident, fn_info>& fns) {
+void declare_reductions(map<ident, fn_info>& fns,
+                        map<string, string>& fn_includes) {
     shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
     shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
     shared_ptr<monotype_t> bin_fn_t =
@@ -206,6 +221,7 @@ void declare_reductions(map<ident, fn_info>& fns) {
     fns.insert(make_pair(
                    make_pair("reduce", iteration_structure::independent),
                    fn_info(reduce_t, reduce_phase_t)));
+    fn_includes.insert(make_pair("reduce", "reduce.h"));
     shared_ptr<polytype_t> sum_t =
         make_shared<polytype_t>(
             make_vector<shared_ptr<monotype_t> >(t_a),
@@ -224,7 +240,7 @@ void declare_reductions(map<ident, fn_info>& fns) {
     fns.insert(make_pair(
                    make_pair("sum", iteration_structure::independent),
                    fn_info(sum_t, sum_phase_t)));
-
+    fn_includes.insert(make_pair("sum", "reduce.h"));
 }
 
 }
@@ -235,12 +251,13 @@ void declare_reductions(map<ident, fn_info>& fns) {
 shared_ptr<library> get_thrust() {
     int max_arity = 10;
     map<ident, fn_info> exported_fns;
-    thrust::detail::declare_maps(max_arity, exported_fns);
-    thrust::detail::declare_scans(exported_fns);
-    thrust::detail::declare_permutes(exported_fns);
-    thrust::detail::declare_special_sequences(exported_fns);
-    thrust::detail::declare_transforms(exported_fns);
-    thrust::detail::declare_reductions(exported_fns);
+    map<string, string> fn_includes;
+    thrust::detail::declare_maps(max_arity, exported_fns, fn_includes);
+    thrust::detail::declare_scans(exported_fns, fn_includes);
+    thrust::detail::declare_permutes(exported_fns, fn_includes);
+    thrust::detail::declare_special_sequences(exported_fns, fn_includes);
+    thrust::detail::declare_transforms(exported_fns, fn_includes);
+    thrust::detail::declare_reductions(exported_fns, fn_includes);
     //XXX HACK.  NEED boost::filesystem path manipulation
     string library_path(string(detail::get_path(PRELUDE_PATH)) +
                              "/../thrust");
@@ -254,6 +271,7 @@ shared_ptr<library> get_thrust() {
     }
     return shared_ptr<library>(
         new library(move(exported_fns),
+                    move(fn_includes),
                     make_set<string>(string(THRUST_FILE)),
                     move(include_paths)));
 }

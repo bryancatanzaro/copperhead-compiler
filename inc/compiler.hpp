@@ -62,7 +62,7 @@ private:
     /*! The name of the entry point function.*/
     std::string m_entry_point;
     /*! The registry used by the compiler.*/
-    registry m_registry;
+    std::shared_ptr<registry> m_registry;
     /*! A helper function to apply a compiler pass.*/
     template<typename P>
     std::shared_ptr<suite> apply(P& pass, const suite &n) {
@@ -94,6 +94,9 @@ public:
     const std::string& entry_point() const;
     //! Gets the \ref backend::registry "registry" used by the compiler
     const registry& reg() const;
+    //! Gets a pointer to the \ref backend::registry "registry" used by the compiler
+    std::shared_ptr<registry> p_reg() const;
+
     //! Gets a \p shared_ptr to the declaration of the wrapper procedure    
     /*! The compiler generates a wrapper procedure, which encapsulates
        input and output type information for the wrapped entry point

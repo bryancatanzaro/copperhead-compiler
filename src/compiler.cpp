@@ -5,17 +5,17 @@
 
 namespace backend {
 compiler::compiler(const std::string& entry_point)
-    : m_entry_point(entry_point) {
+    : m_entry_point(entry_point), m_registry(std::make_shared<registry>()){
     std::shared_ptr<library> thrust = get_thrust();
-    m_registry.add_library(thrust);
+    m_registry->add_library(thrust);
     std::shared_ptr<library> prelude = get_builtins();
-    m_registry.add_library(prelude);
+    m_registry->add_library(prelude);
 
 }
 std::shared_ptr<suite> compiler::operator()(const suite &n) {
-    cuda_printer cp(m_entry_point, m_registry, std::cout);
+    cuda_printer cp(m_entry_point, *m_registry, std::cout);
 
-    phase_analyze phase_analyzer(m_entry_point, m_registry);
+    phase_analyze phase_analyzer(m_entry_point, *m_registry);
     auto phase_analyzed = apply(phase_analyzer, n);
 #ifdef TRACE
     std::cout << "Phase analyzed" << std::endl;
@@ -28,7 +28,7 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
     std::cout << "Type converted" << std::endl;
     boost::apply_visitor(cp, *type_converted);
 #endif
-    functorize functorizer(m_entry_point, m_registry);
+    functorize functorizer(m_entry_point, *m_registry);
     auto functorized = apply(functorizer, type_converted);
 #ifdef TRACE
     std::cout << "Functorized" << std::endl;
@@ -65,6 +65,9 @@ const std::string& compiler::entry_point() const {
     return m_entry_point;
 }
 const registry& compiler::reg() const {
+    return *m_registry;
+}
+std::shared_ptr<registry> compiler::p_reg() const {
     return m_registry;
 }
 std::shared_ptr<procedure> compiler::p_wrap_decl() const {
