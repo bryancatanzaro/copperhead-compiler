@@ -180,7 +180,7 @@ void declare_transforms(map<ident, fn_info>& fns,
     shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
     shared_ptr<polytype_t> adj_t =
         make_shared<polytype_t>(
-            vector<shared_ptr<monotype_t> >{t_a},
+            make_vector<shared_ptr<monotype_t> >(t_a),
             make_shared<fn_t>(
                 make_shared<tuple_t>(
                     make_vector<shared_ptr<type_t> >(seq_t_a)),
@@ -243,6 +243,34 @@ void declare_reductions(map<ident, fn_info>& fns,
     fn_includes.insert(make_pair("sum", "thrust_wrappers/reduce.h"));
 }
 
+void declare_sorts(map<ident, fn_info>& fns,
+                   map<string, string>& fn_includes) {
+    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
+    shared_ptr<polytype_t> cmp_t =
+        make_shared<polytype_t>(
+            make_vector<shared_ptr<monotype_t> >(t_a),
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    make_vector<shared_ptr<type_t> >(t_a)(t_a)),
+                bool_mt));
+    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
+    shared_ptr<polytype_t> sort_t =
+        make_shared<polytype_t>(
+            make_vector<shared_ptr<monotype_t> >(t_a),
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    make_vector<shared_ptr<type_t> >(cmp_t)(seq_t_a)),
+                seq_t_a));
+    shared_ptr<phase_t> sort_phase_t =
+        make_shared<phase_t>(
+            make_vector<completion>(completion::invariant)(completion::total),
+            completion::total);
+    fns.insert(make_pair(
+                   make_pair("sort", iteration_structure::independent),
+                   fn_info(sort_t, sort_phase_t)));
+    fn_includes.insert(make_pair("sort", "thrust_wrappers/sort.h"));
+}
+
 }
 
 }
@@ -258,6 +286,7 @@ shared_ptr<library> get_thrust() {
     thrust::detail::declare_special_sequences(exported_fns, fn_includes);
     thrust::detail::declare_transforms(exported_fns, fn_includes);
     thrust::detail::declare_reductions(exported_fns, fn_includes);
+    thrust::detail::declare_sorts(exported_fns, fn_includes);
     //XXX HACK.  NEED boost::filesystem path manipulation
     string library_path(string(detail::get_path(PRELUDE_PATH)) +
                              "/../thrust");
