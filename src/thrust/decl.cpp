@@ -93,7 +93,7 @@ void declare_maps(int max_arity,
         fns.insert(make_pair(
                        make_pair(map_ids[i], iteration_structure::independent),
                        fn_info(map_types[i], map_phases[i])));
-        fn_includes.insert(make_pair(map_ids[i], "map.h"));
+        fn_includes.insert(make_pair(map_ids[i], "thrust_wrappers/map.h"));
     }
                         
 }
@@ -125,8 +125,8 @@ void declare_scans(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("rscan", iteration_structure::independent),
                    fn_info(scan_t, scan_phase_t)));
-    fn_includes.insert(make_pair("scan", "scan.h"));
-    fn_includes.insert(make_pair("rscan", "scan.h"));
+    fn_includes.insert(make_pair("scan", "thrust_wrappers/scan.h"));
+    fn_includes.insert(make_pair("rscan", "thrust_wrappers/scan.h"));
         
 }
 
@@ -149,7 +149,7 @@ void declare_permutes(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("permute", iteration_structure::independent),
                    fn_info(permute_t, permute_phase_t)));
-    fn_includes.insert(make_pair("permute", "permute.h"));
+    fn_includes.insert(make_pair("permute", "thrust_wrappers/permute.h"));
 }
 
 void declare_special_sequences(map<ident, fn_info>& fns,
@@ -171,7 +171,7 @@ void declare_special_sequences(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("indices", iteration_structure::independent),
                    fn_info(indices_t, indices_phase_t)));
-    fn_includes.insert(make_pair("indices", "indices.h"));
+    fn_includes.insert(make_pair("indices", "thrust_wrappers/indices.h"));
 }
 
 void declare_transforms(map<ident, fn_info>& fns,
@@ -192,7 +192,7 @@ void declare_transforms(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("adjacent_difference", iteration_structure::independent),
                    fn_info(adj_t, adj_phase_t)));
-    fn_includes.insert(make_pair("adjacent_difference", "adjacent_difference.h"));
+    fn_includes.insert(make_pair("adjacent_difference", "thrust_wrappers/adjacent_difference.h"));
 }
 
 void declare_reductions(map<ident, fn_info>& fns,
@@ -221,7 +221,7 @@ void declare_reductions(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("reduce", iteration_structure::independent),
                    fn_info(reduce_t, reduce_phase_t)));
-    fn_includes.insert(make_pair("reduce", "reduce.h"));
+    fn_includes.insert(make_pair("reduce", "thrust_wrappers/reduce.h"));
     shared_ptr<polytype_t> sum_t =
         make_shared<polytype_t>(
             make_vector<shared_ptr<monotype_t> >(t_a),
@@ -240,7 +240,7 @@ void declare_reductions(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("sum", iteration_structure::independent),
                    fn_info(sum_t, sum_phase_t)));
-    fn_includes.insert(make_pair("sum", "reduce.h"));
+    fn_includes.insert(make_pair("sum", "thrust_wrappers/reduce.h"));
 }
 
 }
