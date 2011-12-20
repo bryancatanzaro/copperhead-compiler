@@ -134,7 +134,7 @@ void declare_permutes(map<ident, fn_info>& fns,
                       map<string, string>& fn_includes) {
     shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
     shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
-    shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int32_mt);
+    shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int64_mt);
     shared_ptr<polytype_t> permute_t =
         make_shared<polytype_t>(
             make_vector<shared_ptr<monotype_t> >(t_a),
@@ -156,7 +156,7 @@ void declare_special_sequences(map<ident, fn_info>& fns,
                                map<string, string>& fn_includes) {
     shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
     shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
-    shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int32_mt);
+    shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int64_mt);
     shared_ptr<polytype_t> indices_t =
         make_shared<polytype_t>(
             make_vector<shared_ptr<monotype_t> >(t_a),
@@ -172,6 +172,54 @@ void declare_special_sequences(map<ident, fn_info>& fns,
                    make_pair("indices", iteration_structure::independent),
                    fn_info(indices_t, indices_phase_t)));
     fn_includes.insert(make_pair("indices", "thrust_wrappers/indices.h"));
+
+    shared_ptr<polytype_t> replicate_t =
+        make_shared<polytype_t>(
+            make_vector<shared_ptr<monotype_t> >(t_a),
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    make_vector<shared_ptr<type_t> >(t_a)(int64_mt)),
+                seq_t_a));
+    shared_ptr<phase_t> replicate_phase_t =
+        make_shared<phase_t>(
+            make_vector<completion>(completion::local)(completion::local),
+            completion::local);
+    fns.insert(make_pair(
+                   make_pair("replicate", iteration_structure::independent),
+                   fn_info(replicate_t, replicate_phase_t)));
+    fn_includes.insert(make_pair("replicate", "thrust_wrappers/replicate.h"));
+
+    shared_ptr<polytype_t> shift_t =
+        make_shared<polytype_t>(
+            make_vector<shared_ptr<monotype_t> >(t_a),
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    make_vector<shared_ptr<type_t> >(seq_t_a)(int64_mt)(t_a)),
+                seq_t_a));
+    shared_ptr<phase_t> shift_phase_t =
+        make_shared<phase_t>(
+            make_vector<completion>(completion::total)(completion::local)(completion::local),
+            completion::local);
+    fns.insert(make_pair(
+                   make_pair("shift", iteration_structure::independent),
+                   fn_info(shift_t, shift_phase_t)));
+    fn_includes.insert(make_pair("shift", "thrust_wrappers/shift.h"));
+               
+    shared_ptr<polytype_t> rotate_t =
+        make_shared<polytype_t>(
+            make_vector<shared_ptr<monotype_t> >(t_a),
+            make_shared<fn_t>(
+                make_shared<tuple_t>(
+                    make_vector<shared_ptr<type_t> >(seq_t_a)(int64_mt)),
+                seq_t_a));
+    shared_ptr<phase_t> rotate_phase_t =
+        make_shared<phase_t>(
+            make_vector<completion>(completion::total)(completion::local),
+            completion::local);
+    fns.insert(make_pair(
+                   make_pair("rotate", iteration_structure::independent),
+                   fn_info(rotate_t, rotate_phase_t)));
+    fn_includes.insert(make_pair("rotate", "thrust_wrappers/rotate.h"));                
 }
 
 void declare_transforms(map<ident, fn_info>& fns,

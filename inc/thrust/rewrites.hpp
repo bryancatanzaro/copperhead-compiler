@@ -32,6 +32,12 @@ private:
     
     static result_type indices_rewrite(const bind& n);
 
+    static result_type shift_rewrite(const bind& n);
+
+    static result_type rotate_rewrite(const bind& n);
+    
+    static result_type replicate_rewrite(const bind& n);
+    
     typedef result_type(*rewrite_fn)(const bind&);
     
     typedef std::map<std::string, rewrite_fn> fn_map;

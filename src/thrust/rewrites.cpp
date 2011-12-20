@@ -148,7 +148,7 @@ thrust_rewriter::result_type thrust_rewriter::indices_rewrite(const bind& n) {
     //Indices must have arguments
     assert(ap_args.begin() != ap_args.end());
     const ctype::type_t& arg_t = ap_args.begin()->ctype();
-    //Argument must have Seq[Int] type
+    //Argument must have Seq[a] type
     assert(detail::isinstance<ctype::sequence_t>(arg_t));
         
     shared_ptr<ctype::monotype_t> index_t =
@@ -166,6 +166,102 @@ thrust_rewriter::result_type thrust_rewriter::indices_rewrite(const bind& n) {
     return result;
 }
 
+thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
+    //The rhs must be an apply
+    assert(detail::isinstance<apply>(n.rhs()));
+    const apply& rhs = boost::get<const apply&>(n.rhs());
+    //The rhs must apply "replicate"
+    assert(rhs.fn().id() == string("replicate"));
+    const tuple& ap_args = rhs.args();
+    //replicate must have two arguments
+    assert(ap_args.end() - ap_args.begin() == 2);
+
+    shared_ptr<ctype::type_t> val_t =
+        ap_args.begin()->p_ctype();
+    
+    
+    
+    shared_ptr<ctype::polytype_t> constant_t =
+        make_shared<ctype::polytype_t>(
+            make_vector<shared_ptr<ctype::type_t> >(val_t),
+            make_shared<ctype::monotype_t>("constant_sequence"));
+    shared_ptr<apply> n_rhs =
+        static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+    //Can only handle names on the LHS
+    assert(detail::isinstance<name>(n.lhs()));
+    const name& lhs = boost::get<const name&>(n.lhs());
+    shared_ptr<name> n_lhs =
+        make_shared<name>(lhs.id(),
+                          lhs.p_type(),
+                          constant_t);
+    auto result = make_shared<bind>(n_lhs, n_rhs);
+    return result;
+}
+
+thrust_rewriter::result_type thrust_rewriter::shift_rewrite(const bind& n) {
+     //The rhs must be an apply
+    assert(detail::isinstance<apply>(n.rhs()));
+    const apply& rhs = boost::get<const apply&>(n.rhs());
+    //The rhs must apply "shift"
+    assert(rhs.fn().id() == string("shift"));
+    const tuple& ap_args = rhs.args();
+    //replicate must have three arguments
+    assert(ap_args.end() - ap_args.begin() == 3);
+
+    shared_ptr<ctype::type_t> val_t =
+        ap_args.begin()->p_ctype();
+    
+    
+    
+    shared_ptr<ctype::polytype_t> shifted_t =
+        make_shared<ctype::polytype_t>(
+            make_vector<shared_ptr<ctype::type_t> >(val_t),
+            make_shared<ctype::monotype_t>("shifted_sequence"));
+    shared_ptr<apply> n_rhs =
+        static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+    //Can only handle names on the LHS
+    assert(detail::isinstance<name>(n.lhs()));
+    const name& lhs = boost::get<const name&>(n.lhs());
+    shared_ptr<name> n_lhs =
+        make_shared<name>(lhs.id(),
+                          lhs.p_type(),
+                          shifted_t);
+    auto result = make_shared<bind>(n_lhs, n_rhs);
+    return result;
+}
+
+thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
+     //The rhs must be an apply
+    assert(detail::isinstance<apply>(n.rhs()));
+    const apply& rhs = boost::get<const apply&>(n.rhs());
+    //The rhs must apply "rotate"
+    assert(rhs.fn().id() == string("rotate"));
+    const tuple& ap_args = rhs.args();
+    //replicate must have three arguments
+    assert(ap_args.end() - ap_args.begin() == 2);
+
+    shared_ptr<ctype::type_t> val_t =
+        ap_args.begin()->p_ctype();
+    
+    
+    
+    shared_ptr<ctype::polytype_t> rotated_t =
+        make_shared<ctype::polytype_t>(
+            make_vector<shared_ptr<ctype::type_t> >(val_t),
+            make_shared<ctype::monotype_t>("rotated_sequence"));
+    shared_ptr<apply> n_rhs =
+        static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+    //Can only handle names on the LHS
+    assert(detail::isinstance<name>(n.lhs()));
+    const name& lhs = boost::get<const name&>(n.lhs());
+    shared_ptr<name> n_lhs =
+        make_shared<name>(lhs.id(),
+                          lhs.p_type(),
+                          rotated_t);
+    auto result = make_shared<bind>(n_lhs, n_rhs);
+    return result;
+}
+
 thrust_rewriter::thrust_rewriter() :
     m_lut(make_map<string, rewrite_fn>
           (string("map1"), &backend::thrust_rewriter::map_rewrite)
@@ -178,7 +274,11 @@ thrust_rewriter::thrust_rewriter() :
           (string("map8"), &backend::thrust_rewriter::map_rewrite)
           (string("map9"), &backend::thrust_rewriter::map_rewrite)
           (string("map10"), &backend::thrust_rewriter::map_rewrite)
-          (string("indices"), &backend::thrust_rewriter::indices_rewrite))  {}
+          (string("indices"), &backend::thrust_rewriter::indices_rewrite)
+          (string("replicate"), &backend::thrust_rewriter::replicate_rewrite)
+          (string("shift"), &backend::thrust_rewriter::shift_rewrite)
+          (string("rotate"), &backend::thrust_rewriter::rotate_rewrite)
+        )  {}
 
 thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     const expression& rhs = n.rhs();
