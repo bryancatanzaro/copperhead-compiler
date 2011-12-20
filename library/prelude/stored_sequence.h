@@ -6,6 +6,8 @@ struct stored_sequence
 {
     typedef T value_type;
     typedef T& reference;
+    //XXX This should be templated
+    typedef int index_type;
     T *data;
     int length;
 
