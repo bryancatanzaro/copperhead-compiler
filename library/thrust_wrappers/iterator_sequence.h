@@ -17,7 +17,7 @@ struct iterator_sequence
     iterator_sequence(I _data, int _length) : data(_data), length(_length) {}
 
     __host__ __device__
-    iterator_sequence(I *begin, I *end) : data(begin), length(end-begin) {}
+    iterator_sequence(I begin, I end) : data(begin), length(end-begin) {}
 
     //
     // Methods supporting stream interface
