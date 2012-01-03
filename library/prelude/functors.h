@@ -160,3 +160,35 @@ struct fn_op_not {
         return op_not(i);
     }
 };
+
+template<typename a>
+struct fn_op_int32 {
+    typedef int result_type;
+    __host__ __device__ int operator()(const a &i) {
+        return int(i);
+    }
+};
+
+template<typename a>
+struct fn_op_int64 {
+    typedef long result_type;
+    __host__ __device__ long operator()(const a &i) {
+        return long(i);
+    }
+};
+
+template<typename a>
+struct fn_op_float32 {
+    typedef float result_type;
+    __host__ __device__ float operator()(const a &i) {
+        return float(i);
+    }
+};
+
+template<typename a>
+struct fn_op_float64 {
+    typedef double result_type;
+    __host__ __device__ double operator()(const a &i) {
+        return double(i);
+    }
+};

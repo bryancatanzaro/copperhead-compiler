@@ -99,3 +99,23 @@ template<typename a>
 __host__ __device__ a op_not(const a &i) {
     return !i;
 }
+
+template<typename a>
+__host__ __device__ int op_int32(const a &i) {
+    return int(i);
+}
+
+template<typename a>
+__host__ __device__ long op_int64(const a &i) {
+    return long(i);
+}
+
+template<typename a>
+__host__ __device__ float op_float32(const a &i) {
+    return float(i);
+}
+
+template<typename a>
+__host__ __device__ double op_float64(const a &i) {
+    return double(i);
+}
