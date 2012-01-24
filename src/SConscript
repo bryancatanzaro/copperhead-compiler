@@ -9,6 +9,18 @@ except:
     env = Environment()
 env = env.Clone()
 
+try:
+    Import('siteconf')
+except:
+    siteconf = {}
+
+bid = siteconf.get('BOOST_INC_DIR', None)
+bld = siteconf.get('BOOST_LIB_DIR', None)
+if bid:
+    env.Append(CPPPATH = [bid])
+if bld:
+    env.Append(LIBPATH = [bld])
+
 #XXX Don't hard code this    
 if env['PLATFORM'] == 'darwin':
     env.Append(CPPPATH = ["/Users/catanzar/boost_1_47_0"])
