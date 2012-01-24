@@ -1,5 +1,8 @@
 #pragma once
 
+#include "stored_sequence.h"
+
+
 template<typename T, int Depth>
 struct nested_sequence
 {
