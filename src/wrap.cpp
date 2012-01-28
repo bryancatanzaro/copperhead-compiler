@@ -14,8 +14,7 @@ namespace backend {
 
 wrap::wrap(const string& entry_point) : m_entry_point(entry_point),
                                              m_wrapping(false),
-                                             m_wrapper(),
-                                             m_wrap_decl(){}
+                                             m_wrapper(){}
 
 
 wrap::result_type wrap::operator()(const procedure &n) {
@@ -185,15 +184,6 @@ wrap::result_type wrap::operator()(const procedure &n) {
                                    wrapper_stmts,
                                    t, new_wrap_ct, "");
         m_wrapper = completed_wrapper;
-        m_wrap_decl =
-            make_shared<procedure>(
-                wrapper_proc_id,
-                wrapper_args_tuple,
-                make_shared<suite>(make_vector<shared_ptr<statement> >()),
-                t,
-                new_wrap_ct,
-                "");
-        
         result_type rewritten =
             make_shared<procedure>(
                 static_pointer_cast<name>(
@@ -247,8 +237,5 @@ wrap::result_type wrap::operator()(const suite&n) {
     return result_type(new suite(move(stmts)));
 }
 
-shared_ptr<procedure> wrap::p_wrap_decl() const {
-    return m_wrap_decl;
-}
 
 }

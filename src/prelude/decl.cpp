@@ -96,7 +96,9 @@ vector<named_info> unary_scalar_operators =
 
 vector<named_info> cpp_support_fns =
     make_vector<named_info>
-    (named_info("wrap_cuarray", nullary_info));
+    (named_info("wrap_cuarray", nullary_info))
+    (named_info("make_scalar", nullary_info))
+    (named_info("unpack_scalar", nullary_info));
 
 }
 

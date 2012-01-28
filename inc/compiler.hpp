@@ -74,9 +74,6 @@ private:
     std::shared_ptr<suite> apply(P& pass, const std::shared_ptr<suite> n) {
         return apply(pass, *n);
     }
-    /*! After compilation, this holds a \p procedure describing the
-     *  wrapped entry point.*/
-    std::shared_ptr<procedure> m_wrap_decl;
 public:
     //! Constructor.
     /*!\param entry_point The name of the entry point function.
@@ -95,13 +92,6 @@ public:
     const std::string& entry_point() const;
     //! Gets the \ref backend::registry "registry" used by the compiler
     const registry& reg() const;
-
-    //! Gets a \p shared_ptr to the declaration of the wrapper procedure    
-    /*! The compiler generates a wrapper procedure, which encapsulates
-       input and output type information for the wrapped entry point
-       procedure and therefore facilitates calling the wrapped procedure.
-     */
-    std::shared_ptr<procedure> p_wrap_decl() const;
 };
 
 }

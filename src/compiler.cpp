@@ -51,7 +51,6 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
 #endif        
     wrap wrapper(m_entry_point);
     auto wrapped = apply(wrapper, typedefified);
-    m_wrap_decl = wrapper.p_wrap_decl();
 #ifdef TRACE
     std::cout << "Wrapped" << std::endl;
     boost::apply_visitor(cp, *wrapped);
@@ -69,9 +68,6 @@ const std::string& compiler::entry_point() const {
 }
 const registry& compiler::reg() const {
     return m_registry;
-}
-std::shared_ptr<procedure> compiler::p_wrap_decl() const {
-    return m_wrap_decl;
 }
 
 }

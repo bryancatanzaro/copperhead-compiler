@@ -31,7 +31,6 @@ private:
     const std::string& m_entry_point;
     bool m_wrapping;
     std::shared_ptr<procedure> m_wrapper;
-    std::shared_ptr<procedure> m_wrap_decl;
 public:
     //! Constructor
 /*! 
@@ -47,13 +46,6 @@ public:
     result_type operator()(const ret& n);
     //! Rewrite rule for \p suite nodes
     result_type operator()(const suite&n);
-    //! Gets the wrapper produced by this rewrite
-/*! The wrapper needs to be introspected by other parts of the
-  compiler and runtime. This provides access to the generated
-  wrapper. It will produce a null pointer if called before the
-  wrap pass is executed correctly.
-*/
-    std::shared_ptr<procedure> p_wrap_decl() const;
 };
 
 /*!
