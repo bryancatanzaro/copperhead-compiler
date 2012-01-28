@@ -8,7 +8,6 @@
 #include <string>
 #include <sstream>
 #include <boost/shared_ptr.hpp>
-#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 
 //The private data members of cuarray have to be hidden
 //in order to separate CUDA stuff from the host C++ compiler
@@ -20,21 +19,10 @@
 template<typename T>
 class cuarray_impl;
 
-namespace detail {
-template<typename T>
-struct Deleter {
-    void operator()(T *p) {
-            delete p;
-    }
-};
-}
-
 template<typename T>
 class cuarray {
   public:
-    //Could we hide this better? I don't like making it public
-    //Is there a better (ie, not weird) unique_ptr implementation I can use?
-    boost::interprocess::unique_ptr<cuarray_impl<T>, detail::Deleter<cuarray_impl<T> > > m_impl;
+    cuarray_impl<T>* m_impl;
   public:
     cuarray();
     ~cuarray();

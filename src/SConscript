@@ -21,9 +21,6 @@ if bid:
 if bld:
     env.Append(LIBPATH = [bld])
 
-#XXX Don't hard code this    
-if env['PLATFORM'] == 'darwin':
-    env.Append(CPPPATH = ["/Users/catanzar/boost_1_47_0"])
 parent, current = os.path.split(os.path.abspath(os.curdir))
 env.Append(CPPPATH = [os.path.join(parent, "inc")])
 env.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-g'])
