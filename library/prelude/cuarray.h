@@ -96,7 +96,6 @@ cuarray<T>::cuarray(ssize_t n, bool host) : m_impl(new cuarray_impl<T>()) {
 
 template<typename T>
 cuarray<T>::cuarray(ssize_t n, T* h_s) : m_impl(new cuarray_impl<T>()) {
-    std::cout << "Making cuarray from data" << std::endl;
     m_impl->clean_local = true;
     m_impl->clean_remote = false;
     T* h = new T[n];
@@ -115,9 +114,7 @@ cuarray<T>::cuarray(ssize_t n, T* h_s) : m_impl(new cuarray_impl<T>()) {
 
 template<typename T>
 cuarray<T>::~cuarray() {
-    std::cout << "Destroying cuarray" << std::endl;
     if (m_impl) {
-        std::cout << "  (m_impl was valid)" << std::endl;
         if (m_impl->m_h.data != NULL)
             delete[] m_impl->m_h.data;
         if (m_impl->m_d.data != NULL)
