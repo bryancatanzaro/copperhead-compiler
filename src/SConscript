@@ -24,6 +24,7 @@ if bld:
 parent, current = os.path.split(os.path.abspath(os.curdir))
 env.Append(CPPPATH = [os.path.join(parent, "inc")])
 env.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-g'])
+env.Append(LIBS = ['cudart'])
 
 if not GetOption('num_jobs'):
     #Parallelize the build maximally
