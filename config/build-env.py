@@ -5,6 +5,37 @@ import os
 import inspect
 import platform
 
+def get_cuda_paths():
+  """Determines CUDA {bin,lib,include} paths
+  
+  returns (bin_path,lib_path,inc_path)
+  """
+
+  # determine defaults
+  if os.name == 'nt':
+    bin_path = 'C:/CUDA/bin'
+    lib_path = 'C:/CUDA/lib'
+    inc_path = 'C:/CUDA/include'
+  elif os.name == 'posix':
+    bin_path = '/usr/local/cuda/bin'
+    lib_path = '/usr/local/cuda/lib'
+    inc_path = '/usr/local/cuda/include'
+  else:
+    raise ValueError, 'Error: unknown OS.  Where is nvcc installed?'
+  
+  if platform.system() != 'Darwin' and platform.machine()[-2:] == '64':
+    lib_path += '64'
+
+  # override with environement variables
+  if 'CUDA_BIN_PATH' in os.environ:
+    bin_path = os.path.abspath(os.environ['CUDA_BIN_PATH'])
+  if 'CUDA_LIB_PATH' in os.environ:
+    lib_path = os.path.abspath(os.environ['CUDA_LIB_PATH'])
+  if 'CUDA_INC_PATH' in os.environ:
+    inc_path = os.path.abspath(os.environ['CUDA_INC_PATH'])
+
+  return (bin_path,lib_path,inc_path)
+
 def getTools():
   result = []
   if os.name == 'nt':
@@ -128,6 +159,12 @@ def Environment():
   # get linker switches
   env.Append(LINKFLAGS = getLINKFLAGS(env['mode'], env.subst('$LINK')))
 
+  # get CUDA paths
+  (cuda_exe_path,cuda_lib_path,cuda_inc_path) = get_cuda_paths()
+  env.Append(LIBPATH = [cuda_lib_path])
+  env.Append(CPPPATH = [cuda_inc_path])
+
+  
   # enable Doxygen
   env.Tool('dox', toolpath = [os.path.join(thisDir)])
 

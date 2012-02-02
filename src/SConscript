@@ -44,7 +44,6 @@ for x in object_files:
     objects.append(env.SharedObject(x))
 
 libcopperhead = env.StaticLibrary(target='copperhead', source=objects)
-#libcopperhead_shared = env.SharedLibrary(target='copperhead', source=objects)
 
 #Make this opt-in to avoid forcing everyone to install Doxygen    
 if 'doc' in COMMAND_LINE_TARGETS:
