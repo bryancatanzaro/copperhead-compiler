@@ -5,10 +5,10 @@
 #include <thrust/iterator/reverse_iterator.h>
 
 template<typename F, typename Seq>
-boost::shared_ptr<cuarray<typename F::result_type> >
+sp_cuarray
 scan(const F& fn, Seq& x) {
     typedef typename F::result_type T;
-    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
+    sp_cuarray result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
     thrust::inclusive_scan(x.begin(),
                            x.end(),
@@ -18,13 +18,13 @@ scan(const F& fn, Seq& x) {
 }
 
 template<typename F, typename Seq>
-boost::shared_ptr<cuarray<typename F::result_type> >
+sp_cuarray
 rscan(const F& fn, Seq& x) {
     typedef typename F::result_type T;
     typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
     iterator_type drbegin(x.end());
     iterator_type drend(x.begin());
-    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
+    sp_cuarray result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
     thrust::reverse_iterator<thrust::device_ptr<T> > orbegin(result.end());
     thrust::inclusive_scan(drbegin, drend, orbegin, fn);

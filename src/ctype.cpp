@@ -115,7 +115,7 @@ shared_ptr<type_t> fn_t::p_result() const {
 
 
 cuarray_t::cuarray_t(const shared_ptr<type_t> sub) :
-    sequence_t(*this, "sp_cuarray_var", sub) {}
+    sequence_t(*this, "sp_cuarray", sub) {}
 
 
 polytype_t::polytype_t(vector<shared_ptr<type_t> > && vars,

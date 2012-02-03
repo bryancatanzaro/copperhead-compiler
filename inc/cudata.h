@@ -50,20 +50,22 @@ private:
     void exile();    
 };
 
+typedef boost::shared_ptr<cuarray> sp_cuarray;
+
 template<typename T>
-boost::shared_ptr<cuarray> make_remote(ssize_t in);
+sp_cuarray make_remote(ssize_t in);
 
 template<>
-boost::shared_ptr<cuarray> make_remote<bool>(ssize_t in);
+sp_cuarray make_remote<bool>(ssize_t in);
 
 template<>
-boost::shared_ptr<cuarray> make_remote<int>(ssize_t in);
+sp_cuarray make_remote<int>(ssize_t in);
 
 template<>
-boost::shared_ptr<cuarray> make_remote<long>(ssize_t in);
+sp_cuarray make_remote<long>(ssize_t in);
 
 template<>
-boost::shared_ptr<cuarray> make_remote<float>(ssize_t in);
+sp_cuarray make_remote<float>(ssize_t in);
 
 template<>
-boost::shared_ptr<cuarray> make_remote<double>(ssize_t in);
+sp_cuarray make_remote<double>(ssize_t in);

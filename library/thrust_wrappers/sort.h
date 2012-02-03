@@ -5,12 +5,12 @@
 #include "../prelude/functors.h"
 
 template<typename F, typename Seq>
-boost::shared_ptr<cuarray<typename Seq::value_type> >
+sp_cuarray
 sort(const F& fn, Seq& x) {
     typedef typename Seq::value_type T;
 
     //Copy for value semantics (since thrust sort is "in-place")
-    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
+    sp_cuarray result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
     thrust::copy(x.begin(),
                  x.end(),
@@ -24,12 +24,12 @@ sort(const F& fn, Seq& x) {
 
 
 template<typename Seq>
-boost::shared_ptr<cuarray<typename Seq::value_type> >
+sp_cuarray
 sort(const fn_cmp_lt<typename Seq::value_type>& fn, Seq& x) {
     typedef typename Seq::value_type T;
 
     //Copy for value semantics (since thrust sort is "in-place")
-    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
+    sp_cuarray result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
     thrust::copy(x.begin(),
                  x.end(),
@@ -42,12 +42,12 @@ sort(const fn_cmp_lt<typename Seq::value_type>& fn, Seq& x) {
 }
 
 template<typename Seq>
-boost::shared_ptr<cuarray<typename Seq::value_type> >
+sp_cuarray
 sort(const fn_cmp_gt<typename Seq::value_type>& fn, Seq& x) {
     typedef typename Seq::value_type T;
 
     //Copy for value semantics (since thrust sort is "in-place")
-    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
+    sp_cuarray result_ary = make_remote<T>(x.size());
     stored_sequence<T> result = get_remote_w<T>(result_ary);
     thrust::copy(x.begin(),
                  x.end(),

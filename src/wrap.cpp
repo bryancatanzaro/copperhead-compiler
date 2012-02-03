@@ -118,15 +118,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
             new_wrap_ct = shared_ptr<ctype::fn_t>(
                 new ctype::fn_t(new_wrap_args_ct, new_wrap_res_ct));
 
-            new_res_ct =
-                make_shared<ctype::polytype_t>(
-                    make_vector<shared_ptr<ctype::type_t> >(
-                        make_shared<ctype::polytype_t>(
-                            make_vector<shared_ptr<ctype::type_t> >(
-                                sub_res_t),
-                            make_shared<ctype::monotype_t>("cuarray"))),
-                    make_shared<ctype::monotype_t>(
-                        "boost::shared_ptr"));
+            new_res_ct = make_shared<ctype::monotype_t>("sp_cuarray");
             new_ct = make_shared<ctype::fn_t>(
                 new_args_ct,
                 new_res_ct);
@@ -154,22 +146,8 @@ wrap::result_type wrap::operator()(const procedure &n) {
                     static_pointer_cast<name>(get_node_ptr(n.id())),
                     make_shared<tuple>(
                         move(getter_args))));
-        shared_ptr<ret> dynamize;
+        shared_ptr<ret> dynamize = make_shared<ret>(result_id);
 
-        if (detail::isinstance<ctype::sequence_t, ctype::type_t>(
-                previous_c_res_t)) {
-            dynamize =
-                make_shared<ret>(
-                    make_shared<apply>(
-                        make_shared<name>("wrap_cuarray"),
-                        make_shared<tuple>(
-                            make_vector<shared_ptr<expression> >(
-                                result_id))));
-        } else {
-            dynamize =
-                make_shared<ret>(
-                    result_id);
-        }
         shared_ptr<suite> wrapper_stmts =
             make_shared<suite>(
                 make_vector<shared_ptr<statement> >
