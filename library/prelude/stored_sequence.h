@@ -1,5 +1,6 @@
 #pragma once
 #include <thrust/device_ptr.h>
+#include "cudata.h"
 
 template<typename T>
 struct stored_sequence 
@@ -64,3 +65,16 @@ stored_sequence<T> slice(stored_sequence<T> seq, int base, int len)
 }
 
 
+template<typename T>
+stored_sequence<T> get_remote_w(boost::shared_ptr<cuarray>& in) {
+    std::pair<void*, ssize_t> info = in->get_remote_w();
+    return stored_sequence<T>(reinterpret_cast<T*>(info.first),
+                              info.second);
+}
+
+template<typename T>
+stored_sequence<T> get_remote_r(boost::shared_ptr<cuarray>& in) {
+    std::pair<void*, ssize_t> info = in->get_remote_r();
+    return stored_sequence<T>(reinterpret_cast<T*>(info.first),
+                              info.second);
+}

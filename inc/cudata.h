@@ -6,6 +6,8 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#define BOOST_SP_USE_SPINLOCK
+#include <boost/shared_ptr.hpp>
 
 //For dynamically typing the contents of a cuarray
 //This makes integration with dynamically typed languages easier.
@@ -43,7 +45,25 @@ public:
     std::pair<void*, ssize_t> get_remote_r();
     std::pair<void*, ssize_t> get_remote_w();
 private:
+    cuarray(const cuarray&);
     void retrieve();
     void exile();    
 };
 
+template<typename T>
+boost::shared_ptr<cuarray> make_remote(ssize_t in);
+
+template<>
+boost::shared_ptr<cuarray> make_remote<bool>(ssize_t in);
+
+template<>
+boost::shared_ptr<cuarray> make_remote<int>(ssize_t in);
+
+template<>
+boost::shared_ptr<cuarray> make_remote<long>(ssize_t in);
+
+template<>
+boost::shared_ptr<cuarray> make_remote<float>(ssize_t in);
+
+template<>
+boost::shared_ptr<cuarray> make_remote<double>(ssize_t in);

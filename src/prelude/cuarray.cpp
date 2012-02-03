@@ -5,6 +5,8 @@
 
 typedef std::pair<void*, ssize_t> seq;
 using std::make_pair;
+using std::auto_ptr;
+
 
 cuarray::cuarray() {
     l_d = NULL;
@@ -16,7 +18,9 @@ cuarray::cuarray() {
     clean_remote = true;
 }
 
+#include <iostream>
 cuarray::~cuarray() {
+    std::cout << "destroying cuarray " << l_d << " " << r_d << std::endl;
     if (l_d != NULL) {
         free(l_d);
         l_d = NULL;
@@ -25,6 +29,7 @@ cuarray::~cuarray() {
         cudaFree(r_d);
         r_d = NULL;
     }
+    std::cout << "  Successfully destroyed cuarray" << std::endl;
 }
 
 cuarray::cuarray(ssize_t _n, CUTYPE _t, bool host) {
@@ -49,9 +54,13 @@ cuarray::cuarray(ssize_t _n, CUTYPE _t, bool host) {
     s = e * n;
     if (clean_local) {
         l_d = malloc(s);
+        r_d = NULL;
     } else {
         cudaMalloc(&r_d, s);
+        l_d = NULL;
     }
+    std::cout << "creating cuarray " << l_d << " " << r_d << std::endl;
+    std::cout << "  " << "n: " << n << " e: " << e << " s: " << s << std::endl;
 }
 
 cuarray::cuarray(ssize_t _n, bool* l) {
@@ -61,6 +70,7 @@ cuarray::cuarray(ssize_t _n, bool* l) {
     e = sizeof(bool);
     s = e * n;
     l_d = malloc(s);
+    r_d = NULL;
     memcpy(l_d, l, s);
     t = CUBOOL;
 }
@@ -72,6 +82,7 @@ cuarray::cuarray(ssize_t _n, int* l) {
     e = sizeof(int);
     s = e * n;
     l_d = malloc(s);
+    r_d = NULL;
     memcpy(l_d, l, s);
     t = CUINT32;
 }
@@ -83,6 +94,7 @@ cuarray::cuarray(ssize_t _n, long* l) {
     e = sizeof(long);
     s = e * n;
     l_d = malloc(s);
+    r_d = NULL;
     memcpy(l_d, l, s);
     t = CUINT64;
 }
@@ -94,8 +106,11 @@ cuarray::cuarray(ssize_t _n, float* l) {
     e = sizeof(float);
     s = e * n;
     l_d = malloc(s);
+    r_d = NULL;
     memcpy(l_d, l, s);
     t = CUFLOAT32;
+    std::cout << "creating cuarray " << l_d << " " << r_d << std::endl;
+    std::cout << "  " << "n: " << n << " e: " << e << " s: " << s << std::endl;
 }
 
 cuarray::cuarray(ssize_t _n, double* l) {
@@ -105,6 +120,7 @@ cuarray::cuarray(ssize_t _n, double* l) {
     e = sizeof(float);
     s = e * n;
     l_d = malloc(s);
+    r_d = NULL;
     memcpy(l_d, l, s);
     t = CUFLOAT64;
 }
@@ -117,6 +133,8 @@ void cuarray::retrieve() {
         //Lazy allocation
         if (l_d == NULL) {
             l_d = malloc(s);
+            std::cout << "allocating local space: cuarray " << l_d << " " << r_d << std::endl;     
+            std::cout << "  " << "n: " << n << " e: " << e << " s: " << s << std::endl;
         }
         cudaMemcpy(l_d, r_d, s, cudaMemcpyDeviceToHost);
         clean_local = true;
@@ -130,6 +148,9 @@ void cuarray::exile() {
         //Lazy allocation
         if (r_d == NULL) {
             cudaMalloc(&r_d, s);
+            std::cout << "allocating remote space: cuarray " << l_d << " " << r_d << std::endl;
+            
+            std::cout << "  " << "n: " << n << " e: " << e << " s: " << s << std::endl;
         }
         cudaMemcpy(r_d, l_d, s, cudaMemcpyHostToDevice);
         clean_remote = true;
@@ -158,3 +179,32 @@ seq cuarray::get_remote_w() {
     return make_pair(r_d, n);
 }
 
+template<typename T>
+boost::shared_ptr<cuarray> make_remote(ssize_t in) {
+    return boost::shared_ptr<cuarray>(new cuarray(0, CUVOID, false));
+}
+
+template<>
+boost::shared_ptr<cuarray> make_remote<bool>(ssize_t in) {
+    return boost::shared_ptr<cuarray>(new cuarray(in, CUBOOL, false));
+}
+
+template<>
+boost::shared_ptr<cuarray> make_remote<int>(ssize_t in) {
+    return boost::shared_ptr<cuarray>(new cuarray(in, CUINT32, false));
+}
+
+template<>
+boost::shared_ptr<cuarray> make_remote<long>(ssize_t in) {
+    return boost::shared_ptr<cuarray>(new cuarray(in, CUINT64, false));
+}
+
+template<>
+boost::shared_ptr<cuarray> make_remote<float>(ssize_t in) {
+    return boost::shared_ptr<cuarray>(new cuarray(in, CUFLOAT32, false));
+}
+
+template<>
+boost::shared_ptr<cuarray> make_remote<double>(ssize_t in) {
+    return boost::shared_ptr<cuarray>(new cuarray(in, CUFLOAT64, false));
+}
