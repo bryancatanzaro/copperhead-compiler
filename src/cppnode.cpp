@@ -73,4 +73,17 @@ const ctype::type_t& typedefn::rename() const {
     return *m_rename;
 }
 
+namespace_block::namespace_block(const std::string& name,
+                                 const std::shared_ptr<suite>& stmts)
+    : statement(*this), m_name(name), m_stmts(stmts) {}
+
+const std::string& namespace_block::name() const {
+    return m_name;
+}
+
+const suite& namespace_block::stmts() const {
+    return *m_stmts;
+}
+
+
 }

@@ -124,6 +124,8 @@ public:
     virtual result_type operator()(const include &n);
     
     virtual result_type operator()(const typedefn &n);
+
+    virtual result_type operator()(const namespace_block &n);
     
 };
 /*! 

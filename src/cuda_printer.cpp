@@ -255,6 +255,14 @@ void cuda_printer::operator()(const typedefn &n) {
     boost::apply_visitor(tp, n.rename());
     m_os << ";";
 }
+
+void cuda_printer::operator()(const namespace_block& n) {
+    m_os << "namespace ";
+    m_os << n.name();
+    m_os << " {" << endl;
+    boost::apply_visitor(*this, n.stmts());
+    m_os << "}" << endl;
+}
     
 void cuda_printer::operator()(const string &s) {
     m_os << s;

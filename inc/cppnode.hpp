@@ -146,6 +146,32 @@ public:
     //! Gets the rename type
     const ctype::type_t& rename() const;
 };
+
+//! AST node representing a C++ namespace block
+/*! This node is only used internally by the compiler
+*/
+class namespace_block
+    : public statement
+{
+protected:
+    const std::string m_name;
+    const std::shared_ptr<suite> m_stmts;
+public:
+    //! Constructor
+/*! namespace $name {$sub};
+  
+  \param name The name of the namespace
+  \param stmts The statements inside the namespace
+  
+*/
+    namespace_block(const std::string& name,
+                    const std::shared_ptr<suite>& stmts);
+    //! Gets the name of the namespace
+    const std::string& name() const;
+    //! Gets the statement contained in the namespace
+    const suite& stmts() const;
+};
+
 /*! 
   @}
  */

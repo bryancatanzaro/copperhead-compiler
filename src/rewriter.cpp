@@ -165,4 +165,8 @@ rewriter::result_type rewriter::operator()(const typedefn &n) {
     return get_node_ptr(n);
 }
 
+rewriter::result_type rewriter::operator()(const namespace_block &n) {
+    return get_node_ptr(n);
+}
+
 }

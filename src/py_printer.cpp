@@ -98,7 +98,12 @@ void py_printer::operator()(const typedefn &n) {
     //No typedef statement in python
     assert(false);
 }
-    
+
+void py_printer::operator()(const namespace_block &n) {
+    //No typedef statement in python
+    assert(false);
+}
+
 void py_printer::operator()(const std::string &s) {
     m_os << s;
 }

@@ -88,6 +88,8 @@ public:
     void operator()(const include &n);
     
     void operator()(const typedefn &n);
+
+    void operator()(const namespace_block &n);
     
     void operator()(const std::string &s);
     
