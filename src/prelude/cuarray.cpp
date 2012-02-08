@@ -110,7 +110,7 @@ cuarray::cuarray(ssize_t _n, double* l) {
     clean_local = true;
     clean_remote = false;
     n = _n;
-    e = sizeof(float);
+    e = sizeof(double);
     s = e * n;
     l_d = malloc(s);
     r_d = NULL;
