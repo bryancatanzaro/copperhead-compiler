@@ -14,6 +14,11 @@ try:
 except:
     siteconf = {}
 
+try:
+    Import('cuda_support')
+except:
+    cuda_support = False
+    
 bid = siteconf.get('BOOST_INC_DIR', None)
 bld = siteconf.get('BOOST_LIB_DIR', None)
 if bid:
@@ -24,7 +29,8 @@ if bld:
 parent, current = os.path.split(os.path.abspath(os.curdir))
 env.Append(CPPPATH = [os.path.join(parent, "inc")])
 env.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-g'])
-env.Append(LIBS = ['cudart'])
+if cuda_support:
+    env.Append(LIBS = ['cudart'])
 
 if not GetOption('num_jobs'):
     #Parallelize the build maximally
@@ -38,10 +44,19 @@ def recursive_glob(pattern):
         files += recursive_glob("*/"+pattern)
     return files
 
-object_files = recursive_glob('*.cpp')
+source_dirs = ['import', 'prelude', 'thrust', 'utility']
+if cuda_support:
+    source_dirs.append(os.path.join('platform', 'cuda'))
+source_files = Glob('*.cpp')
+source_files = reduce(lambda x, y: x + y,
+               map(lambda z:
+                       recursive_glob(z + '/*.cpp'),
+                   source_dirs),
+               source_files)
+
 
 objects = []
-for x in object_files:
+for x in source_files:
     objects.append(env.SharedObject(x))
 
 libcopperhead = env.SharedLibrary(target='copperhead', source=objects)
