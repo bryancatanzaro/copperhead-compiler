@@ -11,6 +11,12 @@ try:
     Import('cuda_support')
 except:
     cuda_support = False
+
+# Check dependencies
+conf=Configure(env)
+if not conf.CheckHeader('boost/variant.hpp', language='C++'):
+	print "You need the boost core library to compile this program"
+	Exit(1)
     
 #Parallelize the build maximally
 import multiprocessing
