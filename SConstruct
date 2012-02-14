@@ -15,7 +15,10 @@ except:
 # Check dependencies
 conf=Configure(env)
 if not conf.CheckHeader('boost/variant.hpp', language='C++'):
-	print "You need the boost core library to compile this program"
+	print "You need the boost::variant library to compile this program"
+	Exit(1)
+if not conf.CheckHeader('boost/mpl/logical.hpp', language='C++'):
+	print "You need the boost::mpl library to compile this program"
 	Exit(1)
     
 #Parallelize the build maximally
