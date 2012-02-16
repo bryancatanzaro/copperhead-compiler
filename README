@@ -1,0 +1,15 @@
+Copperhead Compiler
+--------------------------------
+The Copperhead compiler is a data parallel compiler, written in C++,
+built to support Copperhead, a data parallel language embedded in Python.
+The Copperhead compiler accepts a normalized, typed abstract syntax tree
+representing a computation, and generates parallel C++ code which
+implements the computation.  By separating the Copperhead compiler from
+the Copperhead project itself, we hope to allow the compiler to be used
+in other contexts besides Copperhead itself, for example, as a supporting
+compiler for other domain specific and/or embedded languages.
+
+The source code is hosted at:
+    http://code.google.com/p/copperhead-compiler
+    
+Installation instructions and documentation are found on the website.     
