@@ -16,7 +16,7 @@
  */
 #pragma once
 #include <thrust/device_ptr.h>
-#include "cudata.h"
+#include "sequence.h"
 
 template<typename T>
 struct stored_sequence 
@@ -37,6 +37,10 @@ struct stored_sequence
     __host__ __device__
     stored_sequence(T *begin, T *end) : data(begin), length(end-begin) {}
 
+    __host__
+    stored_sequence(const sequence<T, 0>& h_seq)
+        : data(h_seq.m_d), length(h_seq.m_l) {}
+    
     //
     // Methods supporting stream interface
     //
@@ -78,19 +82,4 @@ __host__ __device__
 stored_sequence<T> slice(stored_sequence<T> seq, int base, int len)
 {
     return stored_sequence<T>(&seq[base], len);
-}
-
-
-template<typename T>
-stored_sequence<T> get_remote_w(boost::shared_ptr<cuarray>& in) {
-    std::pair<void*, ssize_t> info = in->get_remote_w();
-    return stored_sequence<T>(reinterpret_cast<T*>(info.first),
-                              info.second);
-}
-
-template<typename T>
-stored_sequence<T> get_remote_r(boost::shared_ptr<cuarray>& in) {
-    std::pair<void*, ssize_t> info = in->get_remote_r();
-    return stored_sequence<T>(reinterpret_cast<T*>(info.first),
-                              info.second);
 }
