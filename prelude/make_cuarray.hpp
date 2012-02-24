@@ -1,5 +1,5 @@
 #pragma once
-#include "sequence.h"
+#include "sequence.hpp"
 
 //XXX Use std::shared_ptr once nvcc can pass it through
 #define BOOST_SP_USE_SPINLOCK

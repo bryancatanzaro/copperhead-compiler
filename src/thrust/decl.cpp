@@ -93,7 +93,7 @@ void declare_maps(int max_arity,
         fns.insert(make_pair(
                        make_pair(map_ids[i], iteration_structure::independent),
                        fn_info(map_types[i], map_phases[i])));
-        fn_includes.insert(make_pair(map_ids[i], "thrust_wrappers/map.h"));
+        fn_includes.insert(make_pair(map_ids[i], "cuda/thrust_wrappers/map.h"));
     }
                         
 }
@@ -125,8 +125,8 @@ void declare_scans(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("rscan", iteration_structure::independent),
                    fn_info(scan_t, scan_phase_t)));
-    fn_includes.insert(make_pair("scan", "thrust_wrappers/scan.h"));
-    fn_includes.insert(make_pair("rscan", "thrust_wrappers/scan.h"));
+    fn_includes.insert(make_pair("scan", "cuda/thrust_wrappers/scan.h"));
+    fn_includes.insert(make_pair("rscan", "cuda/thrust_wrappers/scan.h"));
         
 }
 
@@ -149,7 +149,7 @@ void declare_permutes(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("permute", iteration_structure::independent),
                    fn_info(permute_t, permute_phase_t)));
-    fn_includes.insert(make_pair("permute", "thrust_wrappers/permute.h"));
+    fn_includes.insert(make_pair("permute", "cuda/thrust_wrappers/permute.h"));
 }
 
 void declare_special_sequences(map<ident, fn_info>& fns,
@@ -171,7 +171,7 @@ void declare_special_sequences(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("indices", iteration_structure::independent),
                    fn_info(indices_t, indices_phase_t)));
-    fn_includes.insert(make_pair("indices", "thrust_wrappers/indices.h"));
+    fn_includes.insert(make_pair("indices", "cuda/thrust_wrappers/indices.h"));
 
     shared_ptr<polytype_t> replicate_t =
         make_shared<polytype_t>(
@@ -187,7 +187,7 @@ void declare_special_sequences(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("replicate", iteration_structure::independent),
                    fn_info(replicate_t, replicate_phase_t)));
-    fn_includes.insert(make_pair("replicate", "thrust_wrappers/replicate.h"));
+    fn_includes.insert(make_pair("replicate", "cuda/thrust_wrappers/replicate.h"));
 
     shared_ptr<polytype_t> shift_t =
         make_shared<polytype_t>(
@@ -203,7 +203,7 @@ void declare_special_sequences(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("shift", iteration_structure::independent),
                    fn_info(shift_t, shift_phase_t)));
-    fn_includes.insert(make_pair("shift", "thrust_wrappers/shift.h"));
+    fn_includes.insert(make_pair("shift", "cuda/thrust_wrappers/shift.h"));
                
     shared_ptr<polytype_t> rotate_t =
         make_shared<polytype_t>(
@@ -219,7 +219,7 @@ void declare_special_sequences(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("rotate", iteration_structure::independent),
                    fn_info(rotate_t, rotate_phase_t)));
-    fn_includes.insert(make_pair("rotate", "thrust_wrappers/rotate.h"));                
+    fn_includes.insert(make_pair("rotate", "cuda/thrust_wrappers/rotate.h"));                
 }
 
 void declare_transforms(map<ident, fn_info>& fns,
@@ -240,7 +240,7 @@ void declare_transforms(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("adjacent_difference", iteration_structure::independent),
                    fn_info(adj_t, adj_phase_t)));
-    fn_includes.insert(make_pair("adjacent_difference", "thrust_wrappers/adjacent_difference.h"));
+    fn_includes.insert(make_pair("adjacent_difference", "cuda/thrust_wrappers/adjacent_difference.h"));
 }
 
 void declare_reductions(map<ident, fn_info>& fns,
@@ -269,7 +269,7 @@ void declare_reductions(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("reduce", iteration_structure::independent),
                    fn_info(reduce_t, reduce_phase_t)));
-    fn_includes.insert(make_pair("reduce", "thrust_wrappers/reduce.h"));
+    fn_includes.insert(make_pair("reduce", "cuda/thrust_wrappers/reduce.h"));
     shared_ptr<polytype_t> sum_t =
         make_shared<polytype_t>(
             make_vector<shared_ptr<monotype_t> >(t_a),
@@ -288,7 +288,7 @@ void declare_reductions(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("sum", iteration_structure::independent),
                    fn_info(sum_t, sum_phase_t)));
-    fn_includes.insert(make_pair("sum", "thrust_wrappers/reduce.h"));
+    fn_includes.insert(make_pair("sum", "cuda/thrust_wrappers/reduce.h"));
 }
 
 void declare_sorts(map<ident, fn_info>& fns,
@@ -316,7 +316,7 @@ void declare_sorts(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("sort", iteration_structure::independent),
                    fn_info(sort_t, sort_phase_t)));
-    fn_includes.insert(make_pair("sort", "thrust_wrappers/sort.h"));
+    fn_includes.insert(make_pair("sort", "cuda/thrust_wrappers/sort.h"));
 }
 
 }

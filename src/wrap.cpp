@@ -49,15 +49,20 @@ wrap::result_type wrap::operator()(const procedure &n) {
                     new name(detail::wrap_array_id(arg_name.id()),
                              t, ct));
                 wrapper_args.push_back(wrapped_name);
-                    
-                shared_ptr<ctype::tuple_t> tuple_sub_ct =
+
+                shared_ptr<ctype::type_t> impl_seq_ct =
+                    make_shared<ctype::polytype_t>(
+                        make_vector<shared_ptr<ctype::type_t> >(sub_ct),
+                        make_shared<ctype::monotype_t>("sequence"));
+        
+                shared_ptr<ctype::tuple_t> tuple_impl_seq_ct =
                     make_shared<ctype::tuple_t>(
-                        make_vector<shared_ptr<ctype::type_t> >(
-                            sub_ct));
+                        make_vector<shared_ptr<ctype::type_t> >(impl_seq_ct));
+                
                 shared_ptr<templated_name> getter_name =
                     make_shared<templated_name>(
-                        detail::get_remote_r(),
-                        tuple_sub_ct);
+                        detail::make_sequence(),
+                        tuple_impl_seq_ct);
                 shared_ptr<tuple_t> wrapped_tuple_t =
                     make_shared<tuple_t>(
                         make_vector<shared_ptr<type_t> >(t));
@@ -66,7 +71,9 @@ wrap::result_type wrap::operator()(const procedure &n) {
                         make_vector<shared_ptr<ctype::type_t> >(ct));
                 shared_ptr<tuple> wrapped_name_tuple =
                     make_shared<tuple>(
-                        make_vector<shared_ptr<expression> >(wrapped_name),
+                        make_vector<shared_ptr<expression> >(wrapped_name)
+                        (make_shared<literal>("false"))
+                        (make_shared<literal>("false")),
                         wrapped_tuple_t, wrapped_tuple_ct);
                 shared_ptr<apply> getter_apply =
                     make_shared<apply>(getter_name,

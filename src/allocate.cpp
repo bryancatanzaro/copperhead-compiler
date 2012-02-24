@@ -72,9 +72,14 @@ allocate::result_type allocate::operator()(const bind &n) {
             boost::get<const ctype::sequence_t&>(pre_lhs.ctype());
         shared_ptr<ctype::type_t> sub_lhs_ct =
             pre_lhs_ct.p_sub();
-        shared_ptr<ctype::tuple_t> tuple_sub_lhs_ct =
+        shared_ptr<ctype::type_t> impl_seq_ct =
+            make_shared<ctype::polytype_t>(
+                make_vector<shared_ptr<ctype::type_t> >(sub_lhs_ct),
+                make_shared<ctype::monotype_t>("sequence"));
+        
+        shared_ptr<ctype::tuple_t> tuple_impl_seq_ct =
             make_shared<ctype::tuple_t>(
-                make_vector<shared_ptr<ctype::type_t> >(sub_lhs_ct));
+                make_vector<shared_ptr<ctype::type_t> >(impl_seq_ct));
         shared_ptr<ctype::type_t> result_ct =
             make_shared<ctype::monotype_t>("sp_cuarray");
         shared_ptr<type_t> result_t =
@@ -97,11 +102,13 @@ allocate::result_type allocate::operator()(const bind &n) {
             boost::apply_visitor(*this, n.lhs()));
         shared_ptr<templated_name> getter_name =
             make_shared<templated_name>(
-                detail::get_remote_w(),
-                tuple_sub_lhs_ct);
+                detail::make_sequence(),
+                tuple_impl_seq_ct);
         shared_ptr<tuple> getter_args =
             make_shared<tuple>(
-                make_vector<shared_ptr<expression> >(result_name));
+                make_vector<shared_ptr<expression> >(result_name)
+                (make_shared<literal>("false"))
+                (make_shared<literal>("true")));
         shared_ptr<apply> getter_call =
             make_shared<apply>(getter_name, getter_args);
         shared_ptr<bind> retriever =

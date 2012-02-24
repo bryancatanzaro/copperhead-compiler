@@ -1,5 +1,5 @@
 #pragma once
-#include "allocators.h"
+#include "allocators.hpp"
 
 template<typename M>
 class chunk {
@@ -9,7 +9,8 @@ class chunk {
     size_t m_r;
   public:
     chunk(const M&s,
-          size_t r) : m_s(s), m_d(NULL), m_r(r) {}
+          size_t r) : m_s(s), m_d(NULL), m_r(r) {
+    }
     ~chunk() {
         if (m_d != NULL) {
             m_s.deallocate(m_d);
@@ -37,7 +38,7 @@ class chunk {
         if (m_d == NULL) {
             //Lazy allocation - only allocate when pointer is requested
             m_d = m_s.allocate(m_r);
-        }
+        } 
         return m_d;
     }
     size_t size() const {

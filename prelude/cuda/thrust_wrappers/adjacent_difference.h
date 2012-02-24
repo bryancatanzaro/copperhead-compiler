@@ -15,7 +15,8 @@
  * 
  */
 #pragma once
-
+#include "make_cuarray.hpp"
+#include "make_sequence.hpp"
 #include <thrust/adjacent_difference.h>
 
 //XXX Need to look at F::result_type instead of Seq::value_type
@@ -23,8 +24,8 @@ template<typename F, typename Seq>
 boost::shared_ptr<cuarray<typename Seq::value_type> >
 adjacent_difference(const F& fn, Seq& x) {
     typedef typename Seq::value_type T;
-    boost::shared_ptr<cuarray<T> > result_ary = make_remote<T>(x.size());
-    stored_sequence<T> result = get_remote_w<T>(result_ary);
+    boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
+    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
     thrust::adjacent_difference(x.begin(),
                                 x.end(),
                                 result.begin(),

@@ -17,7 +17,6 @@
 #pragma once
 #include <string>
 
-
 namespace backend {
 namespace detail {
 
@@ -27,10 +26,8 @@ namespace detail {
 */
 
 
-//! Gets string for get_remote_r
-const std::string get_remote_r();
-//! Gets string for get_remote_w
-const std::string get_remote_w();
+//! Gets string for make_sequence
+const std::string make_sequence();
 //! Gets string for wrap
 const std::string wrap();
 //! Gets string for make_remote

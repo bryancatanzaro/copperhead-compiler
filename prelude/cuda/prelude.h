@@ -15,12 +15,14 @@
  * 
  */
 #pragma once
-#include "cudata.h"
+#define BOOST_SP_USE_SPINLOCK
+#include <boost/shared_ptr.hpp>
+#include "stored_sequence.h"
+#include "nested_sequence.h"
+#include "uniform_nested_sequence.h"
 
 #include "operators.h"
 #include "functors.h"
 #include "closures.h"
 #include "cast.h"
 #include "phase_boundary.h"
-#define BOOST_SP_USE_SPINLOCK
-#include <boost/shared_ptr.hpp>

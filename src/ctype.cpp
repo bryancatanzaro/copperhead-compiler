@@ -1,4 +1,5 @@
 #include "ctype.hpp"
+#include "utility/initializers.hpp"
 
 using std::shared_ptr;
 using std::static_pointer_cast;
@@ -76,6 +77,14 @@ sequence_t::sequence_t(const shared_ptr<type_t> &sub)
     : monotype_t(*this,
                  "stored_sequence",
                  make_vector<shared_ptr<type_t> >(sub)) {}
+
+template<typename Derived>
+sequence_t::sequence_t(Derived& self,
+                       const std::string& name,
+                       const std::shared_ptr<type_t>& sub)
+    : monotype_t(self,
+                 name,
+                 utility::make_vector<std::shared_ptr<type_t> >(sub)) {}
 
 const type_t& sequence_t::sub() const {
     return *m_params[0];

@@ -3,8 +3,8 @@
 #include <vector>
 #include <iostream>
 #include <memory>
-#include "allocators.h"
-#include "chunk.h"
+#include "allocators.hpp"
+#include "chunk.hpp"
 #include "type.hpp"
 #include "ctype.hpp"
 

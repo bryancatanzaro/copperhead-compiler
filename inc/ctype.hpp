@@ -20,7 +20,6 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <memory>
 #include <iostream>
-#include "utility/initializers.hpp"
 
 namespace backend {
 
@@ -185,11 +184,11 @@ public:
 */
     template<typename Derived>
     sequence_t(Derived &self,
-                      const std::string& name,
-                      const std::shared_ptr<type_t>& sub) :
-        monotype_t(self,
-                   name,
-                   utility::make_vector<std::shared_ptr<type_t> >(sub)) {}
+               const std::string& name,
+               const std::shared_ptr<type_t>& sub); // :
+        // monotype_t(self,
+        //            name,
+        //            utility::make_vector<std::shared_ptr<type_t> >(sub)) {}
     //! Gets the type of the element of the Sequence
     const type_t& sub() const;
     //! Gets a pointer to the type of the element of the Sequence

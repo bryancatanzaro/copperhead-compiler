@@ -20,7 +20,6 @@
 #include "type.hpp"
 #include <iostream>
 #include <string>
-#include "utility/initializers.hpp"
 
 namespace backend {
 

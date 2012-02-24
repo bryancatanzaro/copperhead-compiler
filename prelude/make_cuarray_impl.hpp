@@ -1,5 +1,5 @@
-#include "make_cuarray.h"
-#include "cuarray.h"
+#include "make_cuarray.hpp"
+#include "cuarray.hpp"
 #include "monotype.hpp"
 
 template<typename T>

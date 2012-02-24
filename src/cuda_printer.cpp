@@ -39,7 +39,7 @@ void cuda_printer::operator()(const templated_name &n) {
     m_os << n.id();
     m_os << "<";
     detail::list(tp, n.template_types());
-    m_os << ">";
+    m_os << " >";
 }
     
 void cuda_printer::operator()(const literal &n) {

@@ -1,4 +1,6 @@
 #include "monotype.hpp"
+#include "utility/initializers.hpp"
+
 
 using std::string;
 using std::shared_ptr;

@@ -1,5 +1,5 @@
 #pragma once
-#include "make_cuarray.h"
+#include "make_cuarray.hpp"
 
 /* This file allows the creation of views of cuarray objects,
    even when cuarray objects can't be instantiated by the compiler.

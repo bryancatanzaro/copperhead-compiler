@@ -15,6 +15,9 @@
  * 
  */
 #pragma once
+#include "make_cuarray.hpp"
+#include "make_sequence.hpp"
+
 
 template<typename SeqX,
          typename SeqI>
@@ -22,8 +25,8 @@ boost::shared_ptr<cuarray> permute(
     SeqX& x,
     SeqI& i) {
     typedef typename SeqX::value_type T;
-    boost::shared_ptr<cuarray > result_ary = make_remote<T>(x.size());
-    stored_sequence<T> result = get_remote_w<T>(result_ary);
+    boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
+    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
     thrust::scatter(x.begin(),
                     x.end(),
                     i.begin(),

@@ -19,13 +19,17 @@
 #include <thrust/scan.h>
 #include <thrust/device_vector.h>
 #include <thrust/iterator/reverse_iterator.h>
+#include "make_cuarray.hpp"
+#include "make_sequence.hpp"
+
+
 
 template<typename F, typename Seq>
 sp_cuarray
 scan(const F& fn, Seq& x) {
     typedef typename F::result_type T;
-    sp_cuarray result_ary = make_remote<T>(x.size());
-    stored_sequence<T> result = get_remote_w<T>(result_ary);
+    sp_cuarray result_ary = make_cuarray<T>(x.size());
+    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
     thrust::inclusive_scan(x.begin(),
                            x.end(),
                            result.begin(),
@@ -40,8 +44,8 @@ rscan(const F& fn, Seq& x) {
     typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
     iterator_type drbegin(x.end());
     iterator_type drend(x.begin());
-    sp_cuarray result_ary = make_remote<T>(x.size());
-    stored_sequence<T> result = get_remote_w<T>(result_ary);
+    sp_cuarray result_ary = make_cuarray<T>(x.size());
+    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
     thrust::reverse_iterator<thrust::device_ptr<T> > orbegin(result.end());
     thrust::inclusive_scan(drbegin, drend, orbegin, fn);
     return result_ary;

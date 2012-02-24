@@ -1,8 +1,8 @@
 #pragma once
-#include "allocators.h"
-#include "sequence.h"
+#include "allocators.hpp"
+#include "sequence.hpp"
 #include <vector>
-#include "chunk.h"
+#include "chunk.hpp"
 #include <boost/iterator/indirect_iterator.hpp>
 
 template<typename S, typename M>

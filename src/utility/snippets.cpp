@@ -5,12 +5,8 @@ namespace detail {
 
 
 
-const std::string get_remote_r() {
-    return "get_remote_r";
-}
-
-const std::string get_remote_w() {
-    return "get_remote_w";
+const std::string make_sequence() {
+    return "make_sequence";
 }
 
 const std::string wrap() {

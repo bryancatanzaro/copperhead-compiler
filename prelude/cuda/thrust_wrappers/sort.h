@@ -18,7 +18,10 @@
 
 #include <thrust/sort.h>
 
-#include "../prelude/functors.h"
+#include "../functors.h"
+#include "make_cuarray.hpp"
+#include "make_sequence.hpp"
+
 
 template<typename F, typename Seq>
 sp_cuarray
@@ -26,8 +29,8 @@ sort(const F& fn, Seq& x) {
     typedef typename Seq::value_type T;
 
     //Copy for value semantics (since thrust sort is "in-place")
-    sp_cuarray result_ary = make_remote<T>(x.size());
-    stored_sequence<T> result = get_remote_w<T>(result_ary);
+    sp_cuarray result_ary = make_cuarray<T>(x.size());
+    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
     thrust::copy(x.begin(),
                  x.end(),
                  result.begin());
@@ -45,8 +48,8 @@ sort(const fn_cmp_lt<typename Seq::value_type>& fn, Seq& x) {
     typedef typename Seq::value_type T;
 
     //Copy for value semantics (since thrust sort is "in-place")
-    sp_cuarray result_ary = make_remote<T>(x.size());
-    stored_sequence<T> result = get_remote_w<T>(result_ary);
+    sp_cuarray result_ary = make_cuarray<T>(x.size());
+    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
     thrust::copy(x.begin(),
                  x.end(),
                  result.begin());
@@ -63,8 +66,8 @@ sort(const fn_cmp_gt<typename Seq::value_type>& fn, Seq& x) {
     typedef typename Seq::value_type T;
 
     //Copy for value semantics (since thrust sort is "in-place")
-    sp_cuarray result_ary = make_remote<T>(x.size());
-    stored_sequence<T> result = get_remote_w<T>(result_ary);
+    sp_cuarray result_ary = make_cuarray<T>(x.size());
+    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
     thrust::copy(x.begin(),
                  x.end(),
                  result.begin());

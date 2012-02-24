@@ -16,7 +16,7 @@
  */
 #pragma once
 #include <thrust/device_ptr.h>
-#include "sequence.h"
+#include "sequence.hpp"
 
 template<typename T>
 struct stored_sequence 
