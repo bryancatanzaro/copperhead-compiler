@@ -18,4 +18,5 @@ struct cuarray {
     std::vector<size_t> m_l;
     std::shared_ptr<backend::type_t> m_t;
     std::shared_ptr<backend::ctype::type_t> m_ct;
+    size_t m_o;
 };
