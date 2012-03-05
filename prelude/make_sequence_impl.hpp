@@ -11,16 +11,18 @@ struct make_seq_impl {};
 template<typename T, typename M>
 struct make_seq_impl<sequence<T, 0>, M > {
     static sequence<T, 0> fun(typename std::vector<std::shared_ptr<chunk<M> > >::iterator d,
-                              std::vector<size_t>::const_iterator l) {
-        return sequence<T, 0>(reinterpret_cast<T*>((*d)->ptr()), *l);
+                              std::vector<size_t>::const_iterator l,
+                              const size_t o=0) {
+        return sequence<T, 0>(reinterpret_cast<T*>((*d)->ptr())+o, *l);
     }
 };
 
 template<typename T, typename M>
 struct make_seq_impl<sequence<T, 1>, M > {
     static sequence<T, 1> fun(typename std::vector<std::shared_ptr<chunk<M> > >::iterator d,
-                              std::vector<size_t>::const_iterator l) {
-        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0>, M >::fun(d, l);
+                              std::vector<size_t>::const_iterator l,
+                              const size_t o=0) {
+        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0>, M >::fun(d, l, o);
         sequence<T, 0> data = make_seq_impl<sequence<T, 0>, M >::fun(d+1, l+1);
         return sequence<T, 1>(desc, data);
     }
@@ -29,8 +31,9 @@ struct make_seq_impl<sequence<T, 1>, M > {
 template<typename T, int D, typename M>
 struct make_seq_impl<sequence<T, D >, M > {
     static sequence<T, D> fun(typename std::vector<std::shared_ptr<chunk<M> > >::iterator d,
-                              std::vector<size_t>::const_iterator l) {
-        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0>, M >::fun(d, l);
+                              std::vector<size_t>::const_iterator l,
+                              const size_t o=0) {
+        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0>, M >::fun(d, l, o);
         sequence<T, D-1> sub = make_seq_impl<sequence<T, D-1>, M >::fun(d+1, l+1);
         return sequence<T, D>(desc, sub);
     }
@@ -40,7 +43,7 @@ struct make_seq_impl<sequence<T, D >, M > {
 template<typename S>
 S make_sequence(sp_cuarray& in, bool local, bool write) {
     cuarray& r = *in;
-    return make_seq_impl<S, host_alloc>::fun(r.m_local.begin(), r.m_l.cbegin());
+    return make_seq_impl<S, host_alloc>::fun(r.m_local.begin(), r.m_l.cbegin(), r.m_o);
 }
 #else
 #include <cuda_runtime.h>
@@ -73,7 +76,7 @@ S make_sequence(sp_cuarray& in, bool local, bool write) {
         }
         if (write)
             r.m_clean_remote = false;
-        return make_seq_impl<S, host_alloc>::fun(r.m_local.begin(), r.m_l.cbegin());
+        return make_seq_impl<S, host_alloc>::fun(r.m_local.begin(), r.m_l.cbegin(), r.m_o);
     } else {
         if (!r.m_clean_remote) {
             exile(r);
@@ -81,7 +84,7 @@ S make_sequence(sp_cuarray& in, bool local, bool write) {
         }
         if (write)
             r.m_clean_local = false;
-        return make_seq_impl<S, cuda_alloc>::fun(r.m_remote.begin(), r.m_l.cbegin());
+        return make_seq_impl<S, cuda_alloc>::fun(r.m_remote.begin(), r.m_l.cbegin(), r.m_o);
     }
 }
 
