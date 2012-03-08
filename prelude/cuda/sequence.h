@@ -18,6 +18,7 @@
 #include "../sequence.hpp"
 #include "sequence_iterator.h"
 
+namespace copperhead {
 namespace cuda {
 
 template<typename T, int D>
@@ -134,4 +135,5 @@ sequence<T, D> slice(sequence<T, D> seq, size_t base, size_t len) {
 }
     
 
+}
 }
