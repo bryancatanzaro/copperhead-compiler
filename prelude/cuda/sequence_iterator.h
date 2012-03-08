@@ -19,6 +19,12 @@
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/functional.h>
+#include <thrust/device_ptr.h>
+
+//forward declaration
+namespace cuda {
+template<typename T, int D> struct sequence;
+}
 
 template<typename Sequence>
 struct sequence_viewer
@@ -37,12 +43,22 @@ struct sequence_iterator {
     typedef thrust::counting_iterator<typename Sequence::index_type> count_type;
     typedef thrust::transform_iterator<
     sequence_viewer<Sequence>, count_type, typename Sequence::ref_type> type;
+    static type make_sequence_iterator_impl(const Sequence& s) {
+        return type(count_type(0), sequence_viewer<Sequence>(s));
+    }
+};
+
+template<typename T>
+struct sequence_iterator<cuda::sequence<T, 0> > {
+    //XXX Change based on system
+    typedef thrust::device_ptr<T> type;
+    static type make_sequence_iterator_impl(const cuda::sequence<T, 0>& s) {
+        return type(s.m_d);
+    }
 };
 
 template<typename Sequence>
 __host__
 typename sequence_iterator<Sequence>::type make_sequence_iterator(const Sequence& s) {
-    return typename sequence_iterator<Sequence>::type(
-        typename sequence_iterator<Sequence>::count_type(0),
-        sequence_viewer<Sequence>(s));
+    return sequence_iterator<Sequence>::make_sequence_iterator_impl(s);
 }

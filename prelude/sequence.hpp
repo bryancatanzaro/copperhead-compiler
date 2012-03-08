@@ -79,29 +79,29 @@ sequence<T, D> slice(sequence<T, D> seq, size_t base, size_t len) {
 }
     
 
-template<typename T>
-struct sequence<T, 1>
-    : public sequence_base<T, 1> {
-    sequence<size_t, 0> m_d;
-    sequence<T, 0> m_s;
+// template<typename T>
+// struct sequence<T, 1>
+//     : public sequence_base<T, 1> {
+//     sequence<size_t, 0> m_d;
+//     sequence<T, 0> m_s;
 
-    sequence() : m_d(), m_s() {}
+//     sequence() : m_d(), m_s() {}
 
-    sequence(sequence<size_t, 0> d,
-             sequence<T, 0> s) : m_d(d), m_s(s) {}
-    sequence<T, 0> operator[](size_t& i) {
-        size_t begin=m_d[i], end=m_d[i+1];
-        return slice(m_s, begin, end-begin);
-    }
-    sequence<T, 0> operator[](const size_t& i) const {
-        size_t begin=m_d[i], end=m_d[i+1];
-        return slice(m_s, begin, end-begin);
-    }
+//     sequence(sequence<size_t, 0> d,
+//              sequence<T, 0> s) : m_d(d), m_s(s) {}
+//     sequence<T, 0> operator[](size_t& i) {
+//         size_t begin=m_d[i], end=m_d[i+1];
+//         return slice(m_s, begin, end-begin);
+//     }
+//     sequence<T, 0> operator[](const size_t& i) const {
+//         size_t begin=m_d[i], end=m_d[i+1];
+//         return slice(m_s, begin, end-begin);
+//     }
 
-    size_t size() const {
-        return m_d.size()-1;
-    }
-};
+//     size_t size() const {
+//         return m_d.size()-1;
+//     }
+// };
 
 
 template<typename T>
