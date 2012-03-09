@@ -18,6 +18,14 @@
 #define BOOST_SP_USE_SPINLOCK
 #include <boost/shared_ptr.hpp>
 
+
+#ifdef CUDA_SUPPORT
+#define THRUST_SYSTEM_DEVICE_CUDA
+#else
+#define THRUST_SYSTEM_DEVICE_OMP
+#endif
+#include <thrust/detail/config.h>
+
 #include <prelude/basic/basic.h>
 #include <prelude/sequences/sequence.h>
 #include <prelude/sequences/uniform_sequence.h>
