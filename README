@@ -10,6 +10,6 @@ in other contexts besides Copperhead itself, for example, as a supporting
 compiler for other domain specific and/or embedded languages.
 
 The source code is hosted at:
-    http://code.google.com/p/copperhead-compiler
+    http://github.com/copperhead/copperhead-compiler
     
 Installation instructions and documentation are found on the website.     
