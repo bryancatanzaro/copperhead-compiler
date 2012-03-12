@@ -25,7 +25,7 @@ template<typename Seq>
 boost::shared_ptr<cuarray> phase_boundary(const Seq& in) {
     typedef typename Seq::value_type T;
     boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(in.size());
-    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
+    sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
     thrust::copy(in.begin(), in.end(), result.begin());
     return result_ary;
 }

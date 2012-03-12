@@ -16,7 +16,7 @@
  */
 #pragma once
 
-#include <prelude/sequences/sequence.hpp>
+#include <prelude/sequences/sequence.h>
 
 //XXX Use std::shared_ptr once nvcc can pass it through
 #define BOOST_SP_USE_SPINLOCK

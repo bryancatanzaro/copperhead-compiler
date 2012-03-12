@@ -68,10 +68,6 @@ struct sequence_iterator<uniform_sequence<T, 0> > {
 };
 
 
-
-template<typename T>
-struct sequence_iterator<
-
 template<typename Sequence>
 __host__
 typename sequence_iterator<Sequence>::type make_sequence_iterator(const Sequence& s) {

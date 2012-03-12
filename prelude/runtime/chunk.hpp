@@ -17,47 +17,64 @@
 
 #pragma once
 
-#include <prelude/runtime/allocators.hpp>
+#include <prelude/runtime/tags.h>
+#include <prelude/runtime/tag_malloc_and_free.h>
 
 namespace copperhead {
 
-template<typename M>
+namespace detail {
+
+struct apply_malloc
+    : public boost::static_visitor<void*> {
+    const size_t m_ctr;
+    apply_malloc(const size_t& ctr) : m_ctr(ctr) {}
+
+    template<typename Tag>
+    void* operator()(const Tag& t) const {
+        return thrust::detail::tag_malloc(Tag(), m_ctr);
+    }
+};
+
+struct apply_free
+    : public boost::static_visitor<> {
+    void* m_p;
+    apply_free(void* p) : m_p(p) {}
+
+    template<typename Tag>
+    void operator()(const Tag& t) const {
+        thrust::detail::tag_free(Tag(), m_p);
+    }
+};
+
+}
+
 class chunk {
   private:
-    M m_s;
+    system_variant m_s;
     void* m_d;
     size_t m_r;
   public:
-    chunk(const M&s,
+    chunk(const system_variant &s,
           size_t r) : m_s(s), m_d(NULL), m_r(r) {
     }
     ~chunk() {
         if (m_d != NULL) {
-            m_s.deallocate(m_d);
-            m_d = NULL;
+            boost::apply_visitor(
+                detail::apply_free(m_d),
+                m_s);
         }
     }
-    //movable
-    chunk(chunk&& o)
-        : m_s(o.m_s) {
-        m_d = o.m_d;
-        m_r = o.m_r;
-        o.m_d = NULL;
-    }
-    chunk& operator=(chunk&& o) {
-        m_s = o.m_s;
-        m_d = o.m_d;
-        m_r = o.m_r;
-        o.m_d = NULL;
-        return *this;
-    }
-    //not copyable
-    chunk(const chunk&) = delete;
-    chunk& operator=(const chunk&) = delete;
+private:
+    //Not copyable
+    chunk(const chunk&);
+    chunk& operator=(const chunk&);
+public:
     void* ptr() {
         if (m_d == NULL) {
             //Lazy allocation - only allocate when pointer is requested
-            m_d = m_s.allocate(m_r);
+            m_d = boost::apply_visitor(
+                detail::apply_malloc(m_r),
+                m_s);
         } 
         return m_d;
     }

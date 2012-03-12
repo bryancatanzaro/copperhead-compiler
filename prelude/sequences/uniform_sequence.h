@@ -30,7 +30,7 @@ struct uniform_sequence {
     typedef size_t index_type;
     typedef T value_type;
     static const int nesting_depth = D;
-    typedef typename sequence_iterator<uniform_sequence<T, D-1> >::type iterator_type;
+    typedef typename sequence_iterator<uniform_sequence<T, D> >::type iterator_type;
     size_t m_s;
     size_t m_l;
     uniform_sequence<T, D-1> m_d;
@@ -80,7 +80,7 @@ struct uniform_sequence<T, 0>
     typedef size_t index_type;
     typedef T value_type;
     static const int nesting_depth = 0;
-    typedef typename sequence_iterator<uniform_sequence<T, D-1> >::type iterator_type;
+    typedef typename sequence_iterator<uniform_sequence<T, 0> >::type iterator_type;
     size_t m_s;
     size_t m_l;
     size_t m_o;
