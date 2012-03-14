@@ -20,7 +20,7 @@
 #include <vector>
 #include "node.hpp"
 #include "rewriter.hpp"
-#include "prelude/phase.hpp"
+#include "import/phase.hpp"
 #include "environment.hpp"
 #include "import/library.hpp"
 #include "utility/isinstance.hpp"

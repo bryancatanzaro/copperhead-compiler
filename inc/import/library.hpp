@@ -23,7 +23,7 @@
 #include <map>
 #include <set>
 #include <ostream>
-#include "prelude/phase.hpp"
+#include "import/phase.hpp"
 #include "type.hpp"
 
 namespace backend {

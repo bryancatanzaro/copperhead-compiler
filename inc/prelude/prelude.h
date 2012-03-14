@@ -14,30 +14,15 @@
  *   limitations under the License.
  * 
  */
-
 #pragma once
+#define BOOST_SP_USE_SPINLOCK
+#include <boost/shared_ptr.hpp>
 
-#include <vector>
-#include <iostream>
-#include <memory>
-#include <prelude/runtime/allocators.hpp>
-#include <prelude/runtime/chunk.hpp>
-#include <prelude/runtime/type.hpp>
-#include <prelude/runtime/ctype.hpp>
+#include <prelude/config.h>
 
-namespace copperhead {
 
-struct cuarray {
-    std::vector<std::shared_ptr<chunk<host_alloc> > > m_local;
-#ifdef CUDA_SUPPORT
-    std::vector<std::shared_ptr<chunk<cuda_alloc> > > m_remote;
-    bool m_clean_local;
-    bool m_clean_remote;
-#endif
-    std::vector<size_t> m_l;
-    std::shared_ptr<backend::type_t> m_t;
-    std::shared_ptr<backend::ctype::type_t> m_ct;
-    size_t m_o;
-};
+#include <prelude/basic/basic.h>
+#include <prelude/sequences/sequence.h>
+#include <prelude/sequences/uniform_sequence.h>
 
-}
+#include <prelude/primitives/phase_boundary.h>

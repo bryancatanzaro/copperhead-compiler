@@ -15,10 +15,11 @@
  * 
  */
 
-#pragma once
-
+#include <prelude/runtime/chunk.hpp>
+#include <prelude/config.h>
 #include <prelude/runtime/tags.h>
 #include <prelude/runtime/tag_malloc_and_free.h>
+#include <stdexcept>
 
 namespace copperhead {
 
@@ -46,42 +47,49 @@ struct apply_free
     }
 };
 
+system_variant fake_to_real(const detail::fake_system_tag& t) {
+    if (t == detail::fake_omp_tag) {
+        return omp_tag();
+    }
+#ifdef CUDA_SUPPORT
+    else if (t == detail::fake_cuda_tag) {
+        return cuda_tag();
+    }
+#endif
+    else {
+        throw std::invalid_argument("Internal error due to non typesafe enum.");
+    }
+}
+            
+
 }
 
-class chunk {
-  private:
-    system_variant m_s;
-    void* m_d;
-    size_t m_r;
-  public:
-    chunk(const system_variant &s,
-          size_t r) : m_s(s), m_d(NULL), m_r(r) {
-    }
-    ~chunk() {
-        if (m_d != NULL) {
-            boost::apply_visitor(
-                detail::apply_free(m_d),
-                m_s);
-        }
-    }
-private:
-    //Not copyable
-    chunk(const chunk&);
-    chunk& operator=(const chunk&);
-public:
-    void* ptr() {
-        if (m_d == NULL) {
-            //Lazy allocation - only allocate when pointer is requested
-            m_d = boost::apply_visitor(
-                detail::apply_malloc(m_r),
-                m_s);
-        } 
-        return m_d;
-    }
-    size_t size() const {
-        return m_r;
-    }
+chunk::chunk(const detail::fake_system_tag &s,
+             size_t r) : m_s(s), m_d(NULL), m_r(r) {}
 
-};
+chunk::~chunk() {
+    if (m_d != NULL) {
+        system_variant s = fake_to_real(m_s);
+        boost::apply_visitor(
+            detail::apply_free(m_d),
+            s);
+    }
+}
+
+void* chunk::ptr() {
+    if (m_d == NULL) {
+        //Lazy allocation - only allocate when pointer is requested
+        system_variant s = fake_to_real(m_s);
+        m_d = boost::apply_visitor(
+            detail::apply_malloc(m_r),
+            s);
+    } 
+    return m_d;
+}
+
+size_t chunk::size() const {
+    return m_r;
+}
+
 
 }

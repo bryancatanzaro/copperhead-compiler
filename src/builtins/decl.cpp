@@ -1,4 +1,4 @@
-#include "prelude/decl.hpp"
+#include "builtins/decl.hpp"
 
 using std::string;
 using std::shared_ptr;
@@ -14,7 +14,7 @@ using backend::utility::make_map;
 
 namespace backend {
 
-namespace prelude {
+namespace builtins {
 
 typedef std::tuple<const char*, fn_info> named_info;
 
@@ -122,9 +122,9 @@ void load_scalars(
 
 shared_ptr<library> get_builtins() {
     map<ident, fn_info> fns;
-    prelude::load_scalars(fns, prelude::detail::unary_scalar_operators);
-    prelude::load_scalars(fns, prelude::detail::binary_scalar_operators);
-    prelude::load_scalars(fns, prelude::detail::cpp_support_fns);
+    builtins::load_scalars(fns, builtins::detail::unary_scalar_operators);
+    builtins::load_scalars(fns, builtins::detail::binary_scalar_operators);
+    builtins::load_scalars(fns, builtins::detail::cpp_support_fns);
     string path(detail::get_path(PRELUDE_PATH));
     set<string> include_paths;
     if (path.length() > 0) {

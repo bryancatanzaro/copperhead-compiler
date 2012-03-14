@@ -26,9 +26,8 @@
 #include "type_convert.hpp"
 #include "allocate.hpp"
 #include "wrap.hpp"
-#include <iostream>
 #include "thrust/decl.hpp"
-#include "prelude/decl.hpp"
+#include "builtins/decl.hpp"
 #include "cuda_printer.hpp"
 #include "typedefify.hpp"
 #include "phase_analyze.hpp"
