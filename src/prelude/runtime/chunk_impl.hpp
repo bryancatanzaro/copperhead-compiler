@@ -25,6 +25,10 @@
 #include <boost/type_traits.hpp>
 #include <boost/mpl/not.hpp>
 
+
+#include <iostream>
+#include <typeinfo>
+
 namespace copperhead {
 
 namespace detail {
@@ -60,15 +64,15 @@ struct apply_copy
         : m_d(d), m_s(s), m_r(r) {}
 
     template<typename DTag, typename STag>
-    boost::enable_if<
-            boost::is_same<DTag, STag> >
+    typename boost::enable_if<
+        boost::is_same<DTag, STag> >::type
     operator()(DTag, STag) const {
     }
     
     template<typename DTag, typename STag>
-    boost::enable_if<
+    typename boost::enable_if<
         boost::mpl::not_<
-            boost::is_same<DTag, STag> > >
+            boost::is_same<DTag, STag> > >::type
     operator()(DTag, STag) const {
         thrust::pointer<char, STag> s_start((char*)m_s);
         thrust::pointer<char, STag> s_end = s_start + m_r;
@@ -107,18 +111,14 @@ chunk::~chunk() {
 }
 
 chunk::chunk(const detail::fake_system_tag &s,
-             chunk& o) {
-    m_s = s;
+             chunk& o)  : m_s(s), m_d(NULL), m_r(o.m_r) {
     if (m_s == o.m_s) {
         throw std::invalid_argument("Internal error: can't copy a chunk into the same memory space");
     }
-    void* my_ptr = this->ptr();
-    void* o_ptr = o.ptr();
-    m_r = o.m_r;
     system_variant m_v = fake_to_real(m_s);
     system_variant o_v = fake_to_real(o.m_s);
-    boost::apply_visitor(detail::apply_copy(my_ptr,
-                                            o_ptr,
+    boost::apply_visitor(detail::apply_copy(ptr(),
+                                            o.ptr(),
                                             m_r),
                          m_v,
                          o_v);
