@@ -29,7 +29,7 @@ struct make_seq_impl {};
 
 template<typename T, typename M>
 struct make_seq_impl<sequence<T, 0>, M > {
-    static sequence<T, 0> fun(typename std::vector<std::shared_ptr<chunk<M> > >::iterator d,
+    static sequence<T, 0> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
                               std::vector<size_t>::const_iterator l,
                               const size_t o=0) {
         return sequence<T, 0>(reinterpret_cast<T*>((*d)->ptr())+o, *l);
@@ -38,7 +38,7 @@ struct make_seq_impl<sequence<T, 0>, M > {
 
 template<typename T, typename M>
 struct make_seq_impl<sequence<T, 1>, M > {
-    static sequence<T, 1> fun(typename std::vector<std::shared_ptr<chunk<M> > >::iterator d,
+    static sequence<T, 1> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
                               std::vector<size_t>::const_iterator l,
                               const size_t o=0) {
         sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0>, M >::fun(d, l, o);
@@ -49,7 +49,7 @@ struct make_seq_impl<sequence<T, 1>, M > {
 
 template<typename T, int D, typename M>
 struct make_seq_impl<sequence<T, D >, M > {
-    static sequence<T, D> fun(typename std::vector<std::shared_ptr<chunk<M> > >::iterator d,
+    static sequence<T, D> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
                               std::vector<size_t>::const_iterator l,
                               const size_t o=0) {
         sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0>, M >::fun(d, l, o);
@@ -58,55 +58,37 @@ struct make_seq_impl<sequence<T, D >, M > {
     }
 };
 
-#ifndef CUDA_SUPPORT
 template<typename S>
-S make_sequence(sp_cuarray& in, bool local, bool write) {
+S make_sequence(sp_cuarray& in, detail::fake_system_tag t, bool write) {
     cuarray& r = *in;
-    return make_seq_impl<S, host_alloc>::fun(r.m_local.begin(), r.m_l.cbegin(), r.m_o);
-}
-#else
-#include <cuda_runtime.h>
-
-void retrieve(cuarray& r) {
-    auto i = boost::make_indirect_iterator(r.m_local.begin());
-    auto j = boost::make_indirect_iterator(r.m_remote.begin());
-    auto e = boost::make_indirect_iterator(r.m_local.end());
-    for(; i != e; ++i, ++j) {
-        cudaMemcpy(i->ptr(), j->ptr(), i->size(), cudaMemcpyDeviceToHost);
-    }
-}
-
-void exile(cuarray& r) {
-    auto i = boost::make_indirect_iterator(r.m_local.begin());
-    auto j = boost::make_indirect_iterator(r.m_remote.begin());
-    auto e = boost::make_indirect_iterator(r.m_local.end());
-    for(; i != e; ++i, ++j) {
-        cudaMemcpy(j->ptr(), i->ptr(), i->size(), cudaMemcpyHostToDevice);
-    }
-}
-
-template<typename S>
-S make_sequence(sp_cuarray& in, bool local, bool write) {
-    cuarray& r = *in;
-    if (local) {
-        if (!r.m_clean_local) {
-            retrieve(r);
-            r.m_clean_local = true;
+    std::pair<std::vector<std::shared_ptr<chunk> >, bool>& s = r.m_d[t];
+    //Do we need to copy?
+    if (!s.second) {
+        //Find a valid representation
+        std::pair<std::vector<std::shared_ptr<chunk> >, bool> x;
+        x.second = false;
+        for(auto i = r.m_d.cbegin();
+            (x.second == false) && (i != r.m_d.cend());
+            i++) {
+            x = *i;
         }
-        if (write)
-            r.m_clean_remote = false;
-        return make_seq_impl<S, host_alloc>::fun(r.m_local.begin(), r.m_l.cbegin(), r.m_o);
-    } else {
-        if (!r.m_clean_remote) {
-            exile(r);
-            r.m_clean_remote = true;
+        //Copy from valid representation
+        for(auto i = s.first.begin(), j = x.first.begin();
+            i != s.first.end();
+            i++, j++) {
+            (*i)->copy_from(**j);
         }
-        if (write)
-            r.m_clean_local = false;
-        return make_seq_impl<S, cuda_alloc>::fun(r.m_remote.begin(), r.m_l.cbegin(), r.m_o);
     }
+    //Do we need to invalidate?
+    if (write) {
+        for(auto i = r.m_d.begin();
+            i != r.m_d.end();
+            i++) {
+            i->second = false;
+        }
+    }
+    s.second = true;
+    return make_seq_impl<S, host_alloc>::fun(s.first.begin(), r.m_l.cbegin(), r.m_o);
 }
-
-#endif
 
 }

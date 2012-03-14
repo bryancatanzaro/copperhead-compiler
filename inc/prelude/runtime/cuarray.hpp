@@ -18,24 +18,25 @@
 #pragma once
 
 #include <vector>
-#include <iostream>
+#include <map>
 #include <memory>
+#include <utility>
 #include <prelude/runtime/chunk.hpp>
 #include <prelude/runtime/type.hpp>
 #include <prelude/runtime/ctype.hpp>
 
 namespace copperhead {
 
-class cuarray {
-private:
-    std::map<detail::fake_system_tag,
-             std::pair<std::vector<std::shared_ptr<chunk> >,
-                       bool> > m_data;
+typedef std::map<detail::fake_system_tag,
+                 std::pair<std::vector<std::shared_ptr<chunk> >,
+                           bool> > data_map;
+
+struct cuarray {
+    data_map m_d;
     std::vector<size_t> m_l;
     std::shared_ptr<backend::type_t> m_t;
     std::shared_ptr<backend::ctype::type_t> m_ct;
     size_t m_o;
-
 };
 
 }

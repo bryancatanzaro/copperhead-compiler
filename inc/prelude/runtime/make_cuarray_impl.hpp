@@ -71,14 +71,22 @@ sp_cuarray make_cuarray(size_t s) {
         std::make_shared<backend::sequence_t>(
             detail::type_deriver<T>::fun());
     r->m_l.push_back(s);
-    r->m_local.push_back(
+    data_map data;
+    data[detail::fake_omp_tag] = std::make_pair(vector<shared_ptr<chunk> >(), true);
+   
+    vector<std::shared_ptr<chunk> >& local_chunks = data[detail::fake_omp_tag].first;
+#ifdef CUDA_SUPPORT
+    data[detail::fake_cuda_tag] = std::make_pair(vector<shared_ptr<chunk> >(), true);
+    vector<std::shared_ptr<chunk> >& remote_chunks = data[detail::fake_cuda_tag].first;
+#endif
+    
+    local_chunks.push_back(
         std::make_shared<chunk<host_alloc> >(host_alloc(), s * sizeof(T)));
 #ifdef CUDA_SUPPORT
-    r->m_remote.push_back(
+    remote_chunks.push_back(
         std::make_shared<chunk<cuda_alloc> >(cuda_alloc(), s * sizeof(T)));
-    r->m_clean_local = true;
-    r->m_clean_remote = true;
 #endif
+    r->m_d = std::move(data);
     return r;
 }
 
