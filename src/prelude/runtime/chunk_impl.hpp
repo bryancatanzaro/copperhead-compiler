@@ -20,6 +20,10 @@
 #include <prelude/runtime/tags.h>
 #include <prelude/runtime/tag_malloc_and_free.h>
 #include <stdexcept>
+#include <thrust/copy.h>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits.hpp>
+#include <boost/mpl/not.hpp>
 
 namespace copperhead {
 
@@ -44,6 +48,32 @@ struct apply_free
     template<typename Tag>
     void operator()(const Tag& t) const {
         thrust::detail::tag_free(Tag(), m_p);
+    }
+};
+
+struct apply_copy
+    : public boost::static_visitor<> {
+    void* m_d;
+    void* m_s;
+    size_t m_r;
+    apply_copy(void* d, void* s, size_t r)
+        : m_d(d), m_s(s), m_r(r) {}
+
+    template<typename DTag, typename STag>
+    boost::enable_if<
+            boost::is_same<DTag, STag> >
+    operator()(DTag, STag) const {
+    }
+    
+    template<typename DTag, typename STag>
+    boost::enable_if<
+        boost::mpl::not_<
+            boost::is_same<DTag, STag> > >
+    operator()(DTag, STag) const {
+        thrust::pointer<char, STag> s_start((char*)m_s);
+        thrust::pointer<char, STag> s_end = s_start + m_r;
+        thrust::pointer<char, DTag> d_start((char*)m_d);
+        thrust::copy(s_start, s_end, d_start);
     }
 };
 
@@ -74,6 +104,25 @@ chunk::~chunk() {
             detail::apply_free(m_d),
             s);
     }
+}
+
+chunk::chunk(const detail::fake_system_tag &s,
+             chunk& o) {
+    m_s = s;
+    if (m_s == o.m_s) {
+        throw std::invalid_argument("Internal error: can't copy a chunk into the same memory space");
+    }
+    void* my_ptr = this->ptr();
+    void* o_ptr = o.ptr();
+    m_r = o.m_r;
+    system_variant m_v = fake_to_real(m_s);
+    system_variant o_v = fake_to_real(o.m_s);
+    boost::apply_visitor(detail::apply_copy(my_ptr,
+                                            o_ptr,
+                                            m_r),
+                         m_v,
+                         o_v);
+    
 }
 
 void* chunk::ptr() {

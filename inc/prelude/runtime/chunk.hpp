@@ -39,17 +39,21 @@ enum fake_system_tag {fake_omp_tag};
 }
 
 class chunk {
-  private:
+private:
     detail::fake_system_tag m_s;
     void* m_d;
     size_t m_r;
-  public:
+public:
     chunk(const detail::fake_system_tag &s,
           size_t r);
     ~chunk();
+    //Copyable if we're going to a different system
+    chunk(const detail::fake_system_tag &s,
+          chunk& o);
 private:
     //Not copyable
-    chunk(const chunk&);
+    chunk(const chunk& o);
+    //Not assignable
     chunk& operator=(const chunk&);
 public:
     void* ptr();
