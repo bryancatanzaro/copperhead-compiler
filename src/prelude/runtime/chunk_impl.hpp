@@ -25,10 +25,6 @@
 #include <boost/type_traits.hpp>
 #include <boost/mpl/not.hpp>
 
-
-#include <iostream>
-#include <typeinfo>
-
 namespace copperhead {
 
 namespace detail {
