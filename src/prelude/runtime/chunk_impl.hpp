@@ -106,10 +106,13 @@ chunk::~chunk() {
     }
 }
 
-chunk::chunk(const detail::fake_system_tag &s,
-             chunk& o)  : m_s(s), m_d(NULL), m_r(o.m_r) {
+void chunk::copy_from(chunk& o) {
     if (m_s == o.m_s) {
+        //XXX Investigate why this doesn't work
         throw std::invalid_argument("Internal error: can't copy a chunk into the same memory space");
+    }
+    if (m_r != o.m_r) {
+        throw std::invalid_argument("Internal error: can't copy chunks of different size");
     }
     system_variant m_v = fake_to_real(m_s);
     system_variant o_v = fake_to_real(o.m_s);
@@ -118,8 +121,8 @@ chunk::chunk(const detail::fake_system_tag &s,
                                             m_r),
                          m_v,
                          o_v);
-    
 }
+
 
 void* chunk::ptr() {
     if (m_d == NULL) {

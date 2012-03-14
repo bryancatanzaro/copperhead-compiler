@@ -47,15 +47,13 @@ public:
     chunk(const detail::fake_system_tag &s,
           size_t r);
     ~chunk();
-    //Copyable if we're going to a different system
-    chunk(const detail::fake_system_tag &s,
-          chunk& o);
 private:
     //Not copyable
     chunk(const chunk& o);
     //Not assignable
     chunk& operator=(const chunk&);
 public:
+    void copy_from(chunk& o);
     void* ptr();
     size_t size() const;
 };
