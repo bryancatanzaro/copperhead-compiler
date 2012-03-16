@@ -18,7 +18,7 @@ try:
     Import('cuda_support')
 except:
     cuda_support = False
-
+cuda_support=False
 bid = siteconf.get('BOOST_INC_DIR', None)
 bld = siteconf.get('BOOST_LIB_DIR', None)
 if bid:
@@ -28,13 +28,22 @@ if bld:
 
 parent, current = os.path.split(os.path.abspath(os.curdir))
 env.Append(CPPPATH = [os.path.join(parent, "inc")])
-env.Append(CPPDEFINES = ['THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP'])
+
+if cuda_support:
+    env.Append(LIBS = ['cudart'])
+
 
 #Protect nvcc from C++0X
 cppenv = env.Clone()
 cppenv.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-g'])
 cudaenv = env.Clone()
+cudaenv.Append(CPPDEFINES = ['CUDA_SUPPORT'])
 
+
+if env['PLATFORM'] == 'darwin':
+    cudaenv.Append(NVCCFLAGS=['-m64'])
+    cudaenv.Append(SHNVCCFLAGS=['-m64'])
+    
 if not GetOption('num_jobs'):
     #Parallelize the build maximally
     import multiprocessing
