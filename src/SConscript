@@ -18,7 +18,7 @@ try:
     Import('cuda_support')
 except:
     cuda_support = False
-cuda_support=False
+
 bid = siteconf.get('BOOST_INC_DIR', None)
 bld = siteconf.get('BOOST_LIB_DIR', None)
 if bid:
