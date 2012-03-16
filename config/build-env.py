@@ -165,6 +165,9 @@ def Environment():
   thisFile = inspect.getabsfile(Environment)
   thisDir = os.path.dirname(thisFile)
 
+  # enable nvcc
+  env.Tool('nvcc', toolpath = [os.path.join(thisDir)])
+  
   # get C compiler switches
   env.Append(CFLAGS = getCFLAGS(env['mode'], env['Wall'], env['Werror'], env.subst('$CC')))
 

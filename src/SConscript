@@ -13,7 +13,12 @@ try:
     Import('siteconf')
 except:
     siteconf = {}
-    
+
+try:
+    Import('cuda_support')
+except:
+    cuda_support = False
+
 bid = siteconf.get('BOOST_INC_DIR', None)
 bld = siteconf.get('BOOST_LIB_DIR', None)
 if bid:
@@ -23,7 +28,12 @@ if bld:
 
 parent, current = os.path.split(os.path.abspath(os.curdir))
 env.Append(CPPPATH = [os.path.join(parent, "inc")])
-env.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-g'])
+env.Append(CPPDEFINES = ['THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP'])
+
+#Protect nvcc from C++0X
+cppenv = env.Clone()
+cppenv.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-g'])
+cudaenv = env.Clone()
 
 if not GetOption('num_jobs'):
     #Parallelize the build maximally
@@ -37,7 +47,7 @@ def recursive_glob(pattern):
         files += recursive_glob("*/"+pattern)
     return files
 
-source_dirs = ['import', 'prelude', 'thrust', 'utility']
+source_dirs = ['builtins', 'import', 'thrust', 'utility']
 source_files = Glob('*.cpp')
 source_files = reduce(lambda x, y: x + y,
                map(lambda z:
@@ -45,11 +55,20 @@ source_files = reduce(lambda x, y: x + y,
                    source_dirs),
                source_files)
 
-
 objects = []
 for x in source_files:
-    objects.append(env.SharedObject(x))
+    objects.append(cppenv.SharedObject(x))
 
+
+    
+#handle objects which must be compiled by nvcc, if we support CUDA
+cuda_support_files = [os.path.join('prelude','runtime','chunk')]
+for x in cuda_support_files:
+    if cuda_support:
+        objects.append(cudaenv.SharedObject(x+'.cu'))
+    else:
+        objects.append(cppenv.SharedObject(x+'.cpp'))
+    
 libcopperhead = env.SharedLibrary(target='copperhead', source=objects)
 
 #Make this opt-in to avoid forcing everyone to install Doxygen    

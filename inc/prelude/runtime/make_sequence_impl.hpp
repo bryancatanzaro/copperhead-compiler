@@ -84,10 +84,9 @@ S make_sequence(sp_cuarray& in, detail::fake_system_tag t, bool write) {
         for(auto i = r.m_d.begin();
             i != r.m_d.end();
             i++) {
-            i->second = false;
+            i->second.second = (i->first == t);
         }
     }
-    s.second = true;
     return make_seq_impl<S, host_alloc>::fun(s.first.begin(), r.m_l.cbegin(), r.m_o);
 }
 
