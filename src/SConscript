@@ -41,8 +41,14 @@ cudaenv.Append(CPPDEFINES = ['CUDA_SUPPORT'])
 
 
 if env['PLATFORM'] == 'darwin':
-    cudaenv.Append(NVCCFLAGS=['-m64'])
-    cudaenv.Append(SHNVCCFLAGS=['-m64'])
+    def add_unique(flag_set, prefix, value):
+        if cudaenv.has_key(flag_set):
+            for x in cudaenv[flag_set]:
+                if x.startswith(prefix):
+                    return
+        cudaenv[flag_set].append(value)
+    add_unique('NVCCFLAGS', '-m', '-m64')
+    add_unique('SHNVCCFLAGS', '-m', '-m64')
     
 if not GetOption('num_jobs'):
     #Parallelize the build maximally

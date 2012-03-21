@@ -35,6 +35,6 @@ namespace copperhead {
 */
 
 template<typename S>
-S make_sequence(sp_cuarray& in, bool local=true, bool write=true);
+S make_sequence(sp_cuarray& in, detail::fake_system_tag t, bool write=true);
 
 }

@@ -22,8 +22,8 @@
 #include <memory>
 #include <utility>
 #include <prelude/runtime/chunk.hpp>
-#include <prelude/runtime/type.hpp>
-#include <prelude/runtime/ctype.hpp>
+#include "type.hpp"
+#include "ctype.hpp"
 
 namespace copperhead {
 

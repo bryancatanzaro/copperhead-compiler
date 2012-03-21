@@ -16,19 +16,16 @@
  */
 #pragma once
 #include <vector>
-#include <boost/iterator/indirect_iterator.hpp>
-
-#include <prelude/runtime/allocators.hpp>
 #include <prelude/runtime/chunk.hpp>
 #include <prelude/sequences/sequence.h>
 
 namespace copperhead {
 
-template<typename S, typename M>
+template<typename S>
 struct make_seq_impl {};
 
-template<typename T, typename M>
-struct make_seq_impl<sequence<T, 0>, M > {
+template<typename T>
+struct make_seq_impl<sequence<T, 0> > {
     static sequence<T, 0> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
                               std::vector<size_t>::const_iterator l,
                               const size_t o=0) {
@@ -36,24 +33,24 @@ struct make_seq_impl<sequence<T, 0>, M > {
     }
 };
 
-template<typename T, typename M>
-struct make_seq_impl<sequence<T, 1>, M > {
+template<typename T>
+struct make_seq_impl<sequence<T, 1> > {
     static sequence<T, 1> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
                               std::vector<size_t>::const_iterator l,
                               const size_t o=0) {
-        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0>, M >::fun(d, l, o);
-        sequence<T, 0> data = make_seq_impl<sequence<T, 0>, M >::fun(d+1, l+1);
+        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0> >::fun(d, l, o);
+        sequence<T, 0> data = make_seq_impl<sequence<T, 0> >::fun(d+1, l+1);
         return sequence<T, 1>(desc, data);
     }
 };
 
-template<typename T, int D, typename M>
-struct make_seq_impl<sequence<T, D >, M > {
+template<typename T, int D>
+struct make_seq_impl<sequence<T, D > > {
     static sequence<T, D> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
                               std::vector<size_t>::const_iterator l,
                               const size_t o=0) {
-        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0>, M >::fun(d, l, o);
-        sequence<T, D-1> sub = make_seq_impl<sequence<T, D-1>, M >::fun(d+1, l+1);
+        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0> >::fun(d, l, o);
+        sequence<T, D-1> sub = make_seq_impl<sequence<T, D-1> >::fun(d+1, l+1);
         return sequence<T, D>(desc, sub);
     }
 };
@@ -70,8 +67,9 @@ S make_sequence(sp_cuarray& in, detail::fake_system_tag t, bool write) {
         for(auto i = r.m_d.cbegin();
             (x.second == false) && (i != r.m_d.cend());
             i++) {
-            x = *i;
+            x = i->second;
         }
+        assert(x.second == true);
         //Copy from valid representation
         for(auto i = s.first.begin(), j = x.first.begin();
             i != s.first.end();
@@ -87,7 +85,7 @@ S make_sequence(sp_cuarray& in, detail::fake_system_tag t, bool write) {
             i->second.second = (i->first == t);
         }
     }
-    return make_seq_impl<S, host_alloc>::fun(s.first.begin(), r.m_l.cbegin(), r.m_o);
+    return make_seq_impl<S>::fun(s.first.begin(), r.m_l.cbegin(), r.m_o);
 }
 
 }
