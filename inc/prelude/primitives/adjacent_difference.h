@@ -18,6 +18,7 @@
 #include <prelude/runtime/make_cuarray.hpp>
 #include <prelude/runtime/make_sequence.hpp>
 #include <thrust/adjacent_difference.h>
+#include <prelude/runtime/tags.h>
 
 namespace copperhead {
 
@@ -25,10 +26,13 @@ template<typename F, typename Seq>
 boost::shared_ptr<cuarray>
 adjacent_difference(const F& fn, Seq& x) {
     typedef typename Seq::value_type T;
+    typedef typename Seq::tag Tag;
     boost::shared_ptr<cuarray> result_ary =
         make_cuarray<T>(x.size());
-    sequence<T> result =
-        make_sequence<sequence<T> >(result_ary, false, true);
+    sequence<Tag, T> result =
+        make_sequence<sequence<Tag, T> >(result_ary,
+                                         detail::real_to_fake_tag_convert(Tag()),
+                                         true);
     thrust::adjacent_difference(x.begin(),
                                 x.end(),
                                 result.begin(),

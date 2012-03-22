@@ -21,6 +21,8 @@
 #include <prelude/basic/functors.h>
 #include <prelude/runtime/make_cuarray.hpp>
 #include <prelude/runtime/make_sequence.hpp>
+#include <prelude/runtime/tags.h>
+
 
 namespace copperhead {
 
@@ -28,10 +30,13 @@ template<typename F, typename Seq>
 sp_cuarray
 sort(const F& fn, Seq& x) {
     typedef typename Seq::value_type T;
-
+    typedef typename Seq::tag Tag;
+    
     //Copy for value semantics (since thrust sort is "in-place")
     sp_cuarray result_ary = make_cuarray<T>(x.size());
-    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
+    sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
+                                                               detail::real_to_fake_converter(Tag()),
+                                                               true);
     thrust::copy(x.begin(),
                  x.end(),
                  result.begin());
@@ -47,10 +52,13 @@ template<typename Seq>
 sp_cuarray
 sort(const fn_cmp_lt<typename Seq::value_type>& fn, Seq& x) {
     typedef typename Seq::value_type T;
-
+    typedef typename Seq::tag Tag;
+    
     //Copy for value semantics (since thrust sort is "in-place")
     sp_cuarray result_ary = make_cuarray<T>(x.size());
-    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
+    sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
+                                                               detail::real_to_fake_converter(Tag()),
+                                                               true);
     thrust::copy(x.begin(),
                  x.end(),
                  result.begin());
@@ -65,10 +73,13 @@ template<typename Seq>
 sp_cuarray
 sort(const fn_cmp_gt<typename Seq::value_type>& fn, Seq& x) {
     typedef typename Seq::value_type T;
-
+    typedef typename Seq::tag Tag;
+    
     //Copy for value semantics (since thrust sort is "in-place")
     sp_cuarray result_ary = make_cuarray<T>(x.size());
-    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
+    sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
+                                                               detail::real_to_fake_converter(Tag()),
+                                                               true);
     thrust::copy(x.begin(),
                  x.end(),
                  result.begin());

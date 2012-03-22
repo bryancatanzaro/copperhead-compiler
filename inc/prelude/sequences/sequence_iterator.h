@@ -16,16 +16,16 @@
  */
 #pragma once
 
+#include <thrust/detail/pointer.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/functional.h>
-#include <thrust/device_ptr.h>
 
 namespace copperhead {
 
 //forward declarations
-template<typename T, int D> struct sequence;
-template<typename T, int D> struct uniform_sequence;
+template<typename Tag, typename T, int D> struct sequence;
+template<typename Tag, typename T, int D> struct uniform_sequence;
 
 template<typename Sequence>
 struct sequence_viewer
@@ -49,20 +49,18 @@ struct sequence_iterator {
     }
 };
 
-template<typename T>
-struct sequence_iterator<sequence<T, 0> > {
-    //XXX Change based on system
-    typedef thrust::device_ptr<T> type;
-    static type make_sequence_iterator_impl(const sequence<T, 0>& s) {
+template<typename Tag, typename T>
+struct sequence_iterator<sequence<Tag, T, 0> > {
+    typedef thrust::pointer<T, Tag> type;
+    static type make_sequence_iterator_impl(const sequence<Tag, T, 0>& s) {
         return type(s.m_d);
     }
 };
 
-template<typename T>
-struct sequence_iterator<uniform_sequence<T, 0> > {
-    //XXX Change based on system
-    typedef thrust::device_ptr<T> type;
-    static type make_sequence_iterator_impl(const uniform_sequence<T, 0>& s) {
+template<typename Tag, typename T>
+struct sequence_iterator<uniform_sequence<Tag, T, 0> > {
+    typedef thrust::pointer<T, Tag> type;
+    static type make_sequence_iterator_impl(const uniform_sequence<Tag, T, 0>& s) {
         return type(s.m_d);
     }
 };

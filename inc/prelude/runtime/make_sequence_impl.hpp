@@ -24,34 +24,34 @@ namespace copperhead {
 template<typename S>
 struct make_seq_impl {};
 
-template<typename T>
-struct make_seq_impl<sequence<T, 0> > {
-    static sequence<T, 0> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
-                              std::vector<size_t>::const_iterator l,
-                              const size_t o=0) {
-        return sequence<T, 0>(reinterpret_cast<T*>((*d)->ptr())+o, *l);
+template<typename Tag, typename T>
+struct make_seq_impl<sequence<Tag, T, 0> > {
+    static sequence<Tag, T, 0> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
+                                   std::vector<size_t>::const_iterator l,
+                                   const size_t o=0) {
+        return sequence<Tag, T, 0>(reinterpret_cast<T*>((*d)->ptr())+o, *l);
     }
 };
 
-template<typename T>
-struct make_seq_impl<sequence<T, 1> > {
-    static sequence<T, 1> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
-                              std::vector<size_t>::const_iterator l,
-                              const size_t o=0) {
-        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0> >::fun(d, l, o);
-        sequence<T, 0> data = make_seq_impl<sequence<T, 0> >::fun(d+1, l+1);
-        return sequence<T, 1>(desc, data);
+template<typename Tag, typename T>
+struct make_seq_impl<sequence<Tag, T, 1> > {
+    static sequence<Tag, T, 1> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
+                                   std::vector<size_t>::const_iterator l,
+                                   const size_t o=0) {
+        sequence<Tag, size_t, 0> desc = make_seq_impl<sequence<Tag, size_t, 0> >::fun(d, l, o);
+        sequence<Tag, T, 0> data = make_seq_impl<sequence<Tag, T, 0> >::fun(d+1, l+1);
+        return sequence<Tag, T, 1>(desc, data);
     }
 };
 
-template<typename T, int D>
-struct make_seq_impl<sequence<T, D > > {
-    static sequence<T, D> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
-                              std::vector<size_t>::const_iterator l,
-                              const size_t o=0) {
-        sequence<size_t, 0> desc = make_seq_impl<sequence<size_t, 0> >::fun(d, l, o);
-        sequence<T, D-1> sub = make_seq_impl<sequence<T, D-1> >::fun(d+1, l+1);
-        return sequence<T, D>(desc, sub);
+template<typename Tag, typename T, int D>
+struct make_seq_impl<sequence<Tag, T, D > > {
+    static sequence<Tag, T, D> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
+                                   std::vector<size_t>::const_iterator l,
+                                   const size_t o=0) {
+        sequence<Tag, size_t, 0> desc = make_seq_impl<sequence<Tag, size_t, 0> >::fun(d, l, o);
+        sequence<Tag, T, D-1> sub = make_seq_impl<sequence<Tag, T, D-1> >::fun(d+1, l+1);
+        return sequence<Tag, T, D>(desc, sub);
     }
 };
 

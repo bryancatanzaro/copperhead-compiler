@@ -18,20 +18,22 @@
 #pragma once
 
 #include <prelude/sequences/sequence_iterator.h>
+#include <thrust/detail/pointer.h>
 
 namespace copperhead {
 
-template<typename T, int D>
+template<typename Tag, typename T, int D>
 struct sequence;
 
-template<typename T>
-struct sequence<T, 0> {
+template<typename Tag, typename T>
+struct sequence<Tag, T, 0> {
+    typedef Tag tag;
     typedef T el_type;
     typedef T& ref_type;
-    typedef T* ptr_type;
+    typedef thrust::pointer<T, Tag> ptr_type;
     typedef size_t index_type;
     static const int nesting_depth = 0;
-    typedef typename sequence_iterator<sequence<T, 0> >::type iterator_type;
+    typedef typename sequence_iterator<sequence<Tag, T, 0> >::type iterator_type;
     
     T* m_d;
     size_t m_l;
@@ -63,40 +65,49 @@ struct sequence<T, 0> {
         m_l--;
         return *source;
     }
+    __host__
+    iterator_type begin() const {
+        return make_sequence_iterator(*this);
+    }
+    __host__
+    iterator_type end() const {
+        return make_sequence_iterator(*this) + size();
+    }
 };
 
-template<typename T>
+template<typename Tag, typename T>
 __host__ __device__
-sequence<T, 0> slice(sequence<T, 0> seq, size_t base, size_t len) {
-    return sequence<T, 0>(&seq[base], len);
+sequence<Tag, T, 0> slice(sequence<Tag, T, 0> seq, size_t base, size_t len) {
+    return sequence<Tag, T, 0>(&seq[base], len);
 }
 
 
-template<typename T, int D=0>
+template<typename Tag, typename T, int D=0>
 struct sequence {
-    typedef sequence<T, D-1> el_type;
+    typedef Tag tag;
+    typedef sequence<Tag, T, D-1> el_type;
     typedef el_type ref_type;
     typedef el_type* ptr_type;
     typedef size_t index_type;
     typedef T value_type;
     static const int nesting_depth = D;
-    typedef typename sequence_iterator<sequence<T, D> >::type iterator_type;
-    sequence<size_t, 0> m_d;
+    typedef typename sequence_iterator<sequence<Tag, T, D> >::type iterator_type;
+    sequence<Tag, size_t, 0> m_d;
 
-    sequence<T, D-1> m_s;
+    sequence<Tag, T, D-1> m_s;
     __host__ __device__
     sequence() : m_d(), m_s() {}
     __host__ __device__
-    sequence(sequence<size_t, 0> d,
-             sequence<T, D-1> s) : m_d(d), m_s(s) {}
+    sequence(sequence<Tag, size_t, 0> d,
+             sequence<Tag, T, D-1> s) : m_d(d), m_s(s) {}
     
     __host__ __device__
-    sequence<T, D-1> operator[](size_t& i) {
+    sequence<Tag, T, D-1> operator[](size_t& i) {
         size_t begin=m_d[i], end=m_d[i+1];
         return slice(m_s, begin, end-begin);
     }
     __host__ __device__
-    sequence<T, D-1> operator[](const size_t& i) const {
+    sequence<Tag, T, D-1> operator[](const size_t& i) const {
         size_t begin=m_d[i], end=m_d[i+1];
         return slice(m_s, begin, end-begin);
     }
@@ -109,8 +120,8 @@ struct sequence {
         return size() <= 0;
     }
     __host__ __device__
-    sequence<T, D-1> next() {
-        sequence<T, D-1> x = operator[](0);
+    sequence<Tag, T, D-1> next() {
+        sequence<Tag, T, D-1> x = operator[](0);
         m_d.next();
         return x;
     }
@@ -125,10 +136,10 @@ struct sequence {
 };
 
 
-template<typename T, int D>
+template<typename Tag, typename T, int D>
 __host__ __device__
-sequence<T, D> slice(sequence<T, D> seq, size_t base, size_t len) {
-    return sequence<T, D>(slice(seq.m_d, base, len+1), seq.m_s);
+sequence<Tag, T, D> slice(sequence<Tag, T, D> seq, size_t base, size_t len) {
+    return sequence<Tag, T, D>(slice(seq.m_d, base, len+1), seq.m_s);
 }
     
 

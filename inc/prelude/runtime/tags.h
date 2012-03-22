@@ -42,3 +42,36 @@ typedef boost::variant<omp_tag, cuda_tag> system_variant;
 typedef boost::variant<omp_tag> system_variant;
 #endif
 }
+
+
+//Fake tags exist due to a sad chain of incompatibilities.
+//Once nvcc can digest std::shared_ptr, nvcc can be used to compile
+//The entire backend, which will render the fake tag scheme unnecessary.
+//As it is, since g++ can't be shown thrust::system::cuda::tag, and
+//since nvcc can't be shown std::shared_ptr, we are at an impasse,
+//and must mediate things through an enum.
+#include <prelude/runtime/fake_tags.h>
+
+//Convert from real tag to fake tag
+namespace copperhead {
+namespace detail {
+
+struct real_to_fake_tag_converter
+    : public boost::static_visitor<fake_system_tag> {
+    fake_system_tag operator()(omp_tag) const {
+        return fake_omp_tag;
+    }
+#ifdef CUDA_SUPPORT
+    fake_system_tag operator()(cuda_tag) const {
+        return fake_cuda_tag;
+    }
+#endif
+};
+
+fake_system_tag real_to_fake_tag_convert(copperhead::system_variant real_tag) {
+    return boost::apply_visitor(real_to_fake_tag_converter(), real_tag);
+}
+
+}
+}
+        

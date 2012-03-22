@@ -18,6 +18,7 @@
 #include <prelude/runtime/make_cuarray.hpp>
 #include <prelude/runtime/cuarray.hpp>
 #include <prelude/runtime/monotype.hpp>
+#include <prelude/runtime/fake_tags.hpp>
 
 namespace copperhead {
 
@@ -81,10 +82,10 @@ sp_cuarray make_cuarray(size_t s) {
 #endif
     
     local_chunks.push_back(
-        std::make_shared<chunk<host_alloc> >(host_alloc(), s * sizeof(T)));
+        std::make_shared<chunk>(detail::fake_omp_tag, s * sizeof(T)));
 #ifdef CUDA_SUPPORT
     remote_chunks.push_back(
-        std::make_shared<chunk<cuda_alloc> >(cuda_alloc(), s * sizeof(T)));
+        std::make_shared<chunk>(detail::fake_cuda_tag, s * sizeof(T)));
 #endif
     r->m_d = std::move(data);
     return r;

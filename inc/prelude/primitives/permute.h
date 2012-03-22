@@ -17,17 +17,20 @@
 #pragma once
 #include <prelude/runtime/make_cuarray.hpp>
 #include <prelude/runtime/make_sequence.hpp>
+#include <prelude/runtime/tags.h>
 
 namespace copperhead {
 
-template<typename SeqX,
-         typename SeqI>
+template<typename SeqX, typename SeqI>
 boost::shared_ptr<cuarray> permute(
     SeqX& x,
     SeqI& i) {
     typedef typename SeqX::value_type T;
+    typedef typename SeqX::tag Tag;
     boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
-    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
+    sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
+                                                               detail::real_to_fake_tag_convert(Tag()),
+                                                               true);
     thrust::scatter(x.begin(),
                     x.end(),
                     i.begin(),

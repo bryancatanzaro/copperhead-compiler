@@ -21,6 +21,8 @@
 #include <thrust/iterator/reverse_iterator.h>
 #include <prelude/runtime/make_cuarray.hpp>
 #include <prelude/runtime/make_sequence.hpp>
+#include <prelude/runtime/tags.h>
+#include <thrust/iterator/retag.h>
 
 namespace copperhead {
 
@@ -28,8 +30,11 @@ template<typename F, typename Seq>
 sp_cuarray
 scan(const F& fn, Seq& x) {
     typedef typename F::result_type T;
+    typedef typename Seq::tag Tag;
     sp_cuarray result_ary = make_cuarray<T>(x.size());
-    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
+    sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
+                                                               detail::real_to_fake_converter(Tag()),
+                                                               true);
     thrust::inclusive_scan(x.begin(),
                            x.end(),
                            result.begin(),
@@ -41,12 +46,15 @@ template<typename F, typename Seq>
 sp_cuarray
 rscan(const F& fn, Seq& x) {
     typedef typename F::result_type T;
+    typedef typename Seq::tag Tag;
     typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
     iterator_type drbegin(x.end());
     iterator_type drend(x.begin());
     sp_cuarray result_ary = make_cuarray<T>(x.size());
-    stored_sequence<T> result = make_sequence<sequence<T> >(result_ary, false, true);
-    thrust::reverse_iterator<thrust::device_ptr<T> > orbegin(result.end());
+    sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
+                                                               detail::real_to_fake_converter(Tag()),
+                                                               true);
+    thrust::reverse_iterator<thrust::pointer<T, Tag> > orbegin(result.end());
     thrust::inclusive_scan(drbegin, drend, orbegin, fn);
     return result_ary;
 }

@@ -19,21 +19,23 @@
 #pragma once
 
 #include <prelude/sequences/sequence_iterator.h>
+#include <thrust/detail/pointer.h>
 
 namespace copperhead {
 
-template<typename T, int D>
+template<typename Tag, typename T, int D>
 struct uniform_sequence {
-    typedef uniform_sequence<T, D-1> el_type;
+    typedef Tag tag;
+    typedef uniform_sequence<Tag, T, D-1> el_type;
     typedef el_type ref_type;
-    typedef el_type* ptr_type;
+    typedef thrust::pointer<T, Tag> ptr_type;
     typedef size_t index_type;
     typedef T value_type;
     static const int nesting_depth = D;
-    typedef typename sequence_iterator<uniform_sequence<T, D> >::type iterator_type;
+    typedef typename sequence_iterator<uniform_sequence<Tag, T, D> >::type iterator_type;
     size_t m_s;
     size_t m_l;
-    uniform_sequence<T, D-1> m_d;
+    uniform_sequence<Tag, T, D-1> m_d;
 
     __host__ __device__
     uniform_sequence() { }
@@ -41,14 +43,14 @@ struct uniform_sequence {
     __host__ __device__
     uniform_sequence(size_t l,
                      size_t s,
-                     uniform_sequence<T, D-1> d)
+                     uniform_sequence<Tag, T, D-1> d)
         : m_l(l), m_s(s), m_d(d) { }
 
     __host__ __device__
     size_t size() const { return m_l; }
 
     __host__ __device__
-    uniform_sequence<T, D-1> operator[](size_t i) {
+    uniform_sequence<Tag, T, D-1> operator[](size_t i) {
         return slice(m_d, i * m_s);
     }
 
@@ -63,24 +65,25 @@ struct uniform_sequence {
     }
 
     __host__ __device__
-    uniform_sequence<T, D-1> next() {
-        uniform_sequence<T, D-1> x = operator[](0);
+    uniform_sequence<Tag, T, D-1> next() {
+        uniform_sequence<Tag, T, D-1> x = operator[](0);
         advance(m_s);
         m_l--;
         return x;
     }
 };
 
-template<typename T>
-struct uniform_sequence<T, 0>
+template<typename Tag, typename T>
+struct uniform_sequence<Tag, T, 0>
 {
+    typedef Tag tag;
     typedef T el_type;
     typedef T& ref_type;
-    typedef T* ptr_type;
+    typedef thrust::pointer<T, Tag> ptr_type;
     typedef size_t index_type;
     typedef T value_type;
     static const int nesting_depth = 0;
-    typedef typename sequence_iterator<uniform_sequence<T, 0> >::type iterator_type;
+    typedef typename sequence_iterator<uniform_sequence<Tag, T, 0> >::type iterator_type;
     size_t m_s;
     size_t m_l;
     size_t m_o;
@@ -121,20 +124,28 @@ struct uniform_sequence<T, 0>
         m_l--;
         return x;
     }
+    __host__
+    iterator_type begin() const {
+        return make_sequence_iterator(*this);
+    }
+    __host__
+    iterator_type end() const {
+        return make_sequence_iterator(*this) + size();
+    }
 };
 
-template<typename T, int D>
+template<typename Tag, typename T, int D>
 __host__ __device__
-uniform_sequence<T, D> slice(uniform_sequence<T, D> seq, int m_o)
+uniform_sequence<Tag, T, D> slice(uniform_sequence<Tag, T, D> seq, int m_o)
 {
-    return uniform_sequence<T, D>(seq.m_l, seq.m_s, slice(seq.m_d, m_o));
+    return uniform_sequence<Tag, T, D>(seq.m_l, seq.m_s, slice(seq.m_d, m_o));
 }
 
-template<typename T>
+template<typename Tag, typename T>
 __host__ __device__
-uniform_sequence<T, 0> slice(uniform_sequence<T, 0> seq, int m_o)
+uniform_sequence<Tag, T, 0> slice(uniform_sequence<Tag, T, 0> seq, int m_o)
 {
-    return uniform_sequence<T, 0>(seq.m_l, seq.m_s, seq.m_d, seq.m_o + m_o);
+    return uniform_sequence<Tag, T, 0>(seq.m_l, seq.m_s, seq.m_d, seq.m_o + m_o);
 }
 
 }

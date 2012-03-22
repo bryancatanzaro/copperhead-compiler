@@ -18,25 +18,9 @@
 #pragma once
 
 #include <cstddef>
+#include <prelude/runtime/fake_tags.h>
 
 namespace copperhead {
-
-namespace detail {
-
-//This exists due to a sad chain of incompatibility dependences.
-//Once nvcc can digest std::shared_ptr, used everywhere else in the
-//backend, we can compile the rest of the backend with nvcc, and then
-//we can use thrust tags in chunk.  But since nvcc can't be exposed to
-//std::shared_ptr, and g++ can't be exposed to
-//thrust::system::cuda::tag, we have to interface through an enum.
-
-#if CUDA_SUPPORT
-enum fake_system_tag {fake_omp_tag, fake_cuda_tag};
-#else
-enum fake_system_tag {fake_omp_tag};
-#endif
-
-}
 
 class chunk {
 private:
