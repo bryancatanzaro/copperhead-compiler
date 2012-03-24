@@ -22,7 +22,8 @@
 
 namespace copperhead {
 
-struct index_sequence : public iterator_sequence<thrust::counting_iterator<long> >
+template<typename Tag>
+struct index_sequence : public iterator_sequence<Tag, thrust::counting_iterator<long> >
 {
   __host__ __device__ index_sequence(long length) :
   iterator_sequence<thrust::counting_iterator<long> >(thrust::counting_iterator<long>(0), length) {}

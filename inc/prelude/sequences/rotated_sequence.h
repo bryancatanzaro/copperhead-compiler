@@ -71,7 +71,7 @@ make_rotate_iterator(const Seq& in,
 
 template<typename Seq>
 struct rotated_sequence
-    : public iterator_sequence<typename rotate_iterator_type<Seq>::type > {
+    : public iterator_sequence<typename Seq::tag, typename rotate_iterator_type<Seq>::type > {
     typedef typename rotate_iterator_type<Seq>::type source_t;
     __host__ __device__
     rotated_sequence(const Seq& in,

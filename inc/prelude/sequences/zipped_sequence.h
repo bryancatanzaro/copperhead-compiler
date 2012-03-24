@@ -64,6 +64,7 @@ struct extract_end {
 template<typename S>
 struct zipped_sequence {
     S m_seqs;
+    typedef typename thrust::tuple_element<0, S>::type::tag tag;
     typedef typename thrust::detail::tuple_meta_transform<
         S, detail::extract_value>::type value_type;
     //XXX Fix references to zipped sequences!

@@ -33,6 +33,8 @@
 #include "phase_analyze.hpp"
 #include "find_includes.hpp"
 
+#include "prelude/runtime/fake_tags.h"
+
 //XXX We need an interface for libraries to insert compiler passes
 //In lieu of such an interface, this is hard coded.
 //And must be changed!
@@ -77,6 +79,9 @@ class compiler {
 private:
     /*! The name of the entry point function.*/
     std::string m_entry_point;
+    /*! The backend system tag.*/
+    copperhead::detail::fake_system_tag m_backend_tag;
+    
     /*! The registry used by the compiler.*/
     registry m_registry;
     /*! A helper function to apply a compiler pass.*/
@@ -96,8 +101,10 @@ public:
        there will be a \p procedure node contained in the \p suite
        named \p entry_point, which will serve as the externally
        visible entry point to the entire program being compiled.
+       \param backend_tag The name of the backend system tag which we are
+       compiling for.  Current valid tags are: cuda_tag, omp_tag.
      */
-    compiler(const std::string& entry_point);
+    compiler(const std::string& entry_point, const copperhead::detail::fake_system_tag& backend_tag);
     /*!Compiles a \ref backend::suite suite node.
        \param n The suite node containing the entire program to be
        compiled.

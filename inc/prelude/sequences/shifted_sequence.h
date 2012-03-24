@@ -70,7 +70,7 @@ make_shift_iterator(const Seq& in,
 
 template<typename Seq>
 struct shifted_sequence
-    : public iterator_sequence<typename shift_iterator_type<Seq>::type > {
+    : public iterator_sequence<typename Seq::tag, typename shift_iterator_type<Seq>::type > {
     typedef typename shift_iterator_type<Seq>::type source_t;
     __host__ __device__
     shifted_sequence(const Seq& in,

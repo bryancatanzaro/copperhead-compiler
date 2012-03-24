@@ -22,9 +22,10 @@
    Copperhead generated code.  (such as zipped, constant,
    counting, transformed, etc.)
  */
-template<typename I>
+template<typename Tag, typename I>
 struct iterator_sequence
 {
+    typedef Tag tag;
     typedef typename I::value_type value_type;
     typedef typename I::value_type T;
     typedef I iterator_type;

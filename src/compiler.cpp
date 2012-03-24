@@ -4,8 +4,9 @@
 #include "compiler.hpp"
 
 namespace backend {
-compiler::compiler(const std::string& entry_point)
-    : m_entry_point(entry_point), m_registry(){
+compiler::compiler(const std::string& entry_point,
+                   const copperhead::detail::fake_system_tag& backend_tag)
+    : m_entry_point(entry_point), m_backend_tag(backend_tag), m_registry(){
     std::shared_ptr<library> thrust = get_thrust();
     m_registry.add_library(thrust);
     std::shared_ptr<library> prelude = get_builtins();
