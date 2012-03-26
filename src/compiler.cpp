@@ -71,4 +71,8 @@ const registry& compiler::reg() const {
     return m_registry;
 }
 
+const copperhead::detail::fake_system_tag& compiler::target() const {
+    return m_backend_tag;
+}
+
 }

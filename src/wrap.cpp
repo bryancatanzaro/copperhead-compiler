@@ -72,7 +72,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 shared_ptr<tuple> wrapped_name_tuple =
                     make_shared<tuple>(
                         make_vector<shared_ptr<expression> >(wrapped_name)
-                        (make_shared<literal>("false"))
+                        (make_shared<name>("tag"))
                         (make_shared<literal>("false")),
                         wrapped_tuple_t, wrapped_tuple_ct);
                 shared_ptr<apply> getter_apply =

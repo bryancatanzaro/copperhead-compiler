@@ -114,6 +114,7 @@ public:
     const std::string& entry_point() const;
     //! Gets the \ref backend::registry "registry" used by the compiler
     const registry& reg() const;
+    const copperhead::detail::fake_system_tag& target() const;
 };
 
 }

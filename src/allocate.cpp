@@ -107,7 +107,7 @@ allocate::result_type allocate::operator()(const bind &n) {
         shared_ptr<tuple> getter_args =
             make_shared<tuple>(
                 make_vector<shared_ptr<expression> >(result_name)
-                (make_shared<literal>("false"))
+                (make_shared<name>("tag"))
                 (make_shared<literal>("true")));
         shared_ptr<apply> getter_call =
             make_shared<apply>(getter_name, getter_args);
