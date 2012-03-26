@@ -50,7 +50,7 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
     std::cout << "Typedefified" << std::endl;
     boost::apply_visitor(cp, *typedefified);
 #endif        
-    wrap wrapper(m_entry_point);
+    wrap wrapper(m_backend_tag, m_entry_point);
     auto wrapped = apply(wrapper, typedefified);
 #ifdef TRACE
     std::cout << "Wrapped" << std::endl;

@@ -27,11 +27,7 @@ namespace detail {
 //std::shared_ptr, and g++ can't be exposed to
 //thrust::system::cuda::tag, we have to interface through an enum.
 
-#if CUDA_SUPPORT
 enum fake_system_tag {fake_omp_tag, fake_cuda_tag};
-#else
-enum fake_system_tag {fake_omp_tag};
-#endif
 
 }
 }

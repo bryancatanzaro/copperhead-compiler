@@ -16,6 +16,9 @@
  */
 #pragma once
 #include <string>
+#include <stdexcept>
+
+#include "prelude/runtime/fake_tags.h"
 
 namespace backend {
 namespace detail {
@@ -38,7 +41,10 @@ const std::string boost_python_module();
 const std::string boost_python_def();
 //! Gets string for phase_boundary
 const std::string phase_boundary();
-
+//! Gets string for default tag
+const std::string tag();
+//! Gets string of thrust tag type, given a fake_system_tag
+const std::string fake_tag_string(const copperhead::detail::fake_system_tag&);
 /*!
   @}
 */
