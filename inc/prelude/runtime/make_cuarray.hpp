@@ -14,34 +14,82 @@
  *   limitations under the License.
  * 
  */
-#pragma once
 
-#include <prelude/sequences/sequence.h>
-
-//XXX Use std::shared_ptr once nvcc can pass it through
-#define BOOST_SP_USE_SPINLOCK
-#include <boost/shared_ptr.hpp>
-
-/* This file allows construction of cuarray objects
-   even when cuarray can't be instantiated by the compiler.
-
-   nvcc cannot yet instantiate cuarray, for two reasons:
-   * parts of cuarray use c++11 move semantics
-   * parts of cuarray use c++11 std::shared_ptr
-
-   Separating the interface for cuarray in this manner
-   allows code compiled by nvcc to construct cuarray objects
-   without needing to instantiate them directly.
-*/
+#include <prelude/runtime/make_cuarray.hpp>
+#include <prelude/runtime/cuarray.hpp>
+#include <prelude/runtime/monotype.hpp>
+#include <prelude/runtime/fake_tags.hpp>
 
 namespace copperhead {
 
-//Forward declaration
-class cuarray;
-
-typedef boost::shared_ptr<cuarray> sp_cuarray;
+namespace detail {
 
 template<typename T>
-sp_cuarray make_cuarray(size_t s);
+struct type_deriver {};
+
+
+template<>
+struct type_deriver<float> {
+    static std::shared_ptr<backend::type_t> fun() {
+        return backend::float32_mt;
+    }
+};
+
+template<>
+struct type_deriver<double> {
+    static std::shared_ptr<backend::type_t> fun() {
+        return backend::float64_mt;
+    }
+};
+
+template<>
+struct type_deriver<int> {
+    static std::shared_ptr<backend::type_t> fun() {
+        return backend::int32_mt;
+    }
+};
+
+template<>
+struct type_deriver<long> {
+    static std::shared_ptr<backend::type_t> fun() {
+        return backend::int64_mt;
+    }
+};
+
+template<>
+struct type_deriver<bool> {
+    static std::shared_ptr<backend::type_t> fun() {
+        return backend::bool_mt;
+    }
+};
+
+}
+
+template<typename T>
+sp_cuarray make_cuarray(size_t s) {
+    sp_cuarray r(new cuarray());
+    r->m_t =
+        std::make_shared<backend::sequence_t>(
+            detail::type_deriver<T>::fun());
+    r->m_l.push_back(s);
+    data_map data;
+    data[detail::fake_omp_tag] = std::make_pair(vector<shared_ptr<chunk> >(), true);
+   
+    vector<std::shared_ptr<chunk> >& local_chunks = data[detail::fake_omp_tag].first;
+#ifdef CUDA_SUPPORT
+    data[detail::fake_cuda_tag] = std::make_pair(vector<shared_ptr<chunk> >(), true);
+    vector<std::shared_ptr<chunk> >& remote_chunks = data[detail::fake_cuda_tag].first;
+#endif
+    
+    local_chunks.push_back(
+        std::make_shared<chunk>(detail::fake_omp_tag, s * sizeof(T)));
+#ifdef CUDA_SUPPORT
+    remote_chunks.push_back(
+        std::make_shared<chunk>(detail::fake_cuda_tag, s * sizeof(T)));
+#endif
+    r->m_d = std::move(data);
+    return r;
+}
+
 
 }

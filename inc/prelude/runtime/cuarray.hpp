@@ -19,23 +19,24 @@
 
 #include <vector>
 #include <map>
-#include <memory>
 #include <utility>
 #include <prelude/runtime/chunk.hpp>
-#include "type.hpp"
-#include "ctype.hpp"
+#include <boost/scoped_ptr.hpp>
 
 namespace copperhead {
 
-typedef std::map<detail::fake_system_tag,
-                 std::pair<std::vector<std::shared_ptr<chunk> >,
-                           bool> > data_map;
+typedef std::map<system_variant,
+                 std::pair<std::vector<boost::shared_ptr<chunk> >,
+                           bool> ,
+                 system_variant_comparator> data_map;
+
+//Forward declaration of PIMPL for hiding std::shared_ptr from NVCC
+class cu_and_c_types;
 
 struct cuarray {
     data_map m_d;
     std::vector<size_t> m_l;
-    std::shared_ptr<backend::type_t> m_t;
-    std::shared_ptr<backend::ctype::type_t> m_ct;
+    boost::scoped_ptr<cu_and_c_types> m_t;
     size_t m_o;
 };
 

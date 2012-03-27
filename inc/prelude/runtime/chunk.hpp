@@ -18,17 +18,17 @@
 #pragma once
 
 #include <cstddef>
-#include <prelude/runtime/fake_tags.h>
+#include <prelude/runtime/tags.h>
 
 namespace copperhead {
 
 class chunk {
 private:
-    detail::fake_system_tag m_s;
+    system_variant m_s;
     void* m_d;
     size_t m_r;
 public:
-    chunk(const detail::fake_system_tag &s,
+    chunk(const system_variant &s,
           size_t r);
     ~chunk();
 private:
