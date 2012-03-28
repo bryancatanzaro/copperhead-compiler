@@ -48,6 +48,9 @@ struct system_variant_less {
                     const system_variant& y) const;
 };
 
+bool system_variant_equal(const system_variant& x,
+                          const system_variant& y);
+
 namespace detail {
     
 struct system_variant_to_string

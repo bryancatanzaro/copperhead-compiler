@@ -26,7 +26,7 @@ struct make_seq_impl {};
 
 template<typename Tag, typename T>
 struct make_seq_impl<sequence<Tag, T, 0> > {
-    static sequence<Tag, T, 0> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
+    static sequence<Tag, T, 0> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
                                    std::vector<size_t>::const_iterator l,
                                    const size_t o=0) {
         return sequence<Tag, T, 0>(reinterpret_cast<T*>((*d)->ptr())+o, *l);
@@ -35,7 +35,7 @@ struct make_seq_impl<sequence<Tag, T, 0> > {
 
 template<typename Tag, typename T>
 struct make_seq_impl<sequence<Tag, T, 1> > {
-    static sequence<Tag, T, 1> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
+    static sequence<Tag, T, 1> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
                                    std::vector<size_t>::const_iterator l,
                                    const size_t o=0) {
         sequence<Tag, size_t, 0> desc = make_seq_impl<sequence<Tag, size_t, 0> >::fun(d, l, o);
@@ -46,7 +46,7 @@ struct make_seq_impl<sequence<Tag, T, 1> > {
 
 template<typename Tag, typename T, int D>
 struct make_seq_impl<sequence<Tag, T, D > > {
-    static sequence<Tag, T, D> fun(typename std::vector<std::shared_ptr<chunk> >::iterator d,
+    static sequence<Tag, T, D> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
                                    std::vector<size_t>::const_iterator l,
                                    const size_t o=0) {
         sequence<Tag, size_t, 0> desc = make_seq_impl<sequence<Tag, size_t, 0> >::fun(d, l, o);
@@ -82,7 +82,7 @@ S make_sequence(sp_cuarray& in, system_variant t, bool write) {
         for(auto i = r.m_d.begin();
             i != r.m_d.end();
             i++) {
-            i->second.second = (i->first == t);
+            i->second.second = system_variant_equal(i->first, t);
         }
     }
     return make_seq_impl<S>::fun(s.first.begin(), r.m_l.cbegin(), r.m_o);
