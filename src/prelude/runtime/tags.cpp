@@ -16,7 +16,7 @@ std::string detail::system_variant_to_string::operator()(const cuda_tag&) const 
 }
 #endif
 
-std::string to_string(const system_variant& x) {
+std::string copperhead::to_string(const system_variant& x) {
     return boost::apply_visitor(detail::system_variant_to_string(), x);
 }
 
