@@ -23,6 +23,7 @@
 #include <boost/variant.hpp>
 #include <thrust/system/omp/memory.h>
 #include <functional>
+#include <string>
 
 namespace copperhead {
 
@@ -43,9 +44,22 @@ typedef boost::variant<omp_tag> system_variant;
 #endif
 
 struct system_variant_less {
-    bool operator()(const copperhead::system_variant& x,
-                    const copperhead::system_variant& y) const {
-        return x.which() < y.which();
-    }
+    bool operator()(const system_variant& x,
+                    const system_variant& y) const;
 };
+
+namespace detail {
+    
+struct system_variant_to_string
+    : boost::static_visitor<std::string> {
+    std::string operator()(const omp_tag&) const;
+    #ifdef CUDA_SUPPORT
+    std::string operator()(const cuda_tag&) const;
+    #endif
+};
+
+}
+
+std::string to_string(const system_variant& x);
+
 }

@@ -12,7 +12,7 @@ using backend::utility::make_vector;
 
 namespace backend {
 
-wrap::wrap(const copperhead::detail::fake_system_tag& target,
+wrap::wrap(const copperhead::system_variant& target,
            const string& entry_point)
     : m_target(target),
       m_entry_point(entry_point),
@@ -172,35 +172,15 @@ wrap::result_type wrap::operator()(const procedure &n) {
                                    wrapper_stmts,
                                    t, new_wrap_ct, "");
         m_wrapper = completed_wrapper;
-
-        shared_ptr<statement> tag =
-            make_shared<bind>(
-                make_shared<name>(
-                    detail::tag(),
-                    void_mt,
-                    make_shared<ctype::monotype_t>(detail::fake_tag_string(m_target))),
-                make_shared<apply>(
-                    make_shared<name>(detail::fake_tag_string(m_target)),
-                    make_shared<tuple>(vector<shared_ptr<expression> >())
-                    ));
-
-        vector<shared_ptr<statement> > stmts;
-        stmts.push_back(tag);
-        for(auto i = n.stmts().begin();
-            i != n.stmts().end();
-            i++) {
-            stmts.push_back(static_pointer_cast<statement>(boost::apply_visitor(*this, *i)));
-        }
-            
-                
-        
+                    
         result_type rewritten =
             make_shared<procedure>(
                 static_pointer_cast<name>(
                     get_node_ptr(n.id())),
                 static_pointer_cast<tuple>(
                     get_node_ptr(n.args())),
-                make_shared<suite>(std::move(stmts)),
+                static_pointer_cast<suite>(
+                    boost::apply_visitor(*this, n.stmts())),
                 n.p_type(),
                 new_ct,
                 "");

@@ -31,9 +31,33 @@ def CheckVersion(context, cmd, exp, required, extra_error=''):
         return False
     context.Result(version)
     return True
+thrust_version_check_file = """
+#define THRUST_DEVICE_SYSTEM THRUST_DEVICE_SYSTEM_OMP
+#include <thrust/version.h>
+#include <iostream>
+int main() {
+  std::cout << THRUST_MAJOR_VERSION << std::endl;
+  std::cout << THRUST_MINOR_VERSION << std::endl;
+  std::cout << THRUST_SUBMINOR_VERSION << std::endl;
+  return 0;
+}
+"""
+
+def CheckThrustVersion(context, required_version):
+    context.Message("Checking Thrust version...")
+    int_required_version = [int(x) for x in required_version]
+    result = context.TryRun(thrust_version_check_file, ".cpp")[1]
+    returned_version = result.splitlines(False)
+    version = '.'.join(returned_version)
+    context.Result(version)
+
+    int_returned_version = [int(x) for x in returned_version]
+    return all(map(operator.le, int_required_version, int_returned_version))
+
 
 # Check dependencies
-conf=Configure(env, custom_tests = {'CheckVersion':CheckVersion})
+conf=Configure(env, custom_tests = {'CheckVersion':CheckVersion,
+                                    'CheckThrustVersion':CheckThrustVersion})
 siteconf = {}
 
 # Check to see if the user has written down siteconf stuff
@@ -82,7 +106,13 @@ if not conf.CheckCXXHeader('thrust/host_vector.h'):
     print("Point us to your Thrust installation by changing THRUST_PATH in siteconf.py")
     Exit(1)
 
-#XXX Insert Thrust version check
+#Ensure Thrust Version > 1.6
+if not conf.CheckThrustVersion((1,6)):
+    print("You need Thrust version 1.6 or greater")
+    print("Change THRUST_PATH in siteconf.py to point to your Thrust installation.")
+    Exit(1)
+
+
     
 try:
     Import('cuda_support')

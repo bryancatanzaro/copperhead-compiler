@@ -24,7 +24,7 @@
 #include "utility/initializers.hpp"
 #include "py_printer.hpp"
 #include "rewriter.hpp"
-#include "prelude/runtime/fake_tags.h"
+#include "prelude/runtime/tags.h"
 
 namespace backend {
 
@@ -45,7 +45,7 @@ class wrap
     : public rewriter
 {
 private:
-    const copperhead::detail::fake_system_tag& m_target;
+    const copperhead::system_variant& m_target;
     const std::string& m_entry_point;
     bool m_wrapping;
     std::shared_ptr<procedure> m_wrapper;
@@ -55,7 +55,7 @@ public:
   
   \param entry_point Name of the entry point procedure
 */
-    wrap(const copperhead::detail::fake_system_tag&, const std::string& entry_point);
+    wrap(const copperhead::system_variant&, const std::string& entry_point);
     
     using rewriter::operator();
     //! Rewrite rule for \p procedure nodes

@@ -5,7 +5,7 @@
 
 namespace backend {
 compiler::compiler(const std::string& entry_point,
-                   const copperhead::detail::fake_system_tag& backend_tag)
+                   const copperhead::system_variant& backend_tag)
     : m_entry_point(entry_point), m_backend_tag(backend_tag), m_registry(){
     std::shared_ptr<library> thrust = get_thrust();
     m_registry.add_library(thrust);
@@ -71,7 +71,7 @@ const registry& compiler::reg() const {
     return m_registry;
 }
 
-const copperhead::detail::fake_system_tag& compiler::target() const {
+const copperhead::system_variant& compiler::target() const {
     return m_backend_tag;
 }
 

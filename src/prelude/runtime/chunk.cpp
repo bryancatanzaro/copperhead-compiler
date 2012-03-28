@@ -91,10 +91,6 @@ chunk::~chunk() {
 }
 
 void chunk::copy_from(chunk& o) {
-    if (boost::apply_visitor(detail::compare_tags(), m_s, o.m_s)) {
-        //XXX Investigate why this doesn't work
-        throw std::invalid_argument("Internal error: can't copy a chunk into the same memory space");
-    }
     if (m_r != o.m_r) {
         throw std::invalid_argument("Internal error: can't copy chunks of different size");
     }

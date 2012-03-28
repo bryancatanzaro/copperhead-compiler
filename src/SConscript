@@ -31,25 +31,9 @@ env.Append(CPPPATH = [os.path.join(parent, "inc")])
 
 if cuda_support:
     env.Append(LIBS = ['cudart'])
+    env.Append(CPPDEFINES = ['CUDA_SUPPORT'])
+env.Append(CCFLAGS = ['-std=c++0x', '-Wall'])
 
-
-#Protect nvcc from C++0X
-cppenv = env.Clone()
-cppenv.Append(CCFLAGS = ['-std=c++0x', '-Wall', '-g'])
-cudaenv = env.Clone()
-cudaenv.Append(CPPDEFINES = ['CUDA_SUPPORT'])
-
-
-if env['PLATFORM'] == 'darwin':
-    def add_unique(flag_set, prefix, value):
-        if cudaenv.has_key(flag_set):
-            for x in cudaenv[flag_set]:
-                if x.startswith(prefix):
-                    return
-        cudaenv[flag_set].append(value)
-    add_unique('NVCCFLAGS', '-m', '-m64')
-    add_unique('SHNVCCFLAGS', '-m', '-m64')
-    
 if not GetOption('num_jobs'):
     #Parallelize the build maximally
     import multiprocessing
@@ -62,7 +46,8 @@ def recursive_glob(pattern):
         files += recursive_glob("*/"+pattern)
     return files
 
-source_dirs = ['builtins', 'import', 'thrust', 'utility']
+source_dirs = ['builtins', 'import', 'thrust', 'utility',
+               os.path.join('prelude', 'runtime')]
 source_files = Glob('*.cpp')
 source_files = reduce(lambda x, y: x + y,
                map(lambda z:
@@ -72,18 +57,8 @@ source_files = reduce(lambda x, y: x + y,
 
 objects = []
 for x in source_files:
-    objects.append(cppenv.SharedObject(x))
-
-
-    
-#handle objects which must be compiled by nvcc, if we support CUDA
-cuda_support_files = [os.path.join('prelude','runtime','chunk')]
-for x in cuda_support_files:
-    if cuda_support:
-        objects.append(cudaenv.SharedObject(x+'.cu'))
-    else:
-        objects.append(cppenv.SharedObject(x+'.cpp'))
-    
+    objects.append(env.SharedObject(x))
+        
 libcopperhead = env.SharedLibrary(target='copperhead', source=objects)
 
 #Make this opt-in to avoid forcing everyone to install Doxygen    
