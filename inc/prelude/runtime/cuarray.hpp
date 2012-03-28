@@ -22,13 +22,17 @@
 #include <utility>
 #include <prelude/runtime/chunk.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <prelude/runtime/tags.h>
+
+#define BOOST_SP_USE_SPINLOCK
+#include <boost/shared_ptr.hpp>
 
 namespace copperhead {
 
 typedef std::map<system_variant,
                  std::pair<std::vector<boost::shared_ptr<chunk> >,
                            bool> ,
-                 system_variant_comparator> data_map;
+                 system_variant_less> data_map;
 
 //Forward declaration of PIMPL for hiding std::shared_ptr from NVCC
 class cu_and_c_types;
@@ -38,6 +42,16 @@ struct cuarray {
     std::vector<size_t> m_l;
     boost::scoped_ptr<cu_and_c_types> m_t;
     size_t m_o;
+
+    cuarray(data_map&& d,
+            std::vector<size_t>&& l,
+            cu_and_c_types* t,
+            size_t o);
+    
+    size_t size() const;
+    
 };
+
+typedef boost::shared_ptr<cuarray> sp_cuarray;
 
 }

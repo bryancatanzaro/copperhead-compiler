@@ -56,13 +56,13 @@ struct make_seq_impl<sequence<Tag, T, D > > {
 };
 
 template<typename S>
-S make_sequence(sp_cuarray& in, detail::fake_system_tag t, bool write) {
+S make_sequence(sp_cuarray& in, system_variant t, bool write) {
     cuarray& r = *in;
-    std::pair<std::vector<std::shared_ptr<chunk> >, bool>& s = r.m_d[t];
+    std::pair<std::vector<boost::shared_ptr<chunk> >, bool>& s = r.m_d[t];
     //Do we need to copy?
     if (!s.second) {
         //Find a valid representation
-        std::pair<std::vector<std::shared_ptr<chunk> >, bool> x;
+        std::pair<std::vector<boost::shared_ptr<chunk> >, bool> x;
         x.second = false;
         for(auto i = r.m_d.cbegin();
             (x.second == false) && (i != r.m_d.cend());
