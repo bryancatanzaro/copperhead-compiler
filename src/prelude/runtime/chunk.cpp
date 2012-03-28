@@ -59,6 +59,7 @@ struct apply_copy
     apply_copy(void* d, void* s, size_t r)
         : m_d(d), m_s(s), m_r(r) {}
 
+    //XXX WAR thrust issue #10.
     template<typename DTag, typename STag>
     typename boost::enable_if<
         boost::is_same<DTag, STag> >::type
