@@ -117,5 +117,8 @@ size_t chunk::size() const {
     return m_r;
 }
 
+const system_variant& chunk::tag() const {
+    return m_s;
+}
 
 }

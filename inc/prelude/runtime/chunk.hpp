@@ -40,6 +40,7 @@ public:
     void copy_from(chunk& o);
     void* ptr();
     size_t size() const;
+    const system_variant& tag() const;
 };
 
 }

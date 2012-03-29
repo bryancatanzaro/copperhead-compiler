@@ -43,12 +43,15 @@ struct cuarray {
     boost::scoped_ptr<cu_and_c_types> m_t;
     size_t m_o;
 
-    cuarray(data_map&& d,
-            std::vector<size_t>&& l,
-            cu_and_c_types* t,
+    cuarray(cu_and_c_types* t,
             size_t o);
     
     size_t size() const;
+    void push_back_length(size_t);
+    void add_chunk(boost::shared_ptr<chunk> c,
+                      const bool& v);
+    std::vector<boost::shared_ptr<chunk> >& get_chunks(const system_variant& t);
+    bool clean(const system_variant& t);
     
 };
 

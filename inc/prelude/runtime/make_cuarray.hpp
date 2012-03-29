@@ -15,79 +15,24 @@
  * 
  */
 
-#include <prelude/runtime/make_cuarray.hpp>
 #include <prelude/runtime/cuarray.hpp>
-#include <prelude/runtime/monotype.hpp>
-#include <prelude/runtime/fake_tags.hpp>
+#include <prelude/runtime/make_cu_and_c_types.hpp>
+#include <prelude/runtime/tags.h>
 
 namespace copperhead {
 
-namespace detail {
-
-template<typename T>
-struct type_deriver {};
-
-
-template<>
-struct type_deriver<float> {
-    static std::shared_ptr<backend::type_t> fun() {
-        return backend::float32_mt;
-    }
-};
-
-template<>
-struct type_deriver<double> {
-    static std::shared_ptr<backend::type_t> fun() {
-        return backend::float64_mt;
-    }
-};
-
-template<>
-struct type_deriver<int> {
-    static std::shared_ptr<backend::type_t> fun() {
-        return backend::int32_mt;
-    }
-};
-
-template<>
-struct type_deriver<long> {
-    static std::shared_ptr<backend::type_t> fun() {
-        return backend::int64_mt;
-    }
-};
-
-template<>
-struct type_deriver<bool> {
-    static std::shared_ptr<backend::type_t> fun() {
-        return backend::bool_mt;
-    }
-};
-
-}
-
 template<typename T>
 sp_cuarray make_cuarray(size_t s) {
-    sp_cuarray r(new cuarray());
-    r->m_t =
-        std::make_shared<backend::sequence_t>(
-            detail::type_deriver<T>::fun());
-    r->m_l.push_back(s);
-    data_map data;
-    data[detail::fake_omp_tag] = std::make_pair(vector<shared_ptr<chunk> >(), true);
-   
-    vector<std::shared_ptr<chunk> >& local_chunks = data[detail::fake_omp_tag].first;
+    cu_and_c_types* type_holder =
+        make_cu_and_c_types(T());
+    sp_cuarray r(new cuarray(type_holder, 0));
+    r.push_back_length(s);    
+
+    r->add_chunk(omp_tag(), s * sizeof(T), true);
 #ifdef CUDA_SUPPORT
-    data[detail::fake_cuda_tag] = std::make_pair(vector<shared_ptr<chunk> >(), true);
-    vector<std::shared_ptr<chunk> >& remote_chunks = data[detail::fake_cuda_tag].first;
+    r->add_chunk(cuda_tag(), s * sizeof(T), true);
 #endif
     
-    local_chunks.push_back(
-        std::make_shared<chunk>(detail::fake_omp_tag, s * sizeof(T)));
-#ifdef CUDA_SUPPORT
-    remote_chunks.push_back(
-        std::make_shared<chunk>(detail::fake_cuda_tag, s * sizeof(T)));
-#endif
-    r->m_d = std::move(data);
     return r;
 }
 
