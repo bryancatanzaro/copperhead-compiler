@@ -35,7 +35,7 @@ sort(const F& fn, Seq& x) {
     //Copy for value semantics (since thrust sort is "in-place")
     sp_cuarray result_ary = make_cuarray<T>(x.size());
     sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                               detail::real_to_fake_converter(Tag()),
+                                                               Tag(),
                                                                true);
     thrust::copy(x.begin(),
                  x.end(),
@@ -57,7 +57,7 @@ sort(const fn_cmp_lt<typename Seq::value_type>& fn, Seq& x) {
     //Copy for value semantics (since thrust sort is "in-place")
     sp_cuarray result_ary = make_cuarray<T>(x.size());
     sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                               detail::real_to_fake_converter(Tag()),
+                                                               Tag(),
                                                                true);
     thrust::copy(x.begin(),
                  x.end(),
@@ -78,7 +78,7 @@ sort(const fn_cmp_gt<typename Seq::value_type>& fn, Seq& x) {
     //Copy for value semantics (since thrust sort is "in-place")
     sp_cuarray result_ary = make_cuarray<T>(x.size());
     sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                               detail::real_to_fake_converter(Tag()),
+                                                               Tag(),
                                                                true);
     thrust::copy(x.begin(),
                  x.end(),

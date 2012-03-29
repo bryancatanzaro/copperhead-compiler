@@ -29,7 +29,7 @@ boost::shared_ptr<cuarray> permute(
     typedef typename SeqX::tag Tag;
     boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
     sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                               detail::real_to_fake_tag_convert(Tag()),
+                                                               Tag(),
                                                                true);
     thrust::scatter(x.begin(),
                     x.end(),

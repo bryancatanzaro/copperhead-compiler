@@ -197,6 +197,7 @@ struct transformed_sequence {
     typedef typename detail::map_adapter<F>::result_type value_type;
     typedef typename zipped_sequence<S>::iterator_type I;
     typedef typename thrust::transform_iterator<detail::map_adapter<F>, I> iterator_type;
+    typedef typename zipped_sequence<S>::tag tag;
     transformed_sequence(F fn,
                          S seqs)
         : m_fn(detail::map_adapter<F>(fn)), m_seq(seqs) {}

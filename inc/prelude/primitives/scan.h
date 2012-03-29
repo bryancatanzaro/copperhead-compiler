@@ -33,7 +33,7 @@ scan(const F& fn, Seq& x) {
     typedef typename Seq::tag Tag;
     sp_cuarray result_ary = make_cuarray<T>(x.size());
     sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                               detail::real_to_fake_converter(Tag()),
+                                                               Tag(),
                                                                true);
     thrust::inclusive_scan(x.begin(),
                            x.end(),
@@ -52,7 +52,7 @@ rscan(const F& fn, Seq& x) {
     iterator_type drend(x.begin());
     sp_cuarray result_ary = make_cuarray<T>(x.size());
     sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                               detail::real_to_fake_converter(Tag()),
+                                                               Tag(),
                                                                true);
     thrust::reverse_iterator<thrust::pointer<T, Tag> > orbegin(result.end());
     thrust::inclusive_scan(drbegin, drend, orbegin, fn);

@@ -4,8 +4,14 @@
 namespace copperhead {
 
 cuarray::cuarray(cu_and_c_types* t,
-                             size_t o)
+                 size_t o)
     : m_t(t), m_o(o) {}
+
+cuarray::~cuarray() {
+    //This is done just to move the destructor to somewhere nvcc can't see
+    //because boost::scoped_ptr requires a complete type upon destruction
+    //And nvcc can't see the complete type of the cu_and_c_types object
+}
 
 void cuarray::push_back_length(size_t l) {
     m_l.push_back(l);

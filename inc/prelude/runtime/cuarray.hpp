@@ -45,7 +45,9 @@ struct cuarray {
 
     cuarray(cu_and_c_types* t,
             size_t o);
-    
+    //Must have explicit destructor because scoped_ptr requires type to be complete
+    //And we can't have the cu_and_c_types type be complete.
+    ~cuarray();
     size_t size() const;
     void push_back_length(size_t);
     void add_chunk(boost::shared_ptr<chunk> c,

@@ -15,6 +15,8 @@
  * 
  */
 
+#pragma once
+
 #include <prelude/runtime/cuarray.hpp>
 #include <prelude/runtime/make_cu_and_c_types.hpp>
 #include <prelude/runtime/tags.h>
@@ -24,13 +26,13 @@ namespace copperhead {
 template<typename T>
 sp_cuarray make_cuarray(size_t s) {
     cu_and_c_types* type_holder =
-        make_cu_and_c_types(T());
+        make_type_holder(T());
     sp_cuarray r(new cuarray(type_holder, 0));
-    r.push_back_length(s);    
+    r->push_back_length(s);    
 
-    r->add_chunk(omp_tag(), s * sizeof(T), true);
+    r->add_chunk(boost::shared_ptr<chunk>(new chunk(omp_tag(), s * sizeof(T))), true);
 #ifdef CUDA_SUPPORT
-    r->add_chunk(cuda_tag(), s * sizeof(T), true);
+    r->add_chunk(boost::shared_ptr<chunk>(new chunk(cuda_tag(), s * sizeof(T))), true);
 #endif
     
     return r;

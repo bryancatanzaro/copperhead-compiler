@@ -19,7 +19,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <prelude/config.h>
-
+#include <prelude/runtime/tags.h>
 
 #include <prelude/basic/basic.h>
 #include <prelude/sequences/sequence.h>

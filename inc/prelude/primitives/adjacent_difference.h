@@ -31,7 +31,7 @@ adjacent_difference(const F& fn, Seq& x) {
         make_cuarray<T>(x.size());
     sequence<Tag, T> result =
         make_sequence<sequence<Tag, T> >(result_ary,
-                                         detail::real_to_fake_tag_convert(Tag()),
+                                         Tag(),
                                          true);
     thrust::adjacent_difference(x.begin(),
                                 x.end(),

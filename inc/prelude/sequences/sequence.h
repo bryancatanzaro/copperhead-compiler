@@ -34,6 +34,7 @@ struct sequence<Tag, T, 0> {
     typedef size_t index_type;
     static const int nesting_depth = 0;
     typedef typename sequence_iterator<sequence<Tag, T, 0> >::type iterator_type;
+    typedef T value_type;
     
     T* m_d;
     size_t m_l;

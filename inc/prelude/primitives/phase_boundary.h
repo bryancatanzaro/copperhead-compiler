@@ -28,7 +28,7 @@ boost::shared_ptr<cuarray> phase_boundary(const Seq& in) {
     typedef typename Seq::tag Tag;
     boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(in.size());
     sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                     detail::real_to_fake_converter(Tag()),
+                                                     Tag(),
                                                      true);
     thrust::copy(in.begin(),
                  in.end(),

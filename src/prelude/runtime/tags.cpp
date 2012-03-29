@@ -1,6 +1,8 @@
 #include <prelude/runtime/tags.h>
 
-using namespace copperhead;
+
+namespace copperhead {
+
 bool system_variant_less::operator()(const system_variant& x,
                                      const system_variant& y) const {
     return x.which() < y.which();
@@ -16,11 +18,13 @@ std::string detail::system_variant_to_string::operator()(const cuda_tag&) const 
 }
 #endif
 
-std::string copperhead::to_string(const system_variant& x) {
+std::string to_string(const system_variant& x) {
     return boost::apply_visitor(detail::system_variant_to_string(), x);
 }
 
 bool system_variant_equal(const system_variant& x,
-                          const system_variant& y) {
+                                      const system_variant& y) {
     return x.which() == y.which();
+}
+
 }

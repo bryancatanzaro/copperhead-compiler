@@ -14,7 +14,9 @@
  *   limitations under the License.
  * 
  */
+
 #pragma once
+
 #include <vector>
 #include <prelude/runtime/chunk.hpp>
 #include <prelude/sequences/sequence.h>
@@ -64,14 +66,14 @@ S make_sequence(sp_cuarray& in, system_variant t, bool write) {
         //Find a valid representation
         std::pair<std::vector<boost::shared_ptr<chunk> >, bool> x;
         x.second = false;
-        for(auto i = r.m_d.cbegin();
-            (x.second == false) && (i != r.m_d.cend());
+        for(typename data_map::iterator i = r.m_d.begin();
+            (x.second == false) && (i != r.m_d.end());
             i++) {
             x = i->second;
         }
         assert(x.second == true);
         //Copy from valid representation
-        for(auto i = s.first.begin(), j = x.first.begin();
+        for(std::vector<boost::shared_ptr<chunk> >::iterator i = s.first.begin(), j = x.first.begin();
             i != s.first.end();
             i++, j++) {
             (*i)->copy_from(**j);
@@ -79,13 +81,13 @@ S make_sequence(sp_cuarray& in, system_variant t, bool write) {
     }
     //Do we need to invalidate?
     if (write) {
-        for(auto i = r.m_d.begin();
+        for(typename data_map::iterator i = r.m_d.begin();
             i != r.m_d.end();
             i++) {
             i->second.second = system_variant_equal(i->first, t);
         }
     }
-    return make_seq_impl<S>::fun(s.first.begin(), r.m_l.cbegin(), r.m_o);
+    return make_seq_impl<S>::fun(s.first.begin(), r.m_l.begin(), r.m_o);
 }
 
 }
