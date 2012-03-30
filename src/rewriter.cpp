@@ -130,7 +130,6 @@ rewriter::result_type rewriter::operator()(const procedure &n) {
 rewriter::result_type rewriter::operator()(const suite &n) {
     start_match();
     vector<shared_ptr<statement> > n_stmts;
-    ctype::ctype_printer cp(std::cout);
     for(auto i = n.begin(); i != n.end(); i++) {
         auto n_stmt = static_pointer_cast<statement>(boost::apply_visitor(*this, *i));
         update_match(n_stmt, *i);

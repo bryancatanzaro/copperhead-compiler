@@ -78,6 +78,7 @@ S make_sequence(sp_cuarray& in, system_variant t, bool write) {
             i++, j++) {
             (*i)->copy_from(**j);
         }
+        s.second = true;
     }
     //Do we need to invalidate?
     if (write) {

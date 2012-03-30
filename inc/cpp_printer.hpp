@@ -25,15 +25,17 @@
 #include "utility/markers.hpp"
 #include "utility/isinstance.hpp"
 #include "utility/up_get.hpp"
+#include "prelude/runtime/tags.h"
 
 namespace backend
 {
 
 
-class cuda_printer
+class cpp_printer
     : public py_printer
 {
 private:
+    const copperhead::system_variant m_t;
     const std::string& entry;
     environment<std::string> declared;
     ctype::ctype_printer tp;
@@ -69,9 +71,10 @@ private:
 
         
 public:
-    cuda_printer(const std::string &entry_point,
-                 const registry& globals,
-                 std::ostream &os);
+    cpp_printer(const copperhead::system_variant &t,
+                const std::string &entry_point,
+                const registry& globals,
+                std::ostream &os);
     
     using backend::py_printer::operator();
 

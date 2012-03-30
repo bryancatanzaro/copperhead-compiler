@@ -1,6 +1,6 @@
 #include "wrap.hpp"
 
-#include "cuda_printer.hpp"
+#include "cpp_printer.hpp"
 
 using std::string;
 using std::vector;
@@ -55,7 +55,9 @@ wrap::result_type wrap::operator()(const procedure &n) {
 
                 shared_ptr<ctype::type_t> impl_seq_ct =
                     make_shared<ctype::polytype_t>(
-                        make_vector<shared_ptr<ctype::type_t> >(sub_ct),
+                        make_vector<shared_ptr<ctype::type_t> >
+                        (make_shared<ctype::monotype_t>(copperhead::to_string(m_target)))
+                        (sub_ct),
                         make_shared<ctype::monotype_t>("sequence"));
         
                 shared_ptr<ctype::tuple_t> tuple_impl_seq_ct =
@@ -75,7 +77,9 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 shared_ptr<tuple> wrapped_name_tuple =
                     make_shared<tuple>(
                         make_vector<shared_ptr<expression> >(wrapped_name)
-                        (make_shared<name>("tag"))
+                        (make_shared<apply>(
+                            make_shared<name>(copperhead::to_string(m_target)),
+                            make_shared<tuple>(make_vector<shared_ptr<expression> >())))
                         (make_shared<literal>("false")),
                         wrapped_tuple_t, wrapped_tuple_ct);
                 shared_ptr<apply> getter_apply =

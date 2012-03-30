@@ -14,7 +14,7 @@ compiler::compiler(const std::string& entry_point,
 
 }
 std::shared_ptr<suite> compiler::operator()(const suite &n) {
-    cuda_printer cp(m_entry_point, m_registry, std::cout);
+    cpp_printer cp(m_backend_tag, m_entry_point, m_registry, std::cout);
 
     phase_analyze phase_analyzer(m_entry_point, m_registry);
     auto phase_analyzed = apply(phase_analyzer, n);

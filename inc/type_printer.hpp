@@ -21,6 +21,7 @@
 #include "monotype.hpp"
 #include "polytype.hpp"
 #include "ctype.hpp"
+#include "prelude/runtime/tags.h"
 
 namespace backend
 {
@@ -66,12 +67,15 @@ class ctype_printer
 {
 private:
     std::stack<bool> m_need_space;
+    const copperhead::system_variant& m_t;
 public:
     //! Constructor
 /*! 
   \param os Stream to be printed to
 */
-    ctype_printer(std::ostream &os);
+    ctype_printer(
+        const copperhead::system_variant& t,
+        std::ostream &os);
     
     void operator()(const monotype_t &mt);
     

@@ -42,8 +42,10 @@ void repr_type_printer::close() const {
 }
 
 namespace ctype {
-ctype_printer::ctype_printer(std::ostream &os)
-    : m_os(os)
+ctype_printer::ctype_printer(
+    const copperhead::system_variant& t,
+    std::ostream &os)
+    : m_t(t), m_os(os)
 {
     m_need_space.push(false);
 }
@@ -53,6 +55,7 @@ void ctype_printer::operator()(const monotype_t &mt) {
 }
 void ctype_printer::operator()(const sequence_t &st) {
     m_os << st.name() << "<";
+    m_os << copperhead::to_string(m_t) << ", ";
     boost::apply_visitor(*this, st.sub());
     m_os << ">";
     m_need_space.top() = true;

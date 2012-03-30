@@ -28,7 +28,7 @@
 #include "wrap.hpp"
 #include "thrust/decl.hpp"
 #include "builtins/decl.hpp"
-#include "cuda_printer.hpp"
+#include "cpp_printer.hpp"
 #include "typedefify.hpp"
 #include "phase_analyze.hpp"
 #include "find_includes.hpp"

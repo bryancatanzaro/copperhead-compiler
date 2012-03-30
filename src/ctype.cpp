@@ -75,7 +75,7 @@ shared_ptr<monotype_t> void_mt = make_shared<monotype_t>("void");
 
 sequence_t::sequence_t(const shared_ptr<type_t> &sub)
     : monotype_t(*this,
-                 "stored_sequence",
+                 "sequence",
                  make_vector<shared_ptr<type_t> >(sub)) {}
 
 template<typename Derived>
