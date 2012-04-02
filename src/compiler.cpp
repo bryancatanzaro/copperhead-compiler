@@ -32,7 +32,7 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
     std::cout << "Functorized" << std::endl;
     boost::apply_visitor(cp, *functorized);
 #endif
-    thrust_rewriter thrustizer;
+    thrust_rewriter thrustizer(m_backend_tag);
     auto thrust_rewritten = apply(thrustizer, functorized);
 #ifdef TRACE
     std::cout << "Thrust rewritten" << std::endl;

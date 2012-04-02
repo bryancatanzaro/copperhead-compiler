@@ -14,16 +14,27 @@
  *   limitations under the License.
  * 
  */
+
 #pragma once
-#include <prelude/sequences/constant_sequence.h>
 
 namespace copperhead {
+namespace detail {
+template<typename T>
+struct signed_index_type{};
 
-template<typename Tag, typename I, typename T>
-constant_sequence<Tag, T> replicate(const Tag& t,
-                                    const T& val,
-                                    const I& amount) {
-    return constant_sequence<Tag, T>(t, val, amount);
+template<>
+struct signed_index_type<unsigned int> {
+    typedef int type;
+};
+
+template<>
+struct signed_index_type<unsigned long> {
+    typedef long type;
+};
+
+template<>
+struct signed_index_type<unsigned long long> {
+    typedef long long type;
+};
 }
-
 }

@@ -27,6 +27,7 @@
 #include "utility/markers.hpp"
 #include "utility/initializers.hpp"
 #include "type_printer.hpp"
+#include <prelude/runtime/tags.h>
 
 namespace backend {
 
@@ -44,6 +45,8 @@ namespace backend {
 class thrust_rewriter
     : public rewriter {
 private:
+    const copperhead::system_variant& m_target;
+    
     static result_type map_rewrite(const bind& n);
     
     static result_type indices_rewrite(const bind& n);
@@ -61,7 +64,7 @@ private:
     const fn_map m_lut; 
 public:
     //! Constructor
-    thrust_rewriter();
+    thrust_rewriter(const copperhead::system_variant&);
     
     using rewriter::operator();
     

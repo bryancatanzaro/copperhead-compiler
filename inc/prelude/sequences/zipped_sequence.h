@@ -20,6 +20,7 @@
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/tuple.h>
 #include <thrust/detail/tuple_meta_transform.h>
+#include <prelude/basic/detail/tagged_iterator_type.h>
 
 namespace copperhead {
 
@@ -59,6 +60,7 @@ struct extract_end {
         return in.end();
     }
 };
+    
 }
 
 template<typename S>
@@ -72,8 +74,11 @@ struct zipped_sequence {
         S, detail::extract_value>::type reference_type;
     typedef typename thrust::zip_iterator<
         typename thrust::detail::tuple_meta_transform<
-            S, detail::extract_iterator>::type > iterator_type;
+            S, detail::extract_iterator>::type > ZI;
+    typedef typename detail::tagged_iterator_type<ZI, tag>::type iterator_type;
+    
     zipped_sequence(S seqs) : m_seqs(seqs) {}
+    //XXX Can only dereference these on the host!!
     reference_type operator[](int index) {
         //XXX Fix references to zipped sequences!
         return thrust::detail::tuple_host_transform
@@ -81,17 +86,19 @@ struct zipped_sequence {
                 m_seqs,
                 detail::index_sequence(index));
     }
+    //XXX Can only call begin() from host!!
     iterator_type begin() const {
-        return thrust::detail::tuple_host_transform
-            <detail::extract_iterator, S, detail::extract_begin>(
-                m_seqs,
-                detail::extract_begin());
+        return thrust::retag<tag>(ZI(thrust::detail::tuple_host_transform
+                                  <detail::extract_iterator, S, detail::extract_begin>(
+                                      m_seqs,
+                                      detail::extract_begin())));
     }
+    //XXX Can only call end() from host!!
     iterator_type end() const {
-        return thrust::detail::tuple_host_transform
-            <detail::extract_iterator, S, detail::extract_end>(
-                m_seqs,
-                detail::extract_end());
+        return thrust::retag<tag>(ZI(thrust::detail::tuple_host_transform
+                                     <detail::extract_iterator, S, detail::extract_end>(
+                                         m_seqs,
+                                         detail::extract_end())));
     }
     int size() const {
         return thrust::get<0>(m_seqs).size();

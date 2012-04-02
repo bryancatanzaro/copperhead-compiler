@@ -20,6 +20,7 @@
 #include <prelude/sequences/iterator_sequence.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
+#include <prelude/basic/detail/signed_index_type.h>
 
 namespace copperhead {
 
@@ -27,7 +28,7 @@ template<typename Seq>
 class rotate_functor {
 protected:
     Seq m_data;
-    typedef typename Seq::index_type I;
+    typedef typename detail::signed_index_type<typename Seq::index_type>::type I;
     I m_shift;
     typedef typename Seq::value_type T;
 public:
@@ -56,16 +57,17 @@ template<typename Seq>
 struct rotate_iterator_type {
     typedef typename thrust::transform_iterator<
         rotate_functor<Seq>,
-        thrust::counting_iterator<typename Seq::index_type> > type;
+        thrust::counting_iterator<typename detail::signed_index_type<typename Seq::index_type>::type> > type;
 };
 
 template<typename Seq>
 __host__ __device__
 typename rotate_iterator_type<Seq>::type
 make_rotate_iterator(const Seq& in,
-                    const typename Seq::index_type rotate) {
+                    const typename detail::signed_index_type<typename Seq::index_type>::type rotate) {
+    typedef typename detail::signed_index_type<typename Seq::index_type>::type I;
     return typename rotate_iterator_type<Seq>::type(
-        thrust::counting_iterator<typename Seq::index_type>(0),
+        thrust::counting_iterator<I>(0),
         rotate_functor<Seq>(in, rotate));
 }
 
@@ -73,10 +75,11 @@ template<typename Seq>
 struct rotated_sequence
     : public iterator_sequence<typename Seq::tag, typename rotate_iterator_type<Seq>::type > {
     typedef typename rotate_iterator_type<Seq>::type source_t;
+    typedef typename detail::signed_index_type<typename Seq::index_type>::type I;
     __host__ __device__
     rotated_sequence(const Seq& in,
-                     const typename Seq::index_type& rotate)
-        : iterator_sequence<source_t>(
+                     const I& rotate)
+        : iterator_sequence<typename Seq::tag, source_t>(
             make_rotate_iterator(in, rotate),
             in.size()) {}
 };

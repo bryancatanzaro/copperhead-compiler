@@ -196,8 +196,9 @@ struct transformed_sequence {
     zipped_sequence<S> m_seq;
     typedef typename detail::map_adapter<F>::result_type value_type;
     typedef typename zipped_sequence<S>::iterator_type I;
-    typedef typename thrust::transform_iterator<detail::map_adapter<F>, I> iterator_type;
     typedef typename zipped_sequence<S>::tag tag;
+    typedef typename thrust::transform_iterator<detail::map_adapter<F>, I> TI;
+    typedef typename detail::tagged_iterator_type<TI, tag>::type iterator_type;
     transformed_sequence(F fn,
                          S seqs)
         : m_fn(detail::map_adapter<F>(fn)), m_seq(seqs) {}
@@ -205,10 +206,10 @@ struct transformed_sequence {
         return m_fn(m_seq[index]);
     }
     iterator_type begin() const {
-        return iterator_type(m_seq.begin(), m_fn);
+        return thrust::retag<tag>(TI(m_seq.begin(), m_fn));
     }
     iterator_type end() const {
-        return iterator_type(m_seq.end(), m_fn);
+        return thrust::retag<tag>(TI(m_seq.end(), m_fn));
     }
     int size() const {
         return m_seq.size();

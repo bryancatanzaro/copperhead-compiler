@@ -12,6 +12,25 @@ using backend::utility::make_map;
 
 namespace backend {
 
+thrust_rewriter::thrust_rewriter(const copperhead::system_variant& target)
+    : m_target(target),
+      m_lut(make_map<string, rewrite_fn>
+            (string("map1"), &backend::thrust_rewriter::map_rewrite)
+            (string("map2"), &backend::thrust_rewriter::map_rewrite)
+            (string("map3"), &backend::thrust_rewriter::map_rewrite)
+            (string("map4"), &backend::thrust_rewriter::map_rewrite)
+            (string("map5"), &backend::thrust_rewriter::map_rewrite)
+            (string("map6"), &backend::thrust_rewriter::map_rewrite)
+            (string("map7"), &backend::thrust_rewriter::map_rewrite)
+            (string("map8"), &backend::thrust_rewriter::map_rewrite)
+            (string("map9"), &backend::thrust_rewriter::map_rewrite)
+            (string("map10"), &backend::thrust_rewriter::map_rewrite)
+            (string("indices"), &backend::thrust_rewriter::indices_rewrite)
+            (string("replicate"), &backend::thrust_rewriter::replicate_rewrite)
+            (string("shift"), &backend::thrust_rewriter::shift_rewrite)
+            (string("rotate"), &backend::thrust_rewriter::rotate_rewrite))  {}
+
+
 thrust_rewriter::result_type thrust_rewriter::map_rewrite(const bind& n) {
     //The rhs must be an apply
     assert(detail::isinstance<apply>(n.rhs()));
@@ -262,23 +281,6 @@ thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
     return result;
 }
 
-thrust_rewriter::thrust_rewriter() :
-    m_lut(make_map<string, rewrite_fn>
-          (string("map1"), &backend::thrust_rewriter::map_rewrite)
-          (string("map2"), &backend::thrust_rewriter::map_rewrite)
-          (string("map3"), &backend::thrust_rewriter::map_rewrite)
-          (string("map4"), &backend::thrust_rewriter::map_rewrite)
-          (string("map5"), &backend::thrust_rewriter::map_rewrite)
-          (string("map6"), &backend::thrust_rewriter::map_rewrite)
-          (string("map7"), &backend::thrust_rewriter::map_rewrite)
-          (string("map8"), &backend::thrust_rewriter::map_rewrite)
-          (string("map9"), &backend::thrust_rewriter::map_rewrite)
-          (string("map10"), &backend::thrust_rewriter::map_rewrite)
-          (string("indices"), &backend::thrust_rewriter::indices_rewrite)
-          (string("replicate"), &backend::thrust_rewriter::replicate_rewrite)
-          (string("shift"), &backend::thrust_rewriter::shift_rewrite)
-          (string("rotate"), &backend::thrust_rewriter::rotate_rewrite)
-        )  {}
 
 thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     const expression& rhs = n.rhs();
