@@ -12,8 +12,10 @@ using backend::utility::make_vector;
 namespace backend {
 
 
-allocate::allocate(const string& entry_point) : m_entry_point(entry_point),
-                                                     m_in_entry(false),
+allocate::allocate(const copperhead::system_variant& target,
+                   const string& entry_point) : m_target(target),
+                                                m_entry_point(entry_point),
+                                                m_in_entry(false),
                                                 m_allocations()
         {}
 
@@ -74,7 +76,9 @@ allocate::result_type allocate::operator()(const bind &n) {
             pre_lhs_ct.p_sub();
         shared_ptr<ctype::type_t> impl_seq_ct =
             make_shared<ctype::polytype_t>(
-                make_vector<shared_ptr<ctype::type_t> >(sub_lhs_ct),
+                make_vector<shared_ptr<ctype::type_t> >
+                (make_shared<ctype::monotype_t>(copperhead::to_string(m_target)))
+                (sub_lhs_ct),
                 make_shared<ctype::monotype_t>("sequence"));
         
         shared_ptr<ctype::tuple_t> tuple_impl_seq_ct =
@@ -107,7 +111,9 @@ allocate::result_type allocate::operator()(const bind &n) {
         shared_ptr<tuple> getter_args =
             make_shared<tuple>(
                 make_vector<shared_ptr<expression> >(result_name)
-                (make_shared<name>("tag"))
+                (make_shared<apply>(
+                    make_shared<name>(copperhead::to_string(m_target)),
+                    make_shared<tuple>(make_vector<shared_ptr<expression> >())))
                 (make_shared<literal>("true")));
         shared_ptr<apply> getter_call =
             make_shared<apply>(getter_name, getter_args);

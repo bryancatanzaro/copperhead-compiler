@@ -25,6 +25,7 @@
 #include "py_printer.hpp"
 #include "cpp_printer.hpp"
 #include "rewriter.hpp"
+#include "prelude/runtime/tags.h"
 
 /*!
   \file   allocate.hpp
@@ -49,6 +50,7 @@ class allocate
     : public rewriter
 {
 private:
+    const copperhead::system_variant& m_target;
     const std::string& m_entry_point;
     bool m_in_entry;
     std::vector<std::shared_ptr<statement> > m_allocations;
@@ -57,7 +59,7 @@ public:
 /*!   
   \param entry_point The name of the entry point procedure 
 */
-    allocate(const std::string& entry_point);
+    allocate(const copperhead::system_variant&, const std::string& entry_point);
     
     using rewriter::operator();
 

@@ -38,7 +38,7 @@ std::shared_ptr<suite> compiler::operator()(const suite &n) {
     std::cout << "Thrust rewritten" << std::endl;
     boost::apply_visitor(cp, *thrust_rewritten);
 #endif
-    allocate allocator(m_entry_point);
+    allocate allocator(m_backend_tag, m_entry_point);
     auto allocated = apply(allocator, thrust_rewritten);
 #ifdef TRACE
     std::cout << "Allocated" << std::endl;
