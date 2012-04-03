@@ -188,11 +188,13 @@ thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
         ap_args.begin()->p_ctype();
     
     
-    
     shared_ptr<ctype::polytype_t> constant_t =
         make_shared<ctype::polytype_t>(
-            make_vector<shared_ptr<ctype::type_t> >(val_t),
+            make_vector<shared_ptr<ctype::type_t> >
+            (make_shared<ctype::monotype_t>(copperhead::to_string(m_target)))
+            (val_t),
             make_shared<ctype::monotype_t>("constant_sequence"));
+
     shared_ptr<apply> n_rhs =
         static_pointer_cast<apply>(get_node_ptr(n.rhs()));
     //Can only handle names on the LHS
@@ -278,7 +280,7 @@ thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     }
     const apply& rhs_apply = boost::get<const apply&>(rhs);
     const name& fn_name = rhs_apply.fn();
-    if (fn_name.id().substr(3) == "map") {
+    if (fn_name.id().substr(0, 3) == "map") {
         return map_rewrite(n);
     } else if (fn_name.id() == "indices") {
         return indices_rewrite(n);

@@ -19,11 +19,11 @@
 
 namespace copperhead {
 
-template<typename Tag, typename I, typename T>
+template<typename Tag, typename T, typename I>
 constant_sequence<Tag, T> replicate(const Tag& t,
                                     const T& val,
                                     const I& amount) {
-    return constant_sequence<Tag, T>(t, val, amount);
+    return constant_sequence<Tag, T>(val, amount);
 }
 
 }
