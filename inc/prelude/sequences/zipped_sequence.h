@@ -20,7 +20,7 @@
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/tuple.h>
 #include <thrust/detail/tuple_meta_transform.h>
-#include <prelude/basic/detail/tagged_iterator_type.h>
+#include <prelude/basic/detail/retagged_iterator_type.h>
 
 namespace copperhead {
 
@@ -75,7 +75,7 @@ struct zipped_sequence {
     typedef typename thrust::zip_iterator<
         typename thrust::detail::tuple_meta_transform<
             S, detail::extract_iterator>::type > ZI;
-    typedef typename detail::tagged_iterator_type<ZI, tag>::type iterator_type;
+    typedef typename detail::retagged_iterator_type<ZI, tag>::type iterator_type;
     
     zipped_sequence(S seqs) : m_seqs(seqs) {}
     //XXX Can only dereference these on the host!!

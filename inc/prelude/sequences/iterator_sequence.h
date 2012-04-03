@@ -16,19 +16,23 @@
  */
 
 #pragma once
+#include <prelude/basic/detail/retagged_iterator_type.h>
 
 /* This sequence wraps Thrust iterators into a sequence.
    This allows the use of Fancy Thrust iterators in
    Copperhead generated code.  (such as zipped, constant,
    counting, transformed, etc.)
  */
+
+namespace copperhead {
+
 template<typename Tag, typename I>
 struct iterator_sequence
 {
     typedef Tag tag;
     typedef typename I::value_type value_type;
     typedef typename I::value_type T;
-    typedef I iterator_type;
+    typedef typename detail::retagged_iterator_type<I, tag>::type iterator_type;
     
     I data;
     int length;
@@ -65,13 +69,14 @@ struct iterator_sequence
     int size() const { return length; }
 
     __host__ __device__
-    I begin() const {
-      return data;
+    iterator_type begin() const {
+        return thrust::retag<tag>(data);
     }
   
     __host__ __device__
-    I end() const {
-      return data + length;
+    iterator_type end() const {
+        return thrust::retag<tag>(data + length);
     }
 };
 
+}
