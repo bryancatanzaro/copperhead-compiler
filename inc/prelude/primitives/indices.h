@@ -21,8 +21,8 @@
 namespace copperhead {
 
 template<typename Seq0>
-index_sequence indices(Seq0& x0) {
-    return index_sequence(x0.size());
+index_sequence<typename Seq0::tag> indices(Seq0& x0) {
+    return index_sequence<typename Seq0::tag>(x0.size());
 }
 
 }

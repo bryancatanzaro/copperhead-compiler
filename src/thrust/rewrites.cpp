@@ -13,25 +13,11 @@ using backend::utility::make_map;
 namespace backend {
 
 thrust_rewriter::thrust_rewriter(const copperhead::system_variant& target)
-    : m_target(target),
-      m_lut(make_map<string, rewrite_fn>
-            (string("map1"), &backend::thrust_rewriter::map_rewrite)
-            (string("map2"), &backend::thrust_rewriter::map_rewrite)
-            (string("map3"), &backend::thrust_rewriter::map_rewrite)
-            (string("map4"), &backend::thrust_rewriter::map_rewrite)
-            (string("map5"), &backend::thrust_rewriter::map_rewrite)
-            (string("map6"), &backend::thrust_rewriter::map_rewrite)
-            (string("map7"), &backend::thrust_rewriter::map_rewrite)
-            (string("map8"), &backend::thrust_rewriter::map_rewrite)
-            (string("map9"), &backend::thrust_rewriter::map_rewrite)
-            (string("map10"), &backend::thrust_rewriter::map_rewrite)
-            (string("indices"), &backend::thrust_rewriter::indices_rewrite)
-            (string("replicate"), &backend::thrust_rewriter::replicate_rewrite)
-            (string("shift"), &backend::thrust_rewriter::shift_rewrite)
-            (string("rotate"), &backend::thrust_rewriter::rotate_rewrite))  {}
+    : m_target(target) {}
 
 
-thrust_rewriter::result_type thrust_rewriter::map_rewrite(const bind& n) {
+thrust_rewriter::result_type thrust_rewriter::map_rewrite(
+    const bind& n) {
     //The rhs must be an apply
     assert(detail::isinstance<apply>(n.rhs()));
     const apply& rhs = boost::get<const apply&>(n.rhs());
@@ -170,8 +156,11 @@ thrust_rewriter::result_type thrust_rewriter::indices_rewrite(const bind& n) {
     //Argument must have Seq[a] type
     assert(detail::isinstance<ctype::sequence_t>(arg_t));
         
-    shared_ptr<ctype::monotype_t> index_t =
-        make_shared<ctype::monotype_t>("index_sequence");
+    shared_ptr<ctype::polytype_t> index_t =
+        make_shared<ctype::polytype_t>(
+            make_vector<shared_ptr<ctype::type_t> >
+            (make_shared<ctype::monotype_t>(copperhead::to_string(m_target))),
+            make_shared<ctype::monotype_t>("index_sequence"));
     shared_ptr<apply> n_rhs =
         static_pointer_cast<apply>(get_node_ptr(n.rhs()));
     //Can only handle names on the LHS
@@ -289,12 +278,20 @@ thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     }
     const apply& rhs_apply = boost::get<const apply&>(rhs);
     const name& fn_name = rhs_apply.fn();
-    auto it_delegate = m_lut.find(fn_name.id());
-    if (it_delegate != m_lut.end()) {
-        return (it_delegate->second)(n);
+    if (fn_name.id().substr(3) == "map") {
+        return map_rewrite(n);
+    } else if (fn_name.id() == "indices") {
+        return indices_rewrite(n);
+    } else if (fn_name.id() == "replicate") {
+        return replicate_rewrite(n);
+    } else if (fn_name.id() == "rotate") {
+        return rotate_rewrite(n);
+    } else if (fn_name.id() == "shift") {
+        return shift_rewrite(n);
     } else {
         return get_node_ptr(n);
     }
+
 }
 
 
