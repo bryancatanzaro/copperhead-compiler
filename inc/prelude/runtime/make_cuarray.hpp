@@ -30,7 +30,7 @@ sp_cuarray make_cuarray(size_t s) {
     sp_cuarray r(new cuarray(type_holder, 0));
     r->push_back_length(s);    
 
-    r->add_chunk(boost::shared_ptr<chunk>(new chunk(omp_tag(), s * sizeof(T))), true);
+    r->add_chunk(boost::shared_ptr<chunk>(new chunk(cpp_tag(), s * sizeof(T))), true);
 #ifdef CUDA_SUPPORT
     r->add_chunk(boost::shared_ptr<chunk>(new chunk(cuda_tag(), s * sizeof(T))), true);
 #endif

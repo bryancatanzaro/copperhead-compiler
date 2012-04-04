@@ -60,7 +60,8 @@ struct make_seq_impl<sequence<Tag, T, D > > {
 template<typename S>
 S make_sequence(sp_cuarray& in, system_variant t, bool write) {
     cuarray& r = *in;
-    std::pair<std::vector<boost::shared_ptr<chunk> >, bool>& s = r.m_d[t];
+    system_variant canonical_tag = canonical_memory_tag(t);
+    std::pair<std::vector<boost::shared_ptr<chunk> >, bool>& s = r.m_d[canonical_tag];
     //Do we need to copy?
     if (!s.second) {
         //Find a valid representation
@@ -73,7 +74,8 @@ S make_sequence(sp_cuarray& in, system_variant t, bool write) {
         }
         assert(x.second == true);
         //Copy from valid representation
-        for(std::vector<boost::shared_ptr<chunk> >::iterator i = s.first.begin(), j = x.first.begin();
+        for(std::vector<boost::shared_ptr<chunk> >::iterator i = s.first.begin(),
+                j = x.first.begin();
             i != s.first.end();
             i++, j++) {
             (*i)->copy_from(**j);
@@ -85,7 +87,7 @@ S make_sequence(sp_cuarray& in, system_variant t, bool write) {
         for(typename data_map::iterator i = r.m_d.begin();
             i != r.m_d.end();
             i++) {
-            i->second.second = system_variant_equal(i->first, t);
+            i->second.second = system_variant_equal(i->first, canonical_tag);
         }
     }
     return make_seq_impl<S>::fun(s.first.begin(), r.m_l.begin(), r.m_o);

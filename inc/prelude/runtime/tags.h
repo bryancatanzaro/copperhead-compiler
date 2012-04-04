@@ -68,4 +68,6 @@ struct system_variant_to_string
 
 std::string to_string(const system_variant& x);
 
+system_variant canonical_memory_tag(const system_variant& x);
+
 }
