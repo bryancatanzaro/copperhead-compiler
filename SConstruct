@@ -72,7 +72,7 @@ We will try building anyway, but may not succeed.
 Read the README for more details.
 """)
         
-    siteconf['THRUST_PATH'] = None
+    siteconf['THRUST_DIR'] = None
     siteconf['BOOST_INC_DIR'] = None
     f = open("siteconf.py", 'w')
     for k, v in siteconf.items():
@@ -82,9 +82,9 @@ Read the README for more details.
         
     f.close()
 
-if siteconf['THRUST_PATH']:
+if siteconf['THRUST_DIR']:
     #Must prepend because build-env might have found an old system Thrust
-    env.Prepend(CPPPATH=siteconf['THRUST_PATH'])
+    env.Prepend(CPPPATH=siteconf['THRUST_DIR'])
 if siteconf['BOOST_INC_DIR']:
     env.Append(CPPPATH=siteconf['BOOST_INC_DIR'])
 #Ensure we have g++ >= 4.5
@@ -103,13 +103,13 @@ if not conf.CheckHeader('boost/mpl/logical.hpp', language='C++'):
 #Check we have a Thrust installation
 if not conf.CheckCXXHeader('thrust/host_vector.h'):
     print("You need Thrust version 1.6 to compile this program")
-    print("Point us to your Thrust installation by changing THRUST_PATH in siteconf.py")
+    print("Point us to your Thrust installation by changing THRUST_DIR in siteconf.py")
     Exit(1)
 
 #Ensure Thrust Version > 1.6
 if not conf.CheckThrustVersion((1,6)):
     print("You need Thrust version 1.6 or greater")
-    print("Change THRUST_PATH in siteconf.py to point to your Thrust installation.")
+    print("Change THRUST_DIR in siteconf.py to point to your Thrust installation.")
     Exit(1)
 
 
