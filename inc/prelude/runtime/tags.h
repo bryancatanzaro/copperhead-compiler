@@ -29,17 +29,19 @@ namespace copperhead {
 
 #ifdef CUDA_SUPPORT
 #include <thrust/system/cuda/memory.h>
-    
+
+typedef thrust::system::cpp::tag cpp_tag;
 typedef thrust::system::omp::tag omp_tag;
 typedef thrust::system::cuda::tag cuda_tag;
 
-typedef boost::variant<omp_tag, cuda_tag> system_variant;
+typedef boost::variant<cpp_tag, omp_tag, cuda_tag> system_variant;
 
 #else
 
+typedef thrust::system::cpp::tag cpp_tag;
 typedef thrust::system::omp::tag omp_tag;
 
-typedef boost::variant<omp_tag> system_variant;
+typedef boost::variant<cpp_tag, omp_tag> system_variant;
 
 #endif
 
@@ -55,6 +57,7 @@ namespace detail {
     
 struct system_variant_to_string
     : boost::static_visitor<std::string> {
+    std::string operator()(const cpp_tag&) const;
     std::string operator()(const omp_tag&) const;
     #ifdef CUDA_SUPPORT
     std::string operator()(const cuda_tag&) const;

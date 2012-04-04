@@ -24,6 +24,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/mpl/not.hpp>
+#include <boost/mpl/or.hpp>
 
 namespace copperhead {
 
@@ -62,14 +63,17 @@ struct apply_copy
     //XXX WAR thrust issue #10.
     template<typename DTag, typename STag>
     typename boost::enable_if<
-        boost::is_same<DTag, STag> >::type
+        boost::mpl::or_<
+            boost::is_convertible<DTag, STag>,
+            boost::is_convertible<STag, DTag> > >::type
     operator()(DTag, STag) const {
     }
-    
+    //XXX WAR thrust issue #10.
     template<typename DTag, typename STag>
-    typename boost::enable_if<
-        boost::mpl::not_<
-            boost::is_same<DTag, STag> > >::type
+    typename boost::disable_if<
+        boost::mpl::or_<
+            boost::is_convertible<DTag, STag>,
+            boost::is_convertible<STag, DTag> > >::type
     operator()(DTag, STag) const {
         thrust::pointer<char, STag> s_start((char*)m_s);
         thrust::pointer<char, STag> s_end = s_start + m_r;
