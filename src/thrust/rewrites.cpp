@@ -184,6 +184,23 @@ thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
     //replicate must have two arguments
     assert(ap_args.end() - ap_args.begin() == 2);
 
+    //Need to add the target tag to this sequence.
+    //Otherwise the machinery has nothing to pull a target from
+    //To do this, we add an additional argument: the tag
+    auto ap_arg_iterator = ap_args.p_begin();
+    shared_ptr<tuple> targeted_arguments =
+        make_shared<tuple>(
+            make_vector<shared_ptr<expression> >
+            (make_shared<apply>(
+                make_shared<name>(
+                    copperhead::to_string(m_target)),
+                make_shared<tuple>(
+                    make_vector<shared_ptr<expression> >())))
+            (*(ap_arg_iterator++))
+            (*ap_arg_iterator));
+    
+                    
+    
     shared_ptr<ctype::type_t> val_t =
         ap_args.begin()->p_ctype();
     
@@ -196,7 +213,9 @@ thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
             make_shared<ctype::monotype_t>("constant_sequence"));
 
     shared_ptr<apply> n_rhs =
-        static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+        make_shared<apply>(rhs.p_fn(),
+                           targeted_arguments);
+            
     //Can only handle names on the LHS
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
