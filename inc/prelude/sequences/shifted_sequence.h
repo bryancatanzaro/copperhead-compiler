@@ -44,7 +44,7 @@ public:
     T operator()(const I& i) const {
         I new_pos = i + m_shift;
         if ((new_pos < 0) ||
-            (new_pos >= m_data.size())) {
+            (typename Seq::index_type(new_pos) >= m_data.size())) {
             return m_boundary;
         }
         return m_data[new_pos];
