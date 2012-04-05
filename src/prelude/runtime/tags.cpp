@@ -1,6 +1,10 @@
 #include <prelude/runtime/tags.h>
 #include <boost/variant.hpp>
 
+#ifdef CUDA_SUPPORT
+#include <thrust/system/cuda/memory.h>
+#endif
+
 namespace copperhead {
 
 namespace detail {

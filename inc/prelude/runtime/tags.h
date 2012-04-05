@@ -27,15 +27,15 @@
 #include <thrust/system/cpp/memory.h>
 
 #ifdef OMP_SUPPORT
-#include <thrust/system/omp/memory.h>
+#include <thrust/system/omp/detail/tag.h>
 #endif
 
 #ifdef TBB_SUPPORT
-#include <thrust/system/tbb/memory.h>
+#include <thrust/system/tbb/detail/tag.h>
 #endif
 
 #ifdef CUDA_SUPPORT
-#include <thrust/system/cuda/memory.h>
+#include <thrust/system/cuda/detail/tag.h>
 #endif
 
 namespace copperhead {
@@ -72,7 +72,7 @@ namespace detail {
 //Computes the canonical memory space tag
 //This is normally an identity
 template<typename T>
-struct canonical_memory_tag{
+struct canonical_memory_tag {
     typedef T tag;
 };
 //Except when thrust tags share a memory space
