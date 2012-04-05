@@ -19,6 +19,17 @@ try:
 except:
     cuda_support = False
 
+try:
+    Import('omp_support')
+except:
+    omp_support = False
+
+try:
+    Import('tbb_support')
+except:
+    tbb_support = False
+
+
 bid = siteconf.get('BOOST_INC_DIR', None)
 bld = siteconf.get('BOOST_LIB_DIR', None)
 if bid:
@@ -32,6 +43,13 @@ env.Append(CPPPATH = [os.path.join(parent, "inc")])
 if cuda_support:
     env.Append(LIBS = ['cudart'])
     env.Append(CPPDEFINES = ['CUDA_SUPPORT'])
+
+if omp_support:
+    env.Append(CPPDEFINES = ['OMP_SUPPORT'])
+
+if tbb_support:
+    env.Append(CPPDEFINES = ['TBB_SUPPORT'])
+    
 env.Append(CCFLAGS = ['-std=c++0x', '-Wall'])
 
 if not GetOption('num_jobs'):

@@ -5,23 +5,6 @@ namespace copperhead {
 
 namespace detail {
 
-
-//Computes the canonical memory space tag
-//This is normally an identity
-template<typename T>
-struct canonical_memory_tag{
-    typedef T tag;
-};
-//Except when thrust tags share a memory space
-//In which case we choose one of the tags
-//As the canonical tag
-
-//The OMP tag's canonical memory space is CPP
-template<>
-struct canonical_memory_tag<omp_tag> {
-    typedef cpp_tag tag;
-};
-
 struct canonicalize_memory_tag
     : boost::static_visitor<copperhead::system_variant> {
     template<typename T>
@@ -83,10 +66,18 @@ std::string detail::system_variant_to_string::operator()(const cpp_tag&) const {
     return "cpp_tag";
 }
 
+#ifdef OMP_SUPPORT
 std::string detail::system_variant_to_string::operator()(const omp_tag&) const {
     return "omp_tag";
 }
+#endif
 
+#ifdef TBB_SUPPORT
+std::string detail::system_variant_to_string::operator()(const tbb_tag&) const {
+    return "tbb_tag";
+}
+#endif
+        
 #ifdef CUDA_SUPPORT
 std::string detail::system_variant_to_string::operator()(const cuda_tag&) const {
     return "cuda_tag";

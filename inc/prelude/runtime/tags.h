@@ -21,29 +21,81 @@
 #pragma once
 
 #include <boost/variant.hpp>
-#include <thrust/system/omp/memory.h>
 #include <functional>
 #include <string>
 
-namespace copperhead {
+#include <thrust/system/cpp/memory.h>
+
+#ifdef OMP_SUPPORT
+#include <thrust/system/omp/memory.h>
+#endif
+
+#ifdef TBB_SUPPORT
+#include <thrust/system/tbb/memory.h>
+#endif
 
 #ifdef CUDA_SUPPORT
 #include <thrust/system/cuda/memory.h>
-
-typedef thrust::system::cpp::tag cpp_tag;
-typedef thrust::system::omp::tag omp_tag;
-typedef thrust::system::cuda::tag cuda_tag;
-
-typedef boost::variant<cpp_tag, omp_tag, cuda_tag> system_variant;
-
-#else
-
-typedef thrust::system::cpp::tag cpp_tag;
-typedef thrust::system::omp::tag omp_tag;
-
-typedef boost::variant<cpp_tag, omp_tag> system_variant;
-
 #endif
+
+namespace copperhead {
+   
+typedef thrust::system::cpp::tag cpp_tag;
+
+#ifdef OMP_SUPPORT
+typedef thrust::system::omp::tag omp_tag;
+#endif
+
+#ifdef TBB_SUPPORT
+typedef thrust::system::tbb::tag tbb_tag;
+#endif
+
+#ifdef CUDA_SUPPORT
+typedef thrust::system::cuda::tag cuda_tag;
+#endif
+
+
+
+typedef boost::variant<cpp_tag
+#ifdef OMP_SUPPORT
+    ,omp_tag
+#endif
+#ifdef TBB_SUPPORT
+    ,tbb_tag
+#endif
+#ifdef CUDA_SUPPORT
+    ,cuda_tag
+#endif
+    > system_variant;
+
+namespace detail {
+//Computes the canonical memory space tag
+//This is normally an identity
+template<typename T>
+struct canonical_memory_tag{
+    typedef T tag;
+};
+//Except when thrust tags share a memory space
+//In which case we choose one of the tags
+//As the canonical tag
+
+#ifdef OMP_SUPPORT
+//The OMP tag's canonical memory space is CPP
+template<>
+struct canonical_memory_tag<omp_tag> {
+    typedef cpp_tag tag;
+};
+#endif
+
+#ifdef TBB_SUPPORT
+//The TBB tag's canonical memory space is CPP
+template<>
+struct canonical_memory_tag<tbb_tag> {
+    typedef cpp_tag tag;
+};
+#endif
+}
+
 
 struct system_variant_less {
     bool operator()(const system_variant& x,
@@ -58,7 +110,12 @@ namespace detail {
 struct system_variant_to_string
     : boost::static_visitor<std::string> {
     std::string operator()(const cpp_tag&) const;
+    #ifdef OMP_SUPPORT
     std::string operator()(const omp_tag&) const;
+    #endif
+    #ifdef TBB_SUPPORT
+    std::string operator()(const tbb_tag&) const;
+    #endif
     #ifdef CUDA_SUPPORT
     std::string operator()(const cuda_tag&) const;
     #endif

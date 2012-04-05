@@ -74,6 +74,9 @@ Read the README for more details.
         
     siteconf['THRUST_DIR'] = None
     siteconf['BOOST_INC_DIR'] = None
+    siteconf['TBB_INC_DIR'] = None
+    siteconf['TBB_LIB_DIR'] = None
+
     f = open("siteconf.py", 'w')
     for k, v in siteconf.items():
         if v:
@@ -120,6 +123,15 @@ except:
     # Check to see if we have nvcc >= 4.1
     nv_re = re.compile(r'release ([\d\.]+)')
     cuda_support=conf.CheckVersion('nvcc --version', nv_re, (4,1), extra_error="nvcc was not found. No CUDA support will be included.")
+try:
+    Import('omp_support')
+except:
+    omp_support = False
+try:
+    Import('tbb_support')
+except:
+    tbb_support = False
+    
 conf.Finish()
 
         

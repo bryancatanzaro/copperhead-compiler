@@ -63,21 +63,23 @@ struct apply_copy
     //XXX WAR thrust issue #10.
     template<typename DTag, typename STag>
     typename boost::enable_if<
-        boost::mpl::or_<
-            boost::is_convertible<DTag, STag>,
-            boost::is_convertible<STag, DTag> > >::type
+        boost::is_same<
+            typename copperhead::detail::canonical_memory_tag<DTag>::tag,
+            typename copperhead::detail::canonical_memory_tag<STag>::tag> >::type
     operator()(DTag, STag) const {
     }
     //XXX WAR thrust issue #10.
     template<typename DTag, typename STag>
     typename boost::disable_if<
-        boost::mpl::or_<
-            boost::is_convertible<DTag, STag>,
-            boost::is_convertible<STag, DTag> > >::type
+        boost::is_same<
+            typename copperhead::detail::canonical_memory_tag<DTag>::tag,
+            typename copperhead::detail::canonical_memory_tag<STag>::tag> >::type
     operator()(DTag, STag) const {
-        thrust::pointer<char, STag> s_start((char*)m_s);
-        thrust::pointer<char, STag> s_end = s_start + m_r;
-        thrust::pointer<char, DTag> d_start((char*)m_d);
+        typedef typename copperhead::detail::canonical_memory_tag<DTag>::tag canonical_tag_D;
+        typedef typename copperhead::detail::canonical_memory_tag<STag>::tag canonical_tag_S;
+        thrust::pointer<char, canonical_tag_S> s_start((char*)m_s);
+        thrust::pointer<char, canonical_tag_S> s_end = s_start + m_r;
+        thrust::pointer<char, canonical_tag_D> d_start((char*)m_d);
         thrust::copy(s_start, s_end, d_start);
     }
 };
