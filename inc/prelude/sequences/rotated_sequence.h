@@ -46,7 +46,7 @@ public:
         while (new_pos < 0) {
             new_pos += m_data.size();
         }
-        if (new_pos >= m_data.size()) {
+        if (typename Seq::index_type(new_pos) >= m_data.size()) {
             new_pos %= m_data.size();
         }
         return m_data[new_pos];
