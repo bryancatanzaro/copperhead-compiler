@@ -196,8 +196,8 @@ thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
                     copperhead::to_string(m_target)),
                 make_shared<tuple>(
                     make_vector<shared_ptr<expression> >())))
-            (*(ap_arg_iterator++))
-            (*ap_arg_iterator));
+            (*(ap_arg_iterator))
+            (*(ap_arg_iterator+1)));
     
                     
     
