@@ -26,18 +26,18 @@ phase_analyze::phase_analyze(const string& entry_point,
 }
 
 phase_analyze::result_type phase_analyze::operator()(const suite& n) {
-    vector<shared_ptr<statement> > stmts;
+    vector<shared_ptr<const statement> > stmts;
     for(auto i = n.begin(); i != n.end(); i++) {
-        auto p = std::static_pointer_cast<statement>(boost::apply_visitor(*this, *i));
+        auto p = std::static_pointer_cast<const statement>(boost::apply_visitor(*this, *i));
         while(m_additionals.size() > 0) {
-            auto p = std::static_pointer_cast<statement>(m_additionals.back());
+            auto p = std::static_pointer_cast<const statement>(m_additionals.back());
             stmts.push_back(p);
             m_additionals.pop_back();
         }
         stmts.push_back(p);
         
     }
-    return make_shared<suite>(move(stmts));
+    return make_shared<const suite>(move(stmts));
 }
 
 phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
@@ -61,54 +61,55 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
                 m_completions.insert(make_pair(arg_id, completion::invariant));
             }
         }
-        shared_ptr<suite> stmts =
-            static_pointer_cast<suite>(
+        shared_ptr<const suite> stmts =
+            static_pointer_cast<const suite>(
                 boost::apply_visitor(*this, n.stmts()));
         result_type result =
-            make_shared<procedure>(
-                static_pointer_cast<name>(get_node_ptr(n.id())),
-                static_pointer_cast<tuple>(get_node_ptr(n.args())),
+            make_shared<const procedure>(
+                static_pointer_cast<const name>(n.id().ptr()),
+                static_pointer_cast<const tuple>(n.args().ptr()),
                 stmts,
-                n.p_type(),
-                n.p_ctype(),
+                n.type().ptr(),
+                n.ctype().ptr(),
                 n.place());
         m_in_entry = false;
         m_completions.end_scope();
         return result;
     } else {
-        return get_node_ptr(n);
+        return n.ptr();
     }
 }
 
 void phase_analyze::add_phase_boundary(const name& n) {
-    shared_ptr<name> p_n = static_pointer_cast<name>(get_node_ptr(n));
-    shared_ptr<name> p_result =
-        make_shared<name>(
+    shared_ptr<const name> p_n =
+        static_pointer_cast<const name>(n.ptr());
+    shared_ptr<const name> p_result =
+        make_shared<const name>(
             detail::complete(n.id()),
-            n.p_type());
+            n.type().ptr());
     
-    shared_ptr<tuple_t> pb_args_t =
-        make_shared<tuple_t>(
-            make_vector<shared_ptr<type_t> >(n.p_type()));
-    shared_ptr<tuple> pb_args =
-        make_shared<tuple>(
-            make_vector<shared_ptr<expression> >(p_n),
+    shared_ptr<const tuple_t> pb_args_t =
+        make_shared<const tuple_t>(
+            make_vector<shared_ptr<const type_t> >(n.type().ptr()));
+    shared_ptr<const tuple> pb_args =
+        make_shared<const tuple>(
+            make_vector<shared_ptr<const expression> >(p_n),
             pb_args_t);
-    shared_ptr<monotype_t> a_mt = make_shared<monotype_t>("a");
-    shared_ptr<monotype_t> seq_a_mt = make_shared<sequence_t>(a_mt);
-    shared_ptr<type_t> pb_type =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(a_mt),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(seq_a_mt)),
+    shared_ptr<const monotype_t> a_mt = make_shared<const monotype_t>("a");
+    shared_ptr<const monotype_t> seq_a_mt = make_shared<const sequence_t>(a_mt);
+    shared_ptr<const type_t> pb_type =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(a_mt),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(seq_a_mt)),
                 seq_a_mt));
-    shared_ptr<name> pb_name =
-        make_shared<name>(detail::phase_boundary(), pb_type);
-    shared_ptr<apply> pb_apply =
-        make_shared<apply>(pb_name, pb_args);
-    shared_ptr<bind> result =
-        make_shared<bind>(p_result, pb_apply);
+    shared_ptr<const name> pb_name =
+        make_shared<const name>(detail::phase_boundary(), pb_type);
+    shared_ptr<const apply> pb_apply =
+        make_shared<const apply>(pb_name, pb_args);
+    shared_ptr<const bind> result =
+        make_shared<const bind>(p_result, pb_apply);
     m_additionals.push_back(result);
 
     //Register completion
@@ -122,26 +123,26 @@ void phase_analyze::add_phase_boundary(const name& n) {
 
 phase_analyze::result_type phase_analyze::operator()(const apply& n) {
     if (!m_in_entry) {
-        return get_node_ptr(n);
+        return n.ptr();
     }
     const name& fn_name = n.fn();
 
     //If function not declared, assume it can't trigger a phase boundary
     if (m_fns.find(fn_name.id()) == m_fns.end()) {
-        return get_node_ptr(n);
+        return n.ptr();
     }
-    shared_ptr<phase_t> fn_phase = m_fns.find(fn_name.id())->second;
+    shared_ptr<const phase_t> fn_phase = m_fns.find(fn_name.id())->second;
     phase_t::iterator j = fn_phase->begin();
     //The phase type for the function must match the args given to it
     assert(fn_phase->size() == n.args().arity());
 
-    vector<shared_ptr<expression> > new_args;
+    vector<shared_ptr<const expression> > new_args;
     
     for(auto i = n.args().begin();
         i != n.args().end();
         i++, j++) {
-        shared_ptr<name> p_i = static_pointer_cast<name>(get_node_ptr(*i));
-        shared_ptr<expression> new_arg = p_i;
+        shared_ptr<const name> p_i = static_pointer_cast<const name>(i->ptr());
+        shared_ptr<const expression> new_arg = p_i;
         //If we have something other than a name, assume it's invariant
         if (detail::isinstance<name>(*i)) {
             const name& id = detail::up_get<name>(*i);
@@ -166,12 +167,12 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
         new_args.push_back(new_arg);
     }
     m_result_completion = fn_phase->result();
-    return get_node_ptr(n);
+    return n.ptr();
 }
 
 phase_analyze::result_type phase_analyze::operator()(const bind& n) {
     if (!m_in_entry) {
-        return get_node_ptr(n);
+        return n.ptr();
     }
     m_result_completion = completion::invariant;
     result_type rewritten = this->rewriter::operator()(n);
@@ -186,13 +187,13 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
 
 phase_analyze::result_type phase_analyze::operator()(const ret& n) {
     if (!m_in_entry) {
-        return get_node_ptr(n);
+        return n.ptr();
     }
 ;
     //Returns can only be names
     assert(detail::isinstance<name>(n.val()));
-    shared_ptr<name> new_result =
-        static_pointer_cast<name>(get_node_ptr(n.val()));
+    shared_ptr<const name> new_result =
+        static_pointer_cast<const name>(n.val().ptr());
     const name& return_name = detail::up_get<name>(n.val());
     if (m_substitutions.exists(return_name.id())) {
         //Phase boundary already happened, use complete version
@@ -208,7 +209,7 @@ phase_analyze::result_type phase_analyze::operator()(const ret& n) {
             }
         }
     }
-    return make_shared<ret>(new_result);
+    return make_shared<const ret>(new_result);
 }
 
 
