@@ -15,7 +15,7 @@ type_t::type_t(const type_t &other)
   : super_t(detail::make_type_base(this, other)) {}
 
 
-std::shared_ptr<type_t> type_t::ptr() {
+std::shared_ptr<const type_t> type_t::ptr() const {
     return this->shared_from_this();
 }
 

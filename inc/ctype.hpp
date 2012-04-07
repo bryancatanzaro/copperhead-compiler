@@ -90,7 +90,7 @@ public:
     //! Copy constructor
     type_t(const type_t &other);
     //! Get pointer holding this type_t object
-    std::shared_ptr<type_t> ptr();
+    std::shared_ptr<const type_t> ptr() const;
 };
 
 //! Monomorphic type

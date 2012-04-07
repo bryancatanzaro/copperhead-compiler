@@ -36,9 +36,9 @@ class structure
     : public statement
 {
 protected:
-    std::shared_ptr<name> m_id;
-    std::shared_ptr<suite> m_stmts;
-    const std::vector<std::shared_ptr<ctype::type_t> > m_typevars;
+    const std::shared_ptr<const name> m_id;
+    const std::shared_ptr<const suite> m_stmts;
+    const std::vector<std::shared_ptr<const ctype::type_t> > m_typevars;
 public:
     //! Constructor
 /*! 
@@ -47,10 +47,10 @@ public:
   \param stmts Statements inside the structure
   \param typevars Template arguments, if any (optional)
 */
-    structure(const std::shared_ptr<name> &name,
-              const std::shared_ptr<suite> &stmts,
-              std::vector<std::shared_ptr<ctype::type_t> > &&typevars =
-              std::vector<std::shared_ptr<ctype::type_t> >());
+    structure(const std::shared_ptr<const name> &name,
+              const std::shared_ptr<const suite> &stmts,
+              std::vector<std::shared_ptr<const ctype::type_t> > &&typevars =
+              std::vector<std::shared_ptr<const ctype::type_t> >());
     //! Gets the name of the structure 
 /*! 
   \return The name of the structure
@@ -68,12 +68,6 @@ public:
     const_iterator begin(void) const;
     //! Gets iterator to end of template arguments
     const_iterator end(void) const;
-    //! Iterator type for accessing pointers to template arguments
-    typedef decltype(m_typevars.cbegin()) const_ptr_iterator;
-    //! Gets iterator to beginning of pointers holding template arguments
-    const_ptr_iterator p_begin(void) const;
-    //! Gets iterator to end of pointers holding template arguments
-    const_ptr_iterator p_end(void) const;
 };
 
 //! A templated name, such as shared_ptr<int>
@@ -85,7 +79,7 @@ class templated_name
     : public name
 {
 protected:
-    std::shared_ptr<ctype::tuple_t> m_template_types;
+    std::shared_ptr<const ctype::tuple_t> m_template_types;
 public:
     //! Constructor
 /*! 
@@ -98,9 +92,9 @@ public:
   \return 
 */
     templated_name(const std::string &id,
-                   const std::shared_ptr<ctype::tuple_t> &template_types,
-                   const std::shared_ptr<type_t>& type = void_mt,
-                   const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt);
+                   const std::shared_ptr<const ctype::tuple_t> &template_types,
+                   const std::shared_ptr<const type_t>& type = void_mt,
+                   const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
     //! Gets the template instantiation types
 /*! 
   \return A tuple of types which are used to instantiate this name
@@ -117,7 +111,7 @@ class include
     : public statement
 {
 protected:
-    const std::shared_ptr<literal> m_id;
+    const std::shared_ptr<const literal> m_id;
     const char m_open;
     const char m_close;
 public:
@@ -127,7 +121,7 @@ public:
   \param open The character to open the include, eg '<'
   \param close The character to close the include, eg '>'
 */
-    include(const std::shared_ptr<literal> &id,
+    include(const std::shared_ptr<const literal> &id,
             const char open = '\"',
             const char close = '\"');
     //! Gets the name of the file which is being included
@@ -145,8 +139,8 @@ class typedefn
     : public statement
 {
 protected:
-    const std::shared_ptr<ctype::type_t> m_origin;
-    const std::shared_ptr<ctype::type_t> m_rename;
+    const std::shared_ptr<const ctype::type_t> m_origin;
+    const std::shared_ptr<const ctype::type_t> m_rename;
 public:
     //! Constructor
 /*! typedef $origin $rename;
@@ -155,8 +149,8 @@ public:
   \param rename The new type.
   
 */
-    typedefn(const std::shared_ptr<ctype::type_t> origin,
-             const std::shared_ptr<ctype::type_t> rename);
+    typedefn(const std::shared_ptr<const ctype::type_t> origin,
+             const std::shared_ptr<const ctype::type_t> rename);
     //! Gets the origin type
     const ctype::type_t& origin() const;
     //! Gets the rename type
@@ -171,7 +165,7 @@ class namespace_block
 {
 protected:
     const std::string m_name;
-    const std::shared_ptr<suite> m_stmts;
+    const std::shared_ptr<const suite> m_stmts;
 public:
     //! Constructor
 /*! namespace $name {$sub};
@@ -181,7 +175,7 @@ public:
   
 */
     namespace_block(const std::string& name,
-                    const std::shared_ptr<suite>& stmts);
+                    const std::shared_ptr<const suite>& stmts);
     //! Gets the name of the namespace
     const std::string& name() const;
     //! Gets the statement contained in the namespace

@@ -62,23 +62,6 @@ class rewriter
     : public boost::static_visitor<std::shared_ptr<const node> >
 {
 protected:
-    //! Get the \p shared_ptr holding an AST \p node
-/*! 
-  If a rewrite pass knows that no rewriting will happen at
-  deeper levels of the AST, it can grab the shared_ptr
-  holding the AST node directly and return it during the copy.
-
-  \param n Assumed to be a \p node held by a \p shared_ptr .
-  
-  \return The shared_ptr that holds \n
-*/
-    //If you know you're not going to do any rewriting at deeper
-    //levels of the AST, just grab the pointer from the node
-    template<typename Node>
-    static inline std::shared_ptr<Node> get_node_ptr(const Node &n) {
-        return std::static_pointer_cast<Node>(
-            std::const_pointer_cast<node>(n.shared_from_this()));
-    }
     /*! Used for bookkeeping to discover straight copies */
     std::stack<bool> m_matches;
     //! Start the check to see if we are doing a straight copy
@@ -98,7 +81,7 @@ protected:
 */
     template<typename T, typename U>
     inline void update_match(const std::shared_ptr<T>& t, const U& u) {
-        m_matches.top() = m_matches.top() && (t == get_node_ptr(u));
+        m_matches.top() = m_matches.top() && (t == u.ptr());
     }
     
     //! Did we find a match, meaning we have a straight copy? 

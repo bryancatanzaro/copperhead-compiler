@@ -53,9 +53,9 @@ class expression
 {
 protected:
     //! The Copperhead type of the expression
-    std::shared_ptr<type_t> m_type;
+    std::shared_ptr<const type_t> m_type;
     //! The C++ implementation type of the expression
-    std::shared_ptr<ctype::type_t> m_ctype;
+    std::shared_ptr<const ctype::type_t> m_ctype;
 /*! 
   The constructor is only intended to be called by subtypes.
   \param self A reference to the subtype object being constructed,
@@ -66,8 +66,8 @@ protected:
 */
     template<typename Derived>
     expression(Derived &self,
-               const std::shared_ptr<type_t>& type = void_mt,
-               const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt)
+               const std::shared_ptr<const type_t>& type = void_mt,
+               const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt)
         : node(self), m_type(type), m_ctype(ctype)
         {}
 public:
@@ -76,10 +76,6 @@ public:
     const type_t& type(void) const;
     //! Gets the C++ implementation type of the expression
     const ctype::type_t& ctype(void) const;
-    //! Gets the \p shared_ptr that holds the Copperhead type of the expression
-    std::shared_ptr<type_t> p_type(void) const;
-    //! Gets the \p shared_ptr that holds the C++ implementation type of the expression
-    std::shared_ptr<ctype::type_t> p_ctype(void) const;
 };
 
 //! The parent class for all Literal expressions
@@ -99,8 +95,8 @@ public:
     template<typename Derived>
     literal(Derived &self,
             const std::string& val,
-            const std::shared_ptr<type_t>& type = void_mt,
-            const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt)
+            const std::shared_ptr<const type_t>& type = void_mt,
+            const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt)
         : expression(self, type, ctype), m_val(val)
         {}
     //! A constructor for standalone Literal expressions.
@@ -112,8 +108,8 @@ public:
   \param ctype C++ implementation type.
 */
     literal(const std::string& val,
-            const std::shared_ptr<type_t>& type = void_mt,
-            const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt);
+            const std::shared_ptr<const type_t>& type = void_mt,
+            const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
 
     //! Get the value of this literal
     const std::string& id(void) const;
@@ -130,8 +126,8 @@ public:
   \param ctype The C++ implementation type.
 */
     name(const std::string &val,
-         const std::shared_ptr<type_t>& type = void_mt,
-         const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt);
+         const std::shared_ptr<const type_t>& type = void_mt,
+         const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
 //! Constructor for subclasses.
 /*! 
   \param self Reference to subclass being constructed.
@@ -143,8 +139,8 @@ public:
 */
     template<typename Derived>
     name(Derived& self, const std::string &val,
-         const std::shared_ptr<type_t>& type,
-         const std::shared_ptr<ctype::type_t>& ctype) :
+         const std::shared_ptr<const type_t>& type,
+         const std::shared_ptr<const ctype::type_t>& ctype) :
         literal(self, val, type, ctype) {}
 };
 //! AST node for tuples.
@@ -163,11 +159,11 @@ public:
   
   \return 
 */
-    tuple(std::vector<std::shared_ptr<expression> > &&values,
-          const std::shared_ptr<type_t>& type = void_mt,
-          const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt);
+    tuple(std::vector<std::shared_ptr<const expression> > &&values,
+          const std::shared_ptr<const type_t>& type = void_mt,
+          const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
 protected:
-    const std::vector<std::shared_ptr<expression> > m_values;
+    const std::vector<std::shared_ptr<const expression> > m_values;
 public:
     //! A constant iterator to the expressions held by the tuple
     typedef decltype(boost::make_indirect_iterator(m_values.cbegin())) const_iterator;
@@ -175,19 +171,7 @@ public:
     const_iterator begin() const;
     //! The iterator to the end of the expressions held by the tuple
     const_iterator end() const;
-    
-    //! A constant iterator to the \p shared_ptr<expression> that are held by the tuple
-    /*! Although it is usually more convenient to work with the expressions held
-      by the tuple, occasionally we need access to the \p shared_ptr objects
-      held by the tuple. 
-    */
-
-    typedef decltype(m_values.cbegin()) const_ptr_iterator;
-    //! The iterator to the beginning of the \p shared_ptr objects held by the tuple
-    const_ptr_iterator p_begin() const;
-    //! The iterator to the end of the \p shared_ptr objects held by the tuple
-    const_ptr_iterator p_end() const;
-    
+        
     //! The arity of this tuple.
 /*! 
   \return How many expressions are held by this tuple.
@@ -199,25 +183,21 @@ class apply
     : public expression
 {
 protected:
-    const std::shared_ptr<name> m_fn;
-    const std::shared_ptr<tuple> m_args;
+    const std::shared_ptr<const name> m_fn;
+    const std::shared_ptr<const tuple> m_args;
 public:
 /*! 
   \param fn The function to be applied.
   \param args The arguments given to the function.
 */
 
-    apply(const std::shared_ptr<name> &fn,
-          const std::shared_ptr<tuple> &args);
+    apply(const std::shared_ptr<const name> &fn,
+          const std::shared_ptr<const tuple> &args);
     //! Get the function to be applied
     const name &fn(void) const;
     //! Get the arguments given to the function
     const tuple &args(void) const;
 
-    //! Get the \p shared_ptr to the function to be applied
-    std::shared_ptr<name> p_fn(void) const;
-    //! Get the \p shared_ptr to the arguments given to the function
-    std::shared_ptr<tuple> p_args(void) const;
 };
 
 //! AST node for \p lambda expressions
@@ -227,8 +207,8 @@ class lambda
     : public expression
 {
 protected:
-    const std::shared_ptr<tuple> m_args;
-    const std::shared_ptr<expression> m_body;
+    const std::shared_ptr<const tuple> m_args;
+    const std::shared_ptr<const expression> m_body;
 public:
     //! Constructor
 /*!
@@ -238,19 +218,14 @@ public:
   \param ctype C++ implementation type.
 */
 
-    lambda(const std::shared_ptr<tuple> &args,
-           const std::shared_ptr<expression> &body,
-           const std::shared_ptr<type_t>& type = void_mt,
-           const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt);
+    lambda(const std::shared_ptr<const tuple> &args,
+           const std::shared_ptr<const expression> &body,
+           const std::shared_ptr<const type_t>& type = void_mt,
+           const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
     //! Get the formal arguments of the \p lambda
     const tuple &args(void) const;
     //! Get the expression to be evaluated in the \p lambda
     const expression &body(void) const;
-
-    //! Get the \p shared_ptr to the formal arguments
-    std::shared_ptr<tuple> p_args(void) const;
-    //! Get the \p shared_ptr to the expression
-    std::shared_ptr<expression> p_body(void) const;
 };
 
 //! AST node for closures
@@ -261,8 +236,8 @@ class closure
     : public expression
 {
 protected:
-    const std::shared_ptr<tuple> m_args;
-    const std::shared_ptr<expression> m_body;
+    const std::shared_ptr<const tuple> m_args;
+    const std::shared_ptr<const expression> m_body;
     
 public:
 /*!   
@@ -271,15 +246,13 @@ public:
   \param type Copperhead type.
   \param ctype C++ implementation type.
 */
-    closure(const std::shared_ptr<tuple> &args,
-            const std::shared_ptr<expression> &body,
-            const std::shared_ptr<type_t>& type = void_mt,
-            const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt);
+    closure(const std::shared_ptr<const tuple> &args,
+            const std::shared_ptr<const expression> &body,
+            const std::shared_ptr<const type_t>& type = void_mt,
+            const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
     const tuple &args(void) const;
     const expression &body(void) const;
 
-    std::shared_ptr<tuple> p_args(void) const;
-    std::shared_ptr<expression> p_body(void) const;
 };
 
 //! AST node for subscripting
@@ -287,8 +260,8 @@ class subscript
     : public expression
 {
 protected:
-    const std::shared_ptr<name> m_src;
-    const std::shared_ptr<expression> m_idx;
+    const std::shared_ptr<const name> m_src;
+    const std::shared_ptr<const expression> m_idx;
     
 public:
 /*!   
@@ -297,15 +270,12 @@ public:
   \param type Copperhead type.
   \param ctype C++ implementation type.
 */
-    subscript(const std::shared_ptr<name> &src,
-              const std::shared_ptr<expression> &idx,
-              const std::shared_ptr<type_t>& type = void_mt,
-              const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt);
+    subscript(const std::shared_ptr<const name> &src,
+              const std::shared_ptr<const expression> &idx,
+              const std::shared_ptr<const type_t>& type = void_mt,
+              const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
     const name &src(void) const;
     const expression &idx(void) const;
-
-    std::shared_ptr<name> p_src(void) const;
-    std::shared_ptr<expression> p_idx(void) const;
 };
 
 /*! 

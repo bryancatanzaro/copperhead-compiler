@@ -83,7 +83,7 @@ public:
 */
     type_t(const type_t &other);
 //! Get the pointer to this type object
-    std::shared_ptr<type_t> ptr();
+    std::shared_ptr<const type_t> ptr() const;
 };
 
 /*!
