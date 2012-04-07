@@ -48,7 +48,7 @@ private:
     const copperhead::system_variant& m_target;
     const std::string& m_entry_point;
     bool m_wrapping;
-    std::shared_ptr<procedure> m_wrapper;
+    std::shared_ptr<const procedure> m_wrapper;
 public:
     //! Constructor
 /*! 

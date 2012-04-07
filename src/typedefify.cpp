@@ -45,7 +45,7 @@ typedefify::result_type typedefify::operator()(const bind &n) {
     shared_ptr<const name> new_lhs =
         std::make_shared<const name>(lhs.id(),
                                      lhs.type().ptr(),
-                               unique_type);
+                                     unique_type);
     m_typedef =
         std::make_shared<const typedefn>(
             lhs.ctype().ptr(),

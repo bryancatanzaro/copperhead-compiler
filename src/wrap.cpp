@@ -24,8 +24,8 @@ wrap::result_type wrap::operator()(const procedure &n) {
     if (n.id().id()  == m_entry_point) {
         m_wrapping = true;
                         
-        vector<shared_ptr<expression> > wrapper_args;
-        vector<shared_ptr<expression> > getter_args;
+        vector<shared_ptr<const expression> > wrapper_args;
+        vector<shared_ptr<const expression> > getter_args;
         //Wrap input arguments
         for(auto i = n.args().begin();
             i != n.args().end();
@@ -38,58 +38,58 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 bool is_node = detail::isinstance<name, node>(*i);
                 assert(is_node);
                     
-                shared_ptr<type_t> t = i->p_type();
+                shared_ptr<const type_t> t = i->type().ptr();
                     
                 const ctype::sequence_t& arg_c_type =
                     boost::get<const ctype::sequence_t&>(i->ctype());
-                shared_ptr<ctype::type_t> sub_ct =
-                    arg_c_type.p_sub();
-                shared_ptr<ctype::type_t> ct(
+                shared_ptr<const ctype::type_t> sub_ct =
+                    arg_c_type.sub().ptr();
+                shared_ptr<const ctype::type_t> ct(
                     new ctype::cuarray_t(sub_ct));
                 const name& arg_name =
                     boost::get<const name&>(*i);
-                shared_ptr<name> wrapped_name(
+                shared_ptr<const name> wrapped_name(
                     new name(detail::wrap_array_id(arg_name.id()),
                              t, ct));
                 wrapper_args.push_back(wrapped_name);
 
-                shared_ptr<ctype::type_t> impl_seq_ct =
-                    make_shared<ctype::polytype_t>(
-                        make_vector<shared_ptr<ctype::type_t> >
-                        (make_shared<ctype::monotype_t>(copperhead::to_string(m_target)))
+                shared_ptr<const ctype::type_t> impl_seq_ct =
+                    make_shared<const ctype::polytype_t>(
+                        make_vector<shared_ptr<const ctype::type_t> >
+                        (make_shared<const ctype::monotype_t>(copperhead::to_string(m_target)))
                         (sub_ct),
-                        make_shared<ctype::monotype_t>("sequence"));
+                        make_shared<const ctype::monotype_t>("sequence"));
         
-                shared_ptr<ctype::tuple_t> tuple_impl_seq_ct =
-                    make_shared<ctype::tuple_t>(
-                        make_vector<shared_ptr<ctype::type_t> >(impl_seq_ct));
+                shared_ptr<const ctype::tuple_t> tuple_impl_seq_ct =
+                    make_shared<const ctype::tuple_t>(
+                        make_vector<shared_ptr<const ctype::type_t> >(impl_seq_ct));
                 
-                shared_ptr<templated_name> getter_name =
-                    make_shared<templated_name>(
+                shared_ptr<const templated_name> getter_name =
+                    make_shared<const templated_name>(
                         detail::make_sequence(),
                         tuple_impl_seq_ct);
-                shared_ptr<tuple_t> wrapped_tuple_t =
-                    make_shared<tuple_t>(
-                        make_vector<shared_ptr<type_t> >(t));
-                shared_ptr<ctype::tuple_t> wrapped_tuple_ct =
-                    make_shared<ctype::tuple_t>(
-                        make_vector<shared_ptr<ctype::type_t> >(ct));
-                shared_ptr<tuple> wrapped_name_tuple =
-                    make_shared<tuple>(
-                        make_vector<shared_ptr<expression> >(wrapped_name)
-                        (make_shared<apply>(
-                            make_shared<name>(copperhead::to_string(m_target)),
-                            make_shared<tuple>(make_vector<shared_ptr<expression> >())))
-                        (make_shared<literal>("false")),
+                shared_ptr<const tuple_t> wrapped_tuple_t =
+                    make_shared<const tuple_t>(
+                        make_vector<shared_ptr<const type_t> >(t));
+                shared_ptr<const ctype::tuple_t> wrapped_tuple_ct =
+                    make_shared<const ctype::tuple_t>(
+                        make_vector<shared_ptr<const ctype::type_t> >(ct));
+                shared_ptr<const tuple> wrapped_name_tuple =
+                    make_shared<const tuple>(
+                        make_vector<shared_ptr<const expression> >(wrapped_name)
+                        (make_shared<const apply>(
+                            make_shared<const name>(copperhead::to_string(m_target)),
+                            make_shared<const tuple>(make_vector<shared_ptr<const expression> >())))
+                        (make_shared<const literal>("false")),
                         wrapped_tuple_t, wrapped_tuple_ct);
-                shared_ptr<apply> getter_apply =
-                    make_shared<apply>(getter_name,
-                                       wrapped_name_tuple);
+                shared_ptr<const apply> getter_apply =
+                    make_shared<const apply>(getter_name,
+                                             wrapped_name_tuple);
                 getter_args.push_back(getter_apply);
             } else {
                 //Fallback
-                shared_ptr<expression> passed =
-                    static_pointer_cast<expression>(
+                shared_ptr<const expression> passed =
+                    static_pointer_cast<const expression>(
                         boost::apply_visitor(*this, *i));
                 wrapper_args.push_back(passed);
                 getter_args.push_back(passed);                    
@@ -99,93 +99,93 @@ wrap::result_type wrap::operator()(const procedure &n) {
         //Derive the new output c type of the wrapper procedure
         const ctype::fn_t& previous_c_t =
             boost::get<const ctype::fn_t&>(n.ctype());
-        std::shared_ptr<ctype::fn_t> p_previous_c_t =
-            static_pointer_cast<ctype::fn_t>(n.p_ctype());
+        std::shared_ptr<const ctype::fn_t> p_previous_c_t =
+            static_pointer_cast<const ctype::fn_t>(n.ctype().ptr());
         const ctype::type_t& previous_c_res_t =
             previous_c_t.result();
             
-        shared_ptr<ctype::type_t> new_wrap_ct;
-        shared_ptr<ctype::type_t> new_ct;
-        shared_ptr<ctype::type_t> new_res_ct;
-        vector<shared_ptr<ctype::type_t> > wrap_arg_cts;
+        shared_ptr<const ctype::type_t> new_wrap_ct;
+        shared_ptr<const ctype::type_t> new_ct;
+        shared_ptr<const ctype::type_t> new_res_ct;
+        vector<shared_ptr<const ctype::type_t> > wrap_arg_cts;
         for(auto i=wrapper_args.begin();
             i != wrapper_args.end();
             i++) {
             wrap_arg_cts.push_back(
-                (*i)->p_ctype());
+                (*i)->ctype().ptr());
         }
-        shared_ptr<ctype::tuple_t> new_wrap_args_ct =
-            make_shared<ctype::tuple_t>(move(wrap_arg_cts));
-        shared_ptr<ctype::tuple_t> new_args_ct =
-            static_pointer_cast<ctype::tuple_t>(
-                previous_c_t.p_args());
+        shared_ptr<const ctype::tuple_t> new_wrap_args_ct =
+            make_shared<const ctype::tuple_t>(move(wrap_arg_cts));
+        shared_ptr<const ctype::tuple_t> new_args_ct =
+            static_pointer_cast<const ctype::tuple_t>(
+                previous_c_t.args().ptr());
         
         if (detail::isinstance<ctype::sequence_t, ctype::type_t>(
                 previous_c_res_t)) {
             const ctype::sequence_t& res_seq_t =
                 boost::get<const ctype::sequence_t&>(previous_c_res_t);
-            shared_ptr<ctype::type_t> sub_res_t =
-                res_seq_t.p_sub();
+            shared_ptr<const ctype::type_t> sub_res_t =
+                res_seq_t.sub().ptr();
                 
-            shared_ptr<ctype::type_t> new_wrap_res_ct(
+            shared_ptr<const ctype::type_t> new_wrap_res_ct(
                 new ctype::cuarray_t(sub_res_t));
-            new_wrap_ct = shared_ptr<ctype::fn_t>(
+            new_wrap_ct = shared_ptr<const ctype::fn_t>(
                 new ctype::fn_t(new_wrap_args_ct, new_wrap_res_ct));
 
-            new_res_ct = make_shared<ctype::monotype_t>("sp_cuarray");
-            new_ct = make_shared<ctype::fn_t>(
+            new_res_ct = make_shared<const ctype::monotype_t>("sp_cuarray");
+            new_ct = make_shared<const ctype::fn_t>(
                 new_args_ct,
                 new_res_ct);
                 
         } else {
-            new_wrap_ct = make_shared<ctype::fn_t>(
-                new_wrap_args_ct, previous_c_t.p_result());
+            new_wrap_ct = make_shared<const ctype::fn_t>(
+                new_wrap_args_ct, previous_c_t.result().ptr());
             new_ct = p_previous_c_t;
-            new_res_ct = previous_c_t.p_result();
+            new_res_ct = previous_c_t.result().ptr();
         }
 
-        shared_ptr<name> wrapper_proc_id =
-            make_shared<name>(
+        shared_ptr<const name> wrapper_proc_id =
+            make_shared<const name>(
                 detail::wrap_proc_id(n.id().id()));
-        auto t = n.p_type();
-        auto res_t = static_pointer_cast<fn_t>(t)->p_result();
+        auto t = n.type();
+        auto res_t = boost::get<const fn_t&>(t).result().ptr();
             
-        shared_ptr<name> result_id =
-            make_shared<name>(
+        shared_ptr<const name> result_id =
+            make_shared<const name>(
                 "result", res_t, new_res_ct);
-        shared_ptr<bind> make_the_call =
-            make_shared<bind>(
+        shared_ptr<const bind> make_the_call =
+            make_shared<const bind>(
                 result_id,
-                make_shared<apply>(
-                    static_pointer_cast<name>(get_node_ptr(n.id())),
-                    make_shared<tuple>(
+                make_shared<const apply>(
+                    static_pointer_cast<const name>(n.id().ptr()),
+                    make_shared<const tuple>(
                         move(getter_args))));
-        shared_ptr<ret> dynamize = make_shared<ret>(result_id);
+        shared_ptr<const ret> dynamize = make_shared<const ret>(result_id);
 
-        shared_ptr<suite> wrapper_stmts =
-            make_shared<suite>(
-                make_vector<shared_ptr<statement> >
+        shared_ptr<const suite> wrapper_stmts =
+            make_shared<const suite>(
+                make_vector<shared_ptr<const statement> >
                 (make_the_call)
                 (dynamize));
-        shared_ptr<tuple> wrapper_args_tuple =
-            make_shared<tuple>(
+        shared_ptr<const tuple> wrapper_args_tuple =
+            make_shared<const tuple>(
                 move(wrapper_args));
-        shared_ptr<procedure> completed_wrapper =
-            make_shared<procedure>(wrapper_proc_id,
-                                   wrapper_args_tuple,
-                                   wrapper_stmts,
-                                   t, new_wrap_ct, "");
+        shared_ptr<const procedure> completed_wrapper =
+            make_shared<const procedure>(wrapper_proc_id,
+                                         wrapper_args_tuple,
+                                         wrapper_stmts,
+                                         t.ptr(), new_wrap_ct, "");
         m_wrapper = completed_wrapper;
                     
         result_type rewritten =
-            make_shared<procedure>(
-                static_pointer_cast<name>(
-                    get_node_ptr(n.id())),
-                static_pointer_cast<tuple>(
-                    get_node_ptr(n.args())),
-                static_pointer_cast<suite>(
+            make_shared<const procedure>(
+                static_pointer_cast<const name>(
+                    n.id().ptr()),
+                static_pointer_cast<const tuple>(
+                    n.args().ptr()),
+                static_pointer_cast<const suite>(
                     boost::apply_visitor(*this, n.stmts())),
-                n.p_type(),
+                n.type().ptr(),
                 new_ct,
                 "");
         m_wrapping = false;
@@ -201,31 +201,31 @@ wrap::result_type wrap::operator()(const ret& n) {
             boost::get<const name&>(n.val());
         if (detail::isinstance<ctype::sequence_t,
                                ctype::type_t>(val.ctype())) {
-            shared_ptr<name> array_wrapped =
-                make_shared<name>(
+            shared_ptr<const name> array_wrapped =
+                make_shared<const name>(
                     detail::wrap_array_id(val.id()),
-                    val.p_type(),
-                    val.p_ctype());
+                    val.type().ptr(),
+                    val.ctype().ptr());
             return result_type(new ret(array_wrapped));
         }
     }
-    shared_ptr<ret> rewritten =
-        static_pointer_cast<ret>(this->rewriter::operator()(n));
+    shared_ptr<const ret> rewritten =
+        static_pointer_cast<const ret>(this->rewriter::operator()(n));
     
     return rewritten;
 }
 wrap::result_type wrap::operator()(const suite&n) {
-    vector<shared_ptr<statement> > stmts;
+    vector<shared_ptr<const statement> > stmts;
     for(auto i = n.begin();
         i != n.end();
         i++) {
         stmts.push_back(
-            static_pointer_cast<statement>(
+            static_pointer_cast<const statement>(
                 boost::apply_visitor(*this, *i)));
     }
     if (!m_wrapping && m_wrapper) {
         stmts.push_back(m_wrapper);
-        m_wrapper = shared_ptr<procedure>();
+        m_wrapper = shared_ptr<const procedure>();
     }
     return result_type(new suite(move(stmts)));
 }
