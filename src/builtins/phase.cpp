@@ -1,4 +1,4 @@
-#include "import/phase.hpp"
+#include "builtins/phase.hpp"
 
 namespace backend {
 
@@ -19,6 +19,10 @@ completion phase_t::result() const {
 
 int phase_t::size() const {
     return m_args.size();
+}
+
+std::shared_ptr<const phase_t> phase_t::ptr() const {
+    return this->shared_from_this();
 }
 
 }

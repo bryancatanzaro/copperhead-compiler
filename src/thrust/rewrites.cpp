@@ -27,7 +27,7 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
     //Map must have arguments
     assert(ap_args.begin() != ap_args.end());
     auto init = ap_args.begin();
-    shared_ptr<ctype::type_t> fn_t;
+    shared_ptr<const ctype::type_t> fn_t;
 
     if (detail::isinstance<apply>(*init)) {
         //Function instantiation
@@ -38,20 +38,20 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
                 boost::get<const templated_name&>(fn_inst.fn());
             const ctype::tuple_t& tt =
                 tn.template_types();
-            vector<shared_ptr<ctype::type_t> > ttc;
-            for(auto i = tt.p_begin();
-                i != tt.p_end();
+            vector<shared_ptr<const ctype::type_t> > ttc;
+            for(auto i = tt.begin();
+                i != tt.end();
                 i++) {
-                ttc.push_back(*i);
+                ttc.push_back(i->ptr());
             }
-            shared_ptr<ctype::monotype_t> base =
-                make_shared<ctype::monotype_t>(tn.id());
-            fn_t = make_shared<ctype::polytype_t>(
+            shared_ptr<const ctype::monotype_t> base =
+                make_shared<const ctype::monotype_t>(tn.id());
+            fn_t = make_shared<const ctype::polytype_t>(
                 std::move(ttc), base);
         } else {
             assert(detail::isinstance<name>(fn_inst.fn()));
             string fn_id = fn_inst.fn().id();
-            fn_t = make_shared<ctype::monotype_t>(fn_id);
+            fn_t = make_shared<const ctype::monotype_t>(fn_id);
         }
     } else {
         //We must be dealing with a closure
@@ -65,13 +65,13 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
         stringstream ss;
         ss << "closure" << arity;
         string closure_t_name = ss.str();
-        shared_ptr<ctype::monotype_t> closure_mt =
-            make_shared<ctype::monotype_t>(closure_t_name);
-        vector<shared_ptr<ctype::type_t> > cts;
+        shared_ptr<const ctype::monotype_t> closure_mt =
+            make_shared<const ctype::monotype_t>(closure_t_name);
+        vector<shared_ptr<const ctype::type_t> > cts;
         for(auto i = close.args().begin();
             i != close.args().end();
             i++) {
-            cts.push_back(i->p_ctype());
+            cts.push_back(i->ctype().ptr());
         }
         //By this point, the body of the closure is an
         //instantiated functor (which must be an apply node)
@@ -107,38 +107,38 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
         }
         
         cts.push_back(
-            make_shared<ctype::monotype_t>(
+            make_shared<const ctype::monotype_t>(
                 os.str()));
-        fn_t = make_shared<ctype::polytype_t>(
+        fn_t = make_shared<const ctype::polytype_t>(
             std::move(cts),
             closure_mt);
     }
-    vector<shared_ptr<ctype::type_t> > arg_types;
+    vector<shared_ptr<const ctype::type_t> > arg_types;
     for(auto i = init+1; i != ap_args.end(); i++) {
         //Assert we're looking at a name
         assert(detail::isinstance<name>(*i));
         arg_types.push_back(
-            make_shared<ctype::monotype_t>(
+            make_shared<const ctype::monotype_t>(
                 detail::typify(boost::get<const name&>(*i).id())));
     }
-    shared_ptr<ctype::polytype_t> thrust_tupled =
-        make_shared<ctype::polytype_t>(
+    shared_ptr<const ctype::polytype_t> thrust_tupled =
+        make_shared<const ctype::polytype_t>(
             std::move(arg_types),
-            make_shared<ctype::monotype_t>("thrust::tuple"));
-    shared_ptr<ctype::polytype_t> transform_t =
-        make_shared<ctype::polytype_t>(
-            make_vector<shared_ptr<ctype::type_t> >
+            make_shared<const ctype::monotype_t>("thrust::tuple"));
+    shared_ptr<const ctype::polytype_t> transform_t =
+        make_shared<const ctype::polytype_t>(
+            make_vector<shared_ptr<const ctype::type_t> >
             (fn_t)(thrust_tupled),
-            make_shared<ctype::monotype_t>("transformed_sequence"));
-    shared_ptr<apply> n_rhs =
-        static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+            make_shared<const ctype::monotype_t>("transformed_sequence"));
+    shared_ptr<const apply> n_rhs =
+        static_pointer_cast<const apply>(n.rhs().ptr());
     //Can only handle names on the LHS
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
-    shared_ptr<name> n_lhs = make_shared<name>(lhs.id(),
-                                                         lhs.p_type(),
-                                                         transform_t);
-    auto result = make_shared<bind>(n_lhs, n_rhs);
+    shared_ptr<const name> n_lhs = make_shared<const name>(lhs.id(),
+                                                           lhs.type().ptr(),
+                                                           transform_t);
+    auto result = make_shared<const bind>(n_lhs, n_rhs);
     return result;
         
 }
@@ -156,21 +156,21 @@ thrust_rewriter::result_type thrust_rewriter::indices_rewrite(const bind& n) {
     //Argument must have Seq[a] type
     assert(detail::isinstance<ctype::sequence_t>(arg_t));
         
-    shared_ptr<ctype::polytype_t> index_t =
-        make_shared<ctype::polytype_t>(
-            make_vector<shared_ptr<ctype::type_t> >
-            (make_shared<ctype::monotype_t>(copperhead::to_string(m_target))),
-            make_shared<ctype::monotype_t>("index_sequence"));
-    shared_ptr<apply> n_rhs =
-        static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+    shared_ptr<const ctype::polytype_t> index_t =
+        make_shared<const ctype::polytype_t>(
+            make_vector<shared_ptr<const ctype::type_t> >
+            (make_shared<const ctype::monotype_t>(copperhead::to_string(m_target))),
+            make_shared<const ctype::monotype_t>("index_sequence"));
+    shared_ptr<const apply> n_rhs =
+        static_pointer_cast<const apply>(n.rhs().ptr());
     //Can only handle names on the LHS
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
-    shared_ptr<name> n_lhs =
-        make_shared<name>(lhs.id(),
-                               lhs.p_type(),
-                               index_t);
-    auto result = make_shared<bind>(n_lhs, n_rhs);
+    shared_ptr<const name> n_lhs =
+        make_shared<const name>(lhs.id(),
+                                lhs.type().ptr(),
+                                index_t);
+    auto result = make_shared<const bind>(n_lhs, n_rhs);
     return result;
 }
 
@@ -187,48 +187,51 @@ thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
     //Need to add the target tag to this sequence.
     //Otherwise the machinery has nothing to pull a target from
     //To do this, we add an additional argument: the tag
-    auto ap_arg_iterator = ap_args.p_begin();
-    shared_ptr<tuple> targeted_arguments =
-        make_shared<tuple>(
-            make_vector<shared_ptr<expression> >
-            (make_shared<apply>(
-                make_shared<name>(
-                    copperhead::to_string(m_target)),
-                make_shared<tuple>(
-                    make_vector<shared_ptr<expression> >())))
-            (*(ap_arg_iterator))
-            (*(ap_arg_iterator+1)));
+    auto ap_arg_iterator = ap_args.begin();
+    shared_ptr<const expression> tag_arg =
+        make_shared<const apply>(
+            make_shared<const name>(
+                copperhead::to_string(m_target)),
+            make_shared<const tuple>(
+                make_vector<shared_ptr<const expression> >()));
+    shared_ptr<const expression> arg1 =
+        static_pointer_cast<const expression>(ap_arg_iterator->ptr());
+    shared_ptr<const expression> arg2 =
+        static_pointer_cast<const expression>((ap_arg_iterator+1)->ptr());
+    shared_ptr<const tuple> targeted_arguments =
+        make_shared<const tuple>(
+            make_vector<shared_ptr<const expression> >(tag_arg)(arg1)(arg2));
     
                     
     
-    shared_ptr<ctype::type_t> val_t =
-        ap_args.begin()->p_ctype();
+    shared_ptr<const ctype::type_t> val_t =
+        ap_args.begin()->ctype().ptr();
     
     
-    shared_ptr<ctype::polytype_t> constant_t =
-        make_shared<ctype::polytype_t>(
-            make_vector<shared_ptr<ctype::type_t> >
-            (make_shared<ctype::monotype_t>(copperhead::to_string(m_target)))
+    shared_ptr<const ctype::polytype_t> constant_t =
+        make_shared<const ctype::polytype_t>(
+            make_vector<shared_ptr<const ctype::type_t> >
+            (make_shared<const ctype::monotype_t>(copperhead::to_string(m_target)))
             (val_t),
-            make_shared<ctype::monotype_t>("constant_sequence"));
+            make_shared<const ctype::monotype_t>("constant_sequence"));
 
-    shared_ptr<apply> n_rhs =
-        make_shared<apply>(rhs.p_fn(),
-                           targeted_arguments);
+    shared_ptr<const apply> n_rhs =
+        make_shared<const apply>(static_pointer_cast<const name>(rhs.fn().ptr()),
+                                 targeted_arguments);
             
     //Can only handle names on the LHS
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
-    shared_ptr<name> n_lhs =
-        make_shared<name>(lhs.id(),
-                          lhs.p_type(),
-                          constant_t);
-    auto result = make_shared<bind>(n_lhs, n_rhs);
+    shared_ptr<const name> n_lhs =
+        make_shared<const name>(lhs.id(),
+                                lhs.type().ptr(),
+                                constant_t);
+    auto result = make_shared<const bind>(n_lhs, n_rhs);
     return result;
 }
 
 thrust_rewriter::result_type thrust_rewriter::shift_rewrite(const bind& n) {
-     //The rhs must be an apply
+    //The rhs must be an apply
     assert(detail::isinstance<apply>(n.rhs()));
     const apply& rhs = boost::get<const apply&>(n.rhs());
     //The rhs must apply "shift"
@@ -237,30 +240,28 @@ thrust_rewriter::result_type thrust_rewriter::shift_rewrite(const bind& n) {
     //replicate must have three arguments
     assert(ap_args.end() - ap_args.begin() == 3);
 
-    shared_ptr<ctype::type_t> val_t =
-        ap_args.begin()->p_ctype();
+    shared_ptr<const ctype::type_t> val_t =
+        ap_args.begin()->ctype().ptr();
     
-    
-    
-    shared_ptr<ctype::polytype_t> shifted_t =
-        make_shared<ctype::polytype_t>(
-            make_vector<shared_ptr<ctype::type_t> >(val_t),
-            make_shared<ctype::monotype_t>("shifted_sequence"));
-    shared_ptr<apply> n_rhs =
-        static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+    shared_ptr<const ctype::polytype_t> shifted_t =
+        make_shared<const ctype::polytype_t>(
+            make_vector<shared_ptr<const ctype::type_t> >(val_t),
+            make_shared<const ctype::monotype_t>("shifted_sequence"));
+    shared_ptr<const apply> n_rhs =
+        static_pointer_cast<const apply>(n.rhs().ptr());
     //Can only handle names on the LHS
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
-    shared_ptr<name> n_lhs =
-        make_shared<name>(lhs.id(),
-                          lhs.p_type(),
-                          shifted_t);
-    auto result = make_shared<bind>(n_lhs, n_rhs);
+    shared_ptr<const name> n_lhs =
+        make_shared<const name>(lhs.id(),
+                                lhs.type().ptr(),
+                                shifted_t);
+    auto result = make_shared<const bind>(n_lhs, n_rhs);
     return result;
 }
 
 thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
-     //The rhs must be an apply
+    //The rhs must be an apply
     assert(detail::isinstance<apply>(n.rhs()));
     const apply& rhs = boost::get<const apply&>(n.rhs());
     //The rhs must apply "rotate"
@@ -269,25 +270,25 @@ thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
     //replicate must have three arguments
     assert(ap_args.end() - ap_args.begin() == 2);
 
-    shared_ptr<ctype::type_t> val_t =
-        ap_args.begin()->p_ctype();
+    shared_ptr<const ctype::type_t> val_t =
+        ap_args.begin()->ctype().ptr();
     
     
     
-    shared_ptr<ctype::polytype_t> rotated_t =
-        make_shared<ctype::polytype_t>(
-            make_vector<shared_ptr<ctype::type_t> >(val_t),
-            make_shared<ctype::monotype_t>("rotated_sequence"));
-    shared_ptr<apply> n_rhs =
-        static_pointer_cast<apply>(get_node_ptr(n.rhs()));
+    shared_ptr<const ctype::polytype_t> rotated_t =
+        make_shared<const ctype::polytype_t>(
+            make_vector<shared_ptr<const ctype::type_t> >(val_t),
+            make_shared<const ctype::monotype_t>("rotated_sequence"));
+    shared_ptr<const apply> n_rhs =
+        static_pointer_cast<const apply>(n.rhs().ptr());
     //Can only handle names on the LHS
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
-    shared_ptr<name> n_lhs =
-        make_shared<name>(lhs.id(),
-                          lhs.p_type(),
-                          rotated_t);
-    auto result = make_shared<bind>(n_lhs, n_rhs);
+    shared_ptr<const name> n_lhs =
+        make_shared<const name>(lhs.id(),
+                                lhs.type().ptr(),
+                                rotated_t);
+    auto result = make_shared<const bind>(n_lhs, n_rhs);
     return result;
 }
 
@@ -295,7 +296,7 @@ thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
 thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     const expression& rhs = n.rhs();
     if (!detail::isinstance<apply>(rhs)) {
-        return get_node_ptr(n);
+        return n.ptr();
     }
     const apply& rhs_apply = boost::get<const apply&>(rhs);
     const name& fn_name = rhs_apply.fn();
@@ -310,7 +311,7 @@ thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     } else if (fn_name.id() == "shift") {
         return shift_rewrite(n);
     } else {
-        return get_node_ptr(n);
+        return n.ptr();
     }
 
 }

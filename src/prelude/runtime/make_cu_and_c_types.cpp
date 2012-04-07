@@ -4,9 +4,9 @@
 
 namespace copperhead {
 
-cu_and_c_types* make_type_holder_helper(std::shared_ptr<backend::type_t> t) {
+cu_and_c_types* make_type_holder_helper(std::shared_ptr<const backend::type_t> t) {
     cu_and_c_types* holder = new cu_and_c_types();
-    holder->m_t = std::make_shared<backend::sequence_t>(t);
+    holder->m_t = std::make_shared<const backend::sequence_t>(t);
     return holder;
 }
 

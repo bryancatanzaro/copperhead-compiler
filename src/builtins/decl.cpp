@@ -49,13 +49,13 @@ shared_ptr<const type_t> un_op_t =
             t_a));
 
 
-shared_ptr<phase_t> bin_phase_t =
-    make_shared<phase_t>(
+shared_ptr<const phase_t> bin_phase_t =
+    make_shared<const phase_t>(
         make_vector<completion>(completion::none)(completion::none),
         completion::invariant);
 
-shared_ptr<phase_t> un_phase_t =
-    make_shared<phase_t>(
+shared_ptr<const phase_t> un_phase_t =
+    make_shared<const phase_t>(
         make_vector<completion>(
             completion::none),
         completion::invariant);
@@ -64,7 +64,7 @@ fn_info bin_op_info(bin_op_t, bin_phase_t);
 fn_info bin_cmp_info(bin_cmp_t, bin_phase_t);
 fn_info un_op_info(un_op_t, un_phase_t);
 fn_info nullary_info(void_mt,
-                     make_shared<phase_t>(
+                     make_shared<const phase_t>(
                          make_vector<completion>(),
                          completion::invariant));
 

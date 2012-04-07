@@ -17,6 +17,7 @@
 #pragma once
 #include <sstream>
 #include <vector>
+#include <memory>
 
 namespace backend {
 
@@ -35,7 +36,8 @@ enum struct completion {
 };
 
 
-class phase_t {
+class phase_t
+    : public std::enable_shared_from_this<phase_t> {
 private:
     const std::vector<completion> m_args;
     const completion m_result;
@@ -46,6 +48,7 @@ public:
     iterator end() const;
     completion result() const;
     int size() const;
+    std::shared_ptr<const phase_t> ptr() const;
 };
 
 

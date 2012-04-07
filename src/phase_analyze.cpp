@@ -21,7 +21,7 @@ phase_analyze::phase_analyze(const string& entry_point,
         auto id = i->first;
         string fn_name = std::get<0>(id);
         auto info = i->second;
-        m_fns.insert(make_pair(fn_name, info.p_phase()));
+        m_fns.insert(make_pair(fn_name, info.phase().ptr()));
     }
 }
 

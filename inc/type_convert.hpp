@@ -33,7 +33,7 @@ namespace detail {
   Copperhead type to C++ type.
 */
 class cu_to_c
-    : public boost::static_visitor<std::shared_ptr<ctype::type_t> >
+    : public boost::static_visitor<std::shared_ptr<const ctype::type_t> >
 {
 public:
     result_type operator()(const monotype_t& mt);

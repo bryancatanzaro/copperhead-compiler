@@ -32,59 +32,59 @@ void declare_maps(int max_arity,
         strm << "map" << i;
         map_ids.push_back(strm.str());
     }
-    shared_ptr<monotype_t> t_b =
-        make_shared<monotype_t>("b");
-    shared_ptr<monotype_t> seq_t_b =
-        make_shared<sequence_t>(t_b);
-    vector<shared_ptr<monotype_t> > a_types;
-    vector<shared_ptr<monotype_t> > a_seq_types;
+    shared_ptr<const monotype_t> t_b =
+        make_shared<const monotype_t>("b");
+    shared_ptr<const monotype_t> seq_t_b =
+        make_shared<const sequence_t>(t_b);
+    vector<shared_ptr<const monotype_t> > a_types;
+    vector<shared_ptr<const monotype_t> > a_seq_types;
     for(int i = 0; i < max_arity; i++) {
         stringstream strm;
         strm << "a" << i;
-        auto t_an = make_shared<monotype_t>(strm.str());
-        auto t_seq_an = make_shared<sequence_t>(t_an);
+        auto t_an = make_shared<const monotype_t>(strm.str());
+        auto t_seq_an = make_shared<const sequence_t>(t_an);
         a_types.push_back(t_an);
         a_seq_types.push_back(t_seq_an);
     }
-    vector<shared_ptr<fn_t> > fn_mts;
+    vector<shared_ptr<const fn_t> > fn_mts;
     for(int i = 0; i < max_arity; i++) {
-        vector<shared_ptr<type_t> > args;
+        vector<shared_ptr<const type_t> > args;
         for(int j = 0; j <= i; j++) {
             args.push_back(a_types[j]);
         }
         auto tuple_args =
-            make_shared<tuple_t>(
+            make_shared<const tuple_t>(
                 std::move(args));
-        auto fn_mt = make_shared<fn_t>(tuple_args,
+        auto fn_mt = make_shared<const fn_t>(tuple_args,
                                        t_b);
         fn_mts.push_back(fn_mt);
     }
-    vector<shared_ptr<type_t> > map_types;
+    vector<shared_ptr<const type_t> > map_types;
     for(int i = 0; i < max_arity; i++) {
-        vector<shared_ptr<monotype_t> > quantifiers;
-        vector<shared_ptr<type_t> > args;
+        vector<shared_ptr<const monotype_t> > quantifiers;
+        vector<shared_ptr<const type_t> > args;
         args.push_back(fn_mts[i]);
         for(int j = 0; j <= i; j++) {
             quantifiers.push_back(a_types[j]);
             args.push_back(a_seq_types[j]);
         }
         auto tuple_args =
-            make_shared<tuple_t>(std::move(args));
-        auto fn_mt = make_shared<fn_t>(tuple_args,
+            make_shared<const tuple_t>(std::move(args));
+        auto fn_mt = make_shared<const fn_t>(tuple_args,
                                        seq_t_b);
-        auto fn_pt = make_shared<polytype_t>(
+        auto fn_pt = make_shared<const polytype_t>(
             std::move(quantifiers),
             fn_mt);
         map_types.push_back(fn_pt);
     }
-    vector<shared_ptr<phase_t> > map_phases;
+    vector<shared_ptr<const phase_t> > map_phases;
     for(int i = 0; i < max_arity; i++) {
         vector<completion> inputs;
         inputs.push_back(completion::invariant);
         for(int j = 0; j <= i; j++) {
             inputs.push_back(completion::local);
         }
-        auto map_phase = make_shared<phase_t>(
+        auto map_phase = make_shared<const phase_t>(
             std::move(inputs),
             completion::local);
         map_phases.push_back(map_phase);
@@ -100,22 +100,22 @@ void declare_maps(int max_arity,
 
 void declare_scans(map<ident, fn_info>& fns,
                    map<string, string>& fn_includes) {
-    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
-    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
-    shared_ptr<monotype_t> bin_fn_t =
-        make_shared<fn_t>(
-            make_shared<tuple_t>(
-                make_vector<shared_ptr<type_t> >(t_a)(t_a)),
+    shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
+    shared_ptr<const monotype_t> seq_t_a = make_shared<const sequence_t>(t_a);
+    shared_ptr<const monotype_t> bin_fn_t =
+        make_shared<const fn_t>(
+            make_shared<const tuple_t>(
+                make_vector<shared_ptr<const type_t> >(t_a)(t_a)),
             t_a);
-    shared_ptr<polytype_t> scan_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(bin_fn_t)(seq_t_a)),
+    shared_ptr<const polytype_t> scan_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(bin_fn_t)(seq_t_a)),
                 seq_t_a));
-    shared_ptr<phase_t> scan_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> scan_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>(completion::invariant)(completion::local),
             completion::total);
     
@@ -132,18 +132,18 @@ void declare_scans(map<ident, fn_info>& fns,
 
 void declare_permutes(map<ident, fn_info>& fns,
                       map<string, string>& fn_includes) {
-    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
-    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
-    shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int64_mt);
-    shared_ptr<polytype_t> permute_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(seq_t_a)(seq_int)),
+    shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
+    shared_ptr<const monotype_t> seq_t_a = make_shared<const sequence_t>(t_a);
+    shared_ptr<const monotype_t> seq_int = make_shared<const sequence_t>(int64_mt);
+    shared_ptr<const polytype_t> permute_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(seq_t_a)(seq_int)),
                 seq_t_a));
-    shared_ptr<phase_t> permute_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> permute_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>(completion::total)(completion::local),
             completion::total);
     fns.insert(make_pair(
@@ -154,18 +154,18 @@ void declare_permutes(map<ident, fn_info>& fns,
 
 void declare_special_sequences(map<ident, fn_info>& fns,
                                map<string, string>& fn_includes) {
-    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
-    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
-    shared_ptr<monotype_t> seq_int = make_shared<sequence_t>(int64_mt);
-    shared_ptr<polytype_t> indices_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(seq_t_a)),
+    shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
+    shared_ptr<const monotype_t> seq_t_a = make_shared<const sequence_t>(t_a);
+    shared_ptr<const monotype_t> seq_int = make_shared<const sequence_t>(int64_mt);
+    shared_ptr<const polytype_t> indices_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(seq_t_a)),
                 seq_int));
-    shared_ptr<phase_t> indices_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> indices_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>(completion::local),
             completion::local);
     fns.insert(make_pair(
@@ -173,15 +173,15 @@ void declare_special_sequences(map<ident, fn_info>& fns,
                    fn_info(indices_t, indices_phase_t)));
     fn_includes.insert(make_pair("indices", "prelude/primitives/indices.h"));
 
-    shared_ptr<polytype_t> replicate_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(t_a)(int64_mt)),
+    shared_ptr<const polytype_t> replicate_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(t_a)(int64_mt)),
                 seq_t_a));
-    shared_ptr<phase_t> replicate_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> replicate_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>(completion::local)(completion::local),
             completion::local);
     fns.insert(make_pair(
@@ -189,15 +189,15 @@ void declare_special_sequences(map<ident, fn_info>& fns,
                    fn_info(replicate_t, replicate_phase_t)));
     fn_includes.insert(make_pair("replicate", "prelude/primitives/replicate.h"));
 
-    shared_ptr<polytype_t> shift_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(seq_t_a)(int64_mt)(t_a)),
+    shared_ptr<const polytype_t> shift_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(seq_t_a)(int64_mt)(t_a)),
                 seq_t_a));
-    shared_ptr<phase_t> shift_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> shift_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>(completion::total)(completion::local)(completion::local),
             completion::local);
     fns.insert(make_pair(
@@ -205,15 +205,15 @@ void declare_special_sequences(map<ident, fn_info>& fns,
                    fn_info(shift_t, shift_phase_t)));
     fn_includes.insert(make_pair("shift", "prelude/primitives/shift.h"));
                
-    shared_ptr<polytype_t> rotate_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(seq_t_a)(int64_mt)),
+    shared_ptr<const polytype_t> rotate_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(seq_t_a)(int64_mt)),
                 seq_t_a));
-    shared_ptr<phase_t> rotate_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> rotate_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>(completion::total)(completion::local),
             completion::local);
     fns.insert(make_pair(
@@ -224,17 +224,17 @@ void declare_special_sequences(map<ident, fn_info>& fns,
 
 void declare_transforms(map<ident, fn_info>& fns,
                         map<string, string>& fn_includes) {
-    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
-    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
-    shared_ptr<polytype_t> adj_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(seq_t_a)),
+    shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
+    shared_ptr<const monotype_t> seq_t_a = make_shared<const sequence_t>(t_a);
+    shared_ptr<const polytype_t> adj_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(seq_t_a)),
                 seq_t_a));
-    shared_ptr<phase_t> adj_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> adj_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>(completion::total),
             completion::total);
     fns.insert(make_pair(
@@ -245,23 +245,23 @@ void declare_transforms(map<ident, fn_info>& fns,
 
 void declare_reductions(map<ident, fn_info>& fns,
                         map<string, string>& fn_includes) {
-    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
-    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
-    shared_ptr<monotype_t> bin_fn_t =
-        make_shared<fn_t>(
-            make_shared<tuple_t>(
-                make_vector<shared_ptr<type_t> >(t_a)(t_a)),
+    shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
+    shared_ptr<const monotype_t> seq_t_a = make_shared<const sequence_t>(t_a);
+    shared_ptr<const monotype_t> bin_fn_t =
+        make_shared<const fn_t>(
+            make_shared<const tuple_t>(
+                make_vector<shared_ptr<const type_t> >(t_a)(t_a)),
             t_a);
-    shared_ptr<polytype_t> reduce_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >
+    shared_ptr<const polytype_t> reduce_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >
                     (bin_fn_t)(seq_t_a)(t_a)),
                 t_a));
-    shared_ptr<phase_t> reduce_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> reduce_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>
             (completion::invariant)(completion::local)(completion::local),
             completion::total);
@@ -270,16 +270,16 @@ void declare_reductions(map<ident, fn_info>& fns,
                    make_pair("reduce", iteration_structure::independent),
                    fn_info(reduce_t, reduce_phase_t)));
     fn_includes.insert(make_pair("reduce", "prelude/primitives/reduce.h"));
-    shared_ptr<polytype_t> sum_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >
+    shared_ptr<const polytype_t> sum_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >
                     (seq_t_a)),
                 t_a));
-    shared_ptr<phase_t> sum_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> sum_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>
             (completion::local),
             completion::total);
@@ -293,24 +293,24 @@ void declare_reductions(map<ident, fn_info>& fns,
 
 void declare_sorts(map<ident, fn_info>& fns,
                    map<string, string>& fn_includes) {
-    shared_ptr<monotype_t> t_a = make_shared<monotype_t>("a");
-    shared_ptr<polytype_t> cmp_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(t_a)(t_a)),
+    shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
+    shared_ptr<const polytype_t> cmp_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(t_a)(t_a)),
                 bool_mt));
-    shared_ptr<monotype_t> seq_t_a = make_shared<sequence_t>(t_a);
-    shared_ptr<polytype_t> sort_t =
-        make_shared<polytype_t>(
-            make_vector<shared_ptr<monotype_t> >(t_a),
-            make_shared<fn_t>(
-                make_shared<tuple_t>(
-                    make_vector<shared_ptr<type_t> >(cmp_t)(seq_t_a)),
+    shared_ptr<const monotype_t> seq_t_a = make_shared<const sequence_t>(t_a);
+    shared_ptr<const polytype_t> sort_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(cmp_t)(seq_t_a)),
                 seq_t_a));
-    shared_ptr<phase_t> sort_phase_t =
-        make_shared<phase_t>(
+    shared_ptr<const phase_t> sort_phase_t =
+        make_shared<const phase_t>(
             make_vector<completion>(completion::invariant)(completion::total),
             completion::total);
     fns.insert(make_pair(

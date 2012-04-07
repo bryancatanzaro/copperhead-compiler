@@ -42,10 +42,10 @@ cu_to_c::result_type cu_to_c::operator()(const tuple_t& tt) {
     return result_type(new ctype::tuple_t(move(subs)));
 }
 cu_to_c::result_type cu_to_c::operator()(const fn_t& ft) {
-    shared_ptr<ctype::tuple_t> args =
-        static_pointer_cast<ctype::tuple_t>(
+    shared_ptr<const ctype::tuple_t> args =
+        static_pointer_cast<const ctype::tuple_t>(
             boost::apply_visitor(*this, ft.args()));
-    shared_ptr<ctype::type_t> result =
+    shared_ptr<const ctype::type_t> result =
         boost::apply_visitor(*this, ft.result());
     result_type fn_result(new ctype::fn_t(args, result));
     return fn_result;
@@ -58,7 +58,7 @@ cu_to_c::result_type cu_to_c::operator()(const polytype_t& p) {
         i++) {
         subs.push_back(boost::apply_visitor(*this, *i));
     }
-    auto base = static_pointer_cast<ctype::monotype_t>(boost::apply_visitor(*this, p.monotype()));
+    auto base = static_pointer_cast<const ctype::monotype_t>(boost::apply_visitor(*this, p.monotype()));
     return result_type(new ctype::polytype_t(move(subs), base));
 }
 
@@ -67,31 +67,31 @@ cu_to_c::result_type cu_to_c::operator()(const polytype_t& p) {
 
 type_convert::type_convert() : m_c() {}
 type_convert::result_type type_convert::operator()(const procedure &p) {
-    shared_ptr<name> id = static_pointer_cast<name>(this->operator()(p.id()));
-    shared_ptr<tuple> args = static_pointer_cast<tuple>(this->operator()(p.args()));
-    shared_ptr<suite> stmts = static_pointer_cast<suite>(this->operator()(p.stmts()));
-    shared_ptr<type_t> t = p.p_type();
+    shared_ptr<const name> id = static_pointer_cast<const name>(this->operator()(p.id()));
+    shared_ptr<const tuple> args = static_pointer_cast<const tuple>(this->operator()(p.args()));
+    shared_ptr<const suite> stmts = static_pointer_cast<const suite>(this->operator()(p.stmts()));
+    shared_ptr<const type_t> t = p.type().ptr();
         
     //Yes, I really want to make a ctype from a type. That's the point!
-    shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
+    shared_ptr<const ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
 
-    shared_ptr<node> result(new procedure(id, args, stmts, t, ct));
+    shared_ptr<const node> result(new procedure(id, args, stmts, t, ct));
     return result;
 }
 type_convert::result_type type_convert::operator()(const name &p) {
-    shared_ptr<type_t> t = p.p_type();
+    shared_ptr<const type_t> t = p.type().ptr();
         
     //Yes, I really want to make a ctype from a type. That's the point!
-    shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
+    shared_ptr<const ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
     result_type result(new name(p.id(), t, ct));
     return result;
 }
 
 type_convert::result_type type_convert::operator()(const literal &p) {
-    shared_ptr<type_t> t = p.p_type();
+    shared_ptr<const type_t> t = p.type().ptr();
         
     //Yes, I really want to make a ctype from a type. That's the point!
-    shared_ptr<ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
+    shared_ptr<const ctype::type_t> ct = boost::apply_visitor(m_c, p.type());
     result_type result(new literal(p.id(), t, ct));
     return result;
 }
