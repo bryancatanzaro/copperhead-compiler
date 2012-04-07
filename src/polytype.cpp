@@ -2,17 +2,13 @@
 
 namespace backend {
 
-polytype_t::polytype_t(std::vector<std::shared_ptr<monotype_t> >&& vars,
-                       std::shared_ptr<monotype_t> monotype)
+polytype_t::polytype_t(std::vector<std::shared_ptr<const monotype_t> >&& vars,
+                       std::shared_ptr<const monotype_t> monotype)
     : type_t(*this), m_vars(std::move(vars)), m_monotype(monotype) {}
 
     
 const monotype_t& polytype_t::monotype() const {
     return *m_monotype;
-}
-
-std::shared_ptr<monotype_t> polytype_t::p_monotype() const {
-    return m_monotype;
 }
 
 polytype_t::const_iterator polytype_t::begin() const {

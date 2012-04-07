@@ -100,7 +100,7 @@ class monotype_t :
 {
 protected:
     const std::string m_name;
-    std::vector<std::shared_ptr<type_t> > m_params;
+    const std::vector<std::shared_ptr<const type_t> > m_params;
 public:
     //! Basic onstructor
 /*! This constructor is used for simple monotypes with no subtypes.
@@ -136,7 +136,7 @@ public:
     template<typename Derived>
     monotype_t(Derived& self,
                const std::string &name,
-               std::vector<std::shared_ptr<type_t> > &&params)
+               std::vector<std::shared_ptr<const type_t> > &&params)
         : type_t(self), m_name(name), m_params(std::move(params)) {}
     
     //! Gets name of type.
@@ -147,23 +147,18 @@ public:
     const_iterator begin() const;
     //! Iterator to the end of the subtypes contained in this monotype
     const_iterator end() const;
-    typedef decltype(m_params.cbegin()) const_ptr_iterator;
-    //! Gets an iterator to the pointer of the first type held by this tuple
-    const_ptr_iterator p_begin() const;
-    //! Gets an iterator to the pointer of the last type held by this tuple
-    const_ptr_iterator p_end() const;
     //! Number of subtypes in this monotype. Returns 0 for non-nested types.
     int size() const;
 };
 
-extern std::shared_ptr<monotype_t> int32_mt;
-extern std::shared_ptr<monotype_t> int64_mt;
-extern std::shared_ptr<monotype_t> uint32_mt;
-extern std::shared_ptr<monotype_t> uint64_mt;
-extern std::shared_ptr<monotype_t> float32_mt;
-extern std::shared_ptr<monotype_t> float64_mt;
-extern std::shared_ptr<monotype_t> bool_mt;
-extern std::shared_ptr<monotype_t> void_mt;
+extern std::shared_ptr<const monotype_t> int32_mt;
+extern std::shared_ptr<const monotype_t> int64_mt;
+extern std::shared_ptr<const monotype_t> uint32_mt;
+extern std::shared_ptr<const monotype_t> uint64_mt;
+extern std::shared_ptr<const monotype_t> float32_mt;
+extern std::shared_ptr<const monotype_t> float64_mt;
+extern std::shared_ptr<const monotype_t> bool_mt;
+extern std::shared_ptr<const monotype_t> void_mt;
 
 //! Sequence type.
 /* Can be used directly or as a parent class */
@@ -175,7 +170,7 @@ public:
 /*!   
   \param sub Type of element of the Sequence
 */
-    sequence_t(const std::shared_ptr<type_t> &sub);
+    sequence_t(const std::shared_ptr<const type_t> &sub);
     //! Derived constructor
 /*! To be called during the construction of a derived object
   
@@ -187,14 +182,14 @@ public:
     template<typename Derived>
     sequence_t(Derived &self,
                const std::string& name,
-               const std::shared_ptr<type_t>& sub); // :
+               const std::shared_ptr<const type_t>& sub); // :
         // monotype_t(self,
         //            name,
-        //            utility::make_vector<std::shared_ptr<type_t> >(sub)) {}
+        //            utility::make_vector<std::shared_ptr<const type_t> >(sub)) {}
     //! Gets the type of the element of the Sequence
     const type_t& sub() const;
     //! Gets a pointer to the type of the element of the Sequence
-    std::shared_ptr<type_t> p_sub() const;
+    std::shared_ptr<const type_t> p_sub() const;
 };
 
 //! Tuple type.
@@ -206,7 +201,7 @@ public:
 /*! 
   \param sub A vector of types contained in this tuple.
 */
-    tuple_t(std::vector<std::shared_ptr<type_t> > && sub);  
+    tuple_t(std::vector<std::shared_ptr<const type_t> > && sub);  
 };
 
 //! Function type
@@ -219,16 +214,12 @@ public:
   \param args Tuple of argument types.
   \param result Result type.
 */
-    fn_t(const std::shared_ptr<tuple_t> args,
-         const std::shared_ptr<type_t> result);
+    fn_t(const std::shared_ptr<const tuple_t> args,
+         const std::shared_ptr<const type_t> result);
     //! Gets the tuple of argument types.
     const tuple_t& args() const;
     //! Gets the result type.
     const type_t& result() const;
-    //! Gets a pointer to the tuple of argument types.
-    std::shared_ptr<tuple_t> p_args() const;
-    //! Gets a pointer to the result type.
-    std::shared_ptr<type_t> p_result() const;
 };
 
 //! Cuarray type
@@ -237,7 +228,7 @@ public:
 class cuarray_t :
         public sequence_t {
 public:
-    cuarray_t(const std::shared_ptr<type_t> sub);
+    cuarray_t(const std::shared_ptr<const type_t> sub);
 };
 
 //! Polymorphic type
@@ -254,8 +245,8 @@ public:
 class polytype_t
     : public type_t {
 private:
-    std::vector<std::shared_ptr<type_t> > m_vars;
-    std::shared_ptr<monotype_t> m_monotype;
+    const std::vector<std::shared_ptr<const type_t> > m_vars;
+    const std::shared_ptr<const monotype_t> m_monotype;
 
 public:
     //! Constructor
@@ -271,24 +262,18 @@ public:
   
   \return 
 */
-    polytype_t(std::vector<std::shared_ptr<type_t> >&& vars,
-               std::shared_ptr<monotype_t> monotype);
+    polytype_t(std::vector<std::shared_ptr<const type_t> >&& vars,
+               const std::shared_ptr<const monotype_t>& monotype);
 //! Gets base type
     const monotype_t& monotype() const;
     //! Gets \p std::shared_ptr to base type
-    std::shared_ptr<monotype_t> p_monotype() const;
+    std::shared_ptr<const monotype_t> p_monotype() const;
     //! Type of iterator to type variables
     typedef decltype(boost::make_indirect_iterator(m_vars.cbegin())) const_iterator;
     //! Iterator to beginning of type variables
     const_iterator begin() const;
     //! Iterator to end of type variables
     const_iterator end() const;
-    //! Type of iterator to std::shared_ptr objects which hold type variables
-    typedef decltype(m_vars.cbegin()) const_ptr_iterator;
-    //! Iterator to beginning of pointers of type variables
-    const_ptr_iterator p_begin() const;
-    //! Iterator to end of pointers of type variables
-    const_ptr_iterator p_end() const;
 };
 
 /*

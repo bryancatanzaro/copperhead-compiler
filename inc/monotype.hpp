@@ -38,7 +38,7 @@ class monotype_t :
 {
 protected:
     const std::string m_name;
-    std::vector<std::shared_ptr<type_t> > m_params;
+    std::vector<std::shared_ptr<const type_t> > m_params;
    
 public:
     //! Basic constructor
@@ -71,7 +71,7 @@ public:
     template<typename Derived>
     monotype_t(Derived& self,
                const std::string &name,
-               std::vector<std::shared_ptr<type_t> > &&params)
+               std::vector<std::shared_ptr<const type_t> > &&params)
         : type_t(self), m_name(name), m_params(std::move(params)) {}
 //! Gets the name of the type
 /*! 
@@ -90,14 +90,14 @@ public:
 
 };
 
-extern std::shared_ptr<monotype_t> int32_mt;
-extern std::shared_ptr<monotype_t> int64_mt;
-extern std::shared_ptr<monotype_t> uint32_mt;
-extern std::shared_ptr<monotype_t> uint64_mt;
-extern std::shared_ptr<monotype_t> float32_mt;
-extern std::shared_ptr<monotype_t> float64_mt;
-extern std::shared_ptr<monotype_t> bool_mt;
-extern std::shared_ptr<monotype_t> void_mt;
+extern std::shared_ptr<const monotype_t> int32_mt;
+extern std::shared_ptr<const monotype_t> int64_mt;
+extern std::shared_ptr<const monotype_t> uint32_mt;
+extern std::shared_ptr<const monotype_t> uint64_mt;
+extern std::shared_ptr<const monotype_t> float32_mt;
+extern std::shared_ptr<const monotype_t> float64_mt;
+extern std::shared_ptr<const monotype_t> bool_mt;
+extern std::shared_ptr<const monotype_t> void_mt;
 
 //! Sequence type.
 /*!   
@@ -107,11 +107,9 @@ class sequence_t :
         public monotype_t
 {
 public:
-    sequence_t(const std::shared_ptr<type_t> &sub);
+    sequence_t(const std::shared_ptr<const type_t> &sub);
     //! Gets the type of each element of the Sequence
     const type_t& sub() const;
-    //! Gets a \p shared_ptr to the type of each element of the Sequence
-    std::shared_ptr<type_t> p_sub() const;
 };
 
 //! Tuple type.
@@ -127,7 +125,7 @@ public:
   \param sub A \p vector of pointers to types which are contained in
   this tuple.
 */
-    tuple_t(std::vector<std::shared_ptr<type_t> > && sub);
+    tuple_t(std::vector<std::shared_ptr<const type_t> > && sub);
     //! Derived constructor
 /*! 
   
@@ -139,15 +137,9 @@ public:
     template<typename Derived>
     inline tuple_t(Derived& self,
                    const std::string& name,
-                   std::vector<std::shared_ptr<type_t> > && sub)
+                   std::vector<std::shared_ptr<const type_t> > && sub)
         : monotype_t(self, name, std::move(sub))
         {}
-    //! An iterator to the pointers of types contained in this tuple
-    typedef decltype(m_params.cbegin()) const_ptr_iterator;
-    //! An iterator to the pointer of the first type of the tuple
-    const_ptr_iterator p_begin() const;
-    //! An iterator to the pointer of the last type of the tuple
-    const_ptr_iterator p_end() const;
 };
 
 
@@ -164,16 +156,12 @@ public:
   
   \return 
 */
-    fn_t(const std::shared_ptr<tuple_t> args,
-                const std::shared_ptr<type_t> result);
+    fn_t(const std::shared_ptr<const tuple_t> args,
+                const std::shared_ptr<const type_t> result);
     //! Gets the argument types
     const tuple_t& args() const;
     //! Gets the result type
     const type_t& result() const;
-    //! Gets a pointer to the argument types
-    std::shared_ptr<tuple_t> p_args() const;
-    //! Gets a pointer to the result types
-    std::shared_ptr<type_t> p_result() const;
 };
 
 /*!
