@@ -120,6 +120,8 @@ public:
     virtual result_type operator()(const lambda &n);
     
     virtual result_type operator()(const closure &n);
+
+    virtual result_type operator()(const subscript &n);
         
     virtual result_type operator()(const conditional &n);
     

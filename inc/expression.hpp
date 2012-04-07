@@ -282,6 +282,32 @@ public:
     std::shared_ptr<expression> p_body(void) const;
 };
 
+//! AST node for subscripting
+class subscript
+    : public expression
+{
+protected:
+    const std::shared_ptr<name> m_src;
+    const std::shared_ptr<expression> m_idx;
+    
+public:
+/*!   
+  \param src Identifier being subscripted
+  \param idx Subscript index
+  \param type Copperhead type.
+  \param ctype C++ implementation type.
+*/
+    subscript(const std::shared_ptr<name> &src,
+              const std::shared_ptr<expression> &idx,
+              const std::shared_ptr<type_t>& type = void_mt,
+              const std::shared_ptr<ctype::type_t>& ctype = ctype::void_mt);
+    const name &src(void) const;
+    const expression &idx(void) const;
+
+    std::shared_ptr<name> p_src(void) const;
+    std::shared_ptr<expression> p_idx(void) const;
+};
+
 /*! 
   @}
  */

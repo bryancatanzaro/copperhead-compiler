@@ -55,6 +55,8 @@ public:
     void operator()(const lambda &n);
     
     void operator()(const closure &n);
+
+    void operator()(const subscript &n);
     
     void operator()(const conditional &n);
     

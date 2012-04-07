@@ -130,6 +130,28 @@ shared_ptr<expression> closure::p_body(void) const {
     return m_body;
 }
 
+subscript::subscript(const shared_ptr<name> &src,
+                     const shared_ptr<expression> &idx,
+                     const shared_ptr<type_t>& type,
+                     const shared_ptr<ctype::type_t>& ctype)
+    : expression(*this, type, ctype), m_src(src), m_idx(idx) {}
+
+const name& subscript::src(void) const {
+    return *m_src;
+}
+
+const expression& subscript::idx(void) const {
+    return *m_idx;
+}
+
+shared_ptr<name> subscript::p_src(void) const {
+    return m_src;
+}
+
+shared_ptr<expression> subscript::p_idx(void) const {
+    return m_idx;
+}
+
 }
     
 

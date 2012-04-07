@@ -35,6 +35,12 @@ void py_printer::operator()(const closure &n) {
     boost::apply_visitor(*this, n.body());
     m_os << ")";
 }
+void py_printer::operator()(const subscript &n) {
+    boost::apply_visitor(*this, n.src());
+    m_os << '[';
+    boost::apply_visitor(*this, n.idx());
+    m_os << ']';
+}
 void py_printer::operator()(const conditional &n) {
     m_os << "if ";
     boost::apply_visitor(*this, n.cond());

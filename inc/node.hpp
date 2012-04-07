@@ -35,6 +35,7 @@ class lambda;
 class closure;
 class conditional;
 class tuple;
+class subscript;
 class ret;
 class bind;
 class call;
@@ -64,6 +65,7 @@ typedef boost::variant<
     closure &,
     conditional &,
     tuple &,
+    subscript &,
     ret &,
     bind &,
     call &,

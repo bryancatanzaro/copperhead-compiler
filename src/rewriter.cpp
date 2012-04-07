@@ -74,6 +74,18 @@ rewriter::result_type rewriter::operator()(const closure &n) {
     shared_ptr<ctype::type_t> ct = n.p_ctype();
     return result_type(new closure(n_args, n_body, t, ct));
 }
+rewriter::result_type rewriter::operator()(const subscript &n) {
+    auto n_src = static_pointer_cast<name>((*this)(n.src()));
+    auto n_idx = static_pointer_cast<expression>(boost::apply_visitor(*this, n.idx()));
+    start_match();
+    update_match(n_src, n.src());
+    update_match(n_idx, n.idx());
+    if (is_match())
+        return get_node_ptr(n);
+    shared_ptr<type_t> t = n.p_type();
+    shared_ptr<ctype::type_t> ct = n.p_ctype();
+    return result_type(new subscript(n_src, n_idx, t, ct));
+}
 rewriter::result_type rewriter::operator()(const conditional &n) {
     auto n_cond = static_pointer_cast<expression>(boost::apply_visitor(*this, n.cond()));
     auto n_then = static_pointer_cast<suite>(boost::apply_visitor(*this, n.then()));
