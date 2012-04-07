@@ -17,14 +17,14 @@ find_includes::find_includes(const registry& reg)
 find_includes::result_type find_includes::operator()(const suite& n) {
     bool outer_suite = m_outer;
     m_outer = false;
-    shared_ptr<suite> rewritten =
-        static_pointer_cast<suite>(this->rewriter::operator()(n));
+    shared_ptr<const suite> rewritten =
+        static_pointer_cast<const suite>(this->rewriter::operator()(n));
     if (!outer_suite) {
         return rewritten;
     }
     
     //We're the outer suite, add include statements
-    vector<shared_ptr<statement> > augmented_statements;
+    vector<shared_ptr<const statement> > augmented_statements;
     for(auto i = m_includes.begin();
         i != m_includes.end();
         i++) {
@@ -33,10 +33,13 @@ find_includes::result_type find_includes::operator()(const suite& n) {
                 make_shared<literal>(
                     *i)));
     }
-    
-    augmented_statements.insert(augmented_statements.end(),
-                                n.p_begin(), n.p_end());
-    return make_shared<suite>(move(augmented_statements));
+    for(auto i = n.begin();
+        i != n.end();
+        i++) {
+        augmented_statements.push_back(
+            static_pointer_cast<const statement>(n.ptr()));
+    }
+    return make_shared<const suite>(move(augmented_statements));
 }
 
 find_includes::result_type find_includes::operator()(const apply& n) {
