@@ -46,7 +46,7 @@ class typedefify
     : public rewriter
 {
 private:
-    std::shared_ptr<statement> m_typedef;
+    std::shared_ptr<const statement> m_typedef;
 public:
     //! Constructor
     typedefify();

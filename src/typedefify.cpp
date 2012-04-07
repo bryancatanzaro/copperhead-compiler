@@ -1,21 +1,27 @@
 #include "typedefify.hpp"
 
+using std::vector;
+using std::shared_ptr;
+using std::make_shared;
+using std::static_pointer_cast;
+
+
 namespace backend {
 
 typedefify::typedefify() :
     m_typedef() {}
 
 typedefify::result_type typedefify::operator()(const suite &n) {
-    std::vector<std::shared_ptr<statement> > stmts;
+    vector<shared_ptr<const statement> > stmts;
     for(auto i = n.begin();
         i != n.end();
         i++) {
-        std::shared_ptr<statement> s =
-            std::static_pointer_cast<statement>(
+        shared_ptr<const statement> s =
+            static_pointer_cast<const statement>(
                 boost::apply_visitor(*this, *i));
         if (m_typedef) {
             stmts.push_back(m_typedef);
-            m_typedef = std::shared_ptr<statement>();
+            m_typedef = shared_ptr<const statement>();
         }
         stmts.push_back(s);
     }
@@ -30,71 +36,67 @@ typedefify::result_type typedefify::operator()(const bind &n) {
 
     const name& lhs = boost::get<const name&>(n.lhs());
         
-    std::shared_ptr<ctype::type_t> unique_type =
-        std::make_shared<ctype::monotype_t>(
+    shared_ptr<const ctype::type_t> unique_type =
+        std::make_shared<const ctype::monotype_t>(
             detail::typify(lhs.id()));
-    std::shared_ptr<expression> rhs =
-        std::static_pointer_cast<expression>(
+    shared_ptr<const expression> rhs =
+        static_pointer_cast<const expression>(
             boost::apply_visitor(*this, n.rhs()));
-    std::shared_ptr<name> new_lhs =
-        std::make_shared<name>(lhs.id(),
-                               lhs.p_type(),
+    shared_ptr<const name> new_lhs =
+        std::make_shared<const name>(lhs.id(),
+                                     lhs.type().ptr(),
                                unique_type);
     m_typedef =
-        std::make_shared<typedefn>(
-            lhs.p_ctype(),
+        std::make_shared<const typedefn>(
+            lhs.ctype().ptr(),
             unique_type);
     return result_type(
-        new bind(
-            new_lhs, rhs));
+        new bind(new_lhs, rhs));
 }
 typedefify::result_type typedefify::operator()(const procedure &n) {
     const tuple& args = n.args();
-    std::vector<std::shared_ptr<statement> > stmts;
+    vector<shared_ptr<const statement> > stmts;
     for(auto i = args.begin();
         i != args.end();
         i++) {
         assert(detail::isinstance<name>(*i));
         const name& arg_name = boost::get<const name&>(*i);
-        std::shared_ptr<ctype::type_t> unique_type =
-            std::make_shared<ctype::monotype_t>(
+        shared_ptr<const ctype::type_t> unique_type =
+            std::make_shared<const ctype::monotype_t>(
                 detail::typify(arg_name.id()));
-        std::shared_ptr<typedefn> arg_typedef =
-            std::make_shared<typedefn>(
-                arg_name.p_ctype(),
+        shared_ptr<const typedefn> arg_typedef =
+            std::make_shared<const typedefn>(
+                arg_name.ctype().ptr(),
                 unique_type);
         stmts.push_back(arg_typedef);
     }
     for(auto i = n.stmts().begin();
         i != n.stmts().end();
         i++) {
-        auto s = std::static_pointer_cast<statement>(
+        auto s = static_pointer_cast<const statement>(
             boost::apply_visitor(*this, *i));
         if (m_typedef) {
             stmts.push_back(m_typedef);
-            m_typedef = std::shared_ptr<statement>();
+            m_typedef = shared_ptr<const statement>();
         }
         stmts.push_back(s);
           
     }
-    std::shared_ptr<name> n_name =
-        std::static_pointer_cast<name>(
+    shared_ptr<const name> n_name =
+        static_pointer_cast<const name>(
             boost::apply_visitor(*this, n.id()));
-    std::shared_ptr<tuple> n_args =
-        std::static_pointer_cast<tuple>(
+    shared_ptr<const tuple> n_args =
+        static_pointer_cast<const tuple>(
             boost::apply_visitor(*this, args));
-    std::shared_ptr<suite> n_stmts =
-        std::make_shared<suite>(std::move(stmts));
-    std::shared_ptr<type_t> n_type = n.p_type();
-    std::shared_ptr<ctype::type_t> n_ctype = n.p_ctype();
-        
-        
-    return std::make_shared<procedure>(
+    shared_ptr<const suite> n_stmts =
+        std::make_shared<const suite>(std::move(stmts));
+                
+    return std::make_shared<const procedure>(
         n_name,
         n_args,
         n_stmts,
-        n_type,
-        n_ctype);
+        n.type().ptr(),
+        n.ctype().ptr());
 }
 
 
