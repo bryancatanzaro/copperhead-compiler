@@ -20,32 +20,32 @@ typedef std::tuple<const char*, fn_info> named_info;
 
 namespace detail {
 
-shared_ptr<monotype_t> t_a =
-    make_shared<monotype_t>("a");
+shared_ptr<const monotype_t> t_a =
+    make_shared<const monotype_t>("a");
 
-shared_ptr<type_t> bin_op_t =
-    make_shared<polytype_t>(
-        make_vector<shared_ptr<monotype_t> >(t_a),
-        make_shared<fn_t>(
-            make_shared<tuple_t>(
-                make_vector<shared_ptr<type_t> >(t_a)(t_a)),
+shared_ptr<const type_t> bin_op_t =
+    make_shared<const polytype_t>(
+        make_vector<shared_ptr<const monotype_t> >(t_a),
+        make_shared<const fn_t>(
+            make_shared<const tuple_t>(
+                make_vector<shared_ptr<const type_t> >(t_a)(t_a)),
             t_a));
 
-shared_ptr<type_t> bin_cmp_t =
-    make_shared<polytype_t>(
-        make_vector<shared_ptr<monotype_t> >(t_a),
-        make_shared<fn_t>(
-            make_shared<tuple_t>(
-                make_vector<shared_ptr<type_t> >(t_a)(t_a)),
+shared_ptr<const type_t> bin_cmp_t =
+    make_shared<const polytype_t>(
+        make_vector<shared_ptr<const monotype_t> >(t_a),
+        make_shared<const fn_t>(
+            make_shared<const tuple_t>(
+                make_vector<shared_ptr<const type_t> >(t_a)(t_a)),
             bool_mt));
 
-shared_ptr<type_t> un_op_t =
-     make_shared<polytype_t>(
-         make_vector<shared_ptr<monotype_t> >(
+shared_ptr<const type_t> un_op_t =
+     make_shared<const polytype_t>(
+         make_vector<shared_ptr<const monotype_t> >(
              t_a),
-        make_shared<fn_t>(
-            make_shared<tuple_t>(
-                make_vector<shared_ptr<type_t> >(t_a)),
+        make_shared<const fn_t>(
+            make_shared<const tuple_t>(
+                make_vector<shared_ptr<const type_t> >(t_a)),
             t_a));
 
 
