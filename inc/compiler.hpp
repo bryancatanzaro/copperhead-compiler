@@ -86,12 +86,12 @@ private:
     registry m_registry;
     /*! A helper function to apply a compiler pass.*/
     template<typename P>
-    std::shared_ptr<suite> apply(P& pass, const suite &n) {
-        return std::static_pointer_cast<suite>(pass(n));
+    std::shared_ptr<const suite> apply(P& pass, const suite &n) {
+        return std::static_pointer_cast<const suite>(pass(n));
     }
     /*! A helper function to apply a compiler pass.*/
     template<typename P>
-    std::shared_ptr<suite> apply(P& pass, const std::shared_ptr<suite> n) {
+    std::shared_ptr<const suite> apply(P& pass, const std::shared_ptr<const suite> n) {
         return apply(pass, *n);
     }
 public:
@@ -109,7 +109,7 @@ public:
        \param n The suite node containing the entire program to be
        compiled.
     */
-    std::shared_ptr<suite> operator()(const suite &n);
+    std::shared_ptr<const suite> operator()(const suite &n);
     //! Gets the name of the entry point function
     const std::string& entry_point() const;
     //! Gets the \ref backend::registry "registry" used by the compiler

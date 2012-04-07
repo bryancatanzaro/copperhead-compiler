@@ -13,7 +13,7 @@ compiler::compiler(const std::string& entry_point,
     m_registry.add_library(prelude);
 
 }
-std::shared_ptr<suite> compiler::operator()(const suite &n) {
+std::shared_ptr<const suite> compiler::operator()(const suite &n) {
     cpp_printer cp(m_backend_tag, m_entry_point, m_registry, std::cout);
 
     phase_analyze phase_analyzer(m_entry_point, m_registry);
