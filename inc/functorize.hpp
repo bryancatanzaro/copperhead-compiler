@@ -39,16 +39,16 @@ class type_corresponder
     : public boost::static_visitor<> {
 private:
     typedef std::map<std::string,
-                     std::shared_ptr<type_t> > type_map;
+                     std::shared_ptr<const type_t> > type_map;
 
-    std::shared_ptr<type_t> m_working;
+    std::shared_ptr<const type_t> m_working;
     type_map& m_corresponded;
     //! Helper function to find return type of a procedure
 /*! 
   \param n Procedure to be inspected
   \return A pointer to the C++ implementation type of the procedure
 */
-    std::shared_ptr<ctype::type_t> get_return_type(const procedure& n);
+    std::shared_ptr<const ctype::type_t> get_return_type(const procedure& n);
 public:
     //! Constructor
 /*! 
@@ -57,7 +57,7 @@ public:
   \param corresponded Type map that will be amended with correspondence
   \return 
 */
-    type_corresponder(const std::shared_ptr<type_t>& input,
+    type_corresponder(const std::shared_ptr<const type_t>& input,
                       type_map& corresponded);
 
     //! Harvest correspondence from a monotype_t
@@ -84,10 +84,10 @@ public:
  *  Then we need to translate Seq(a) to Seq(Int)
  */
 class type_translator
-    : public boost::static_visitor<std::shared_ptr<type_t> > {
+    : public boost::static_visitor<std::shared_ptr<const type_t> > {
 private:
     typedef std::map<std::string,
-                     std::shared_ptr<type_t> > type_map;
+                     std::shared_ptr<const type_t> > type_map;
     
     const type_map& m_corresponded;
 public:
@@ -134,14 +134,14 @@ private:
 
 
     typedef std::map<std::string,
-                     std::shared_ptr<type_t> > type_map;
+                     std::shared_ptr<const type_t> > type_map;
 
     type_map m_type_map;
 
     void make_type_map(const apply& n);
 
-    std::shared_ptr<expression> instantiate_fn(const name& n,
-                                               std::shared_ptr<type_t> p_t);
+    std::shared_ptr<const expression> instantiate_fn(const name& n,
+                                                     const type_t& t);
 public:
     //! Constructor
     /*! \param entry_point The name of the entry point procedure
