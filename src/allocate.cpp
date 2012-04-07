@@ -22,11 +22,11 @@ allocate::allocate(const copperhead::system_variant& target,
 allocate::result_type allocate::operator()(const procedure &n) {
     if (n.id().id()  == m_entry_point) {
         m_in_entry = true;
-        vector<shared_ptr<statement> > statements;
+        vector<shared_ptr<const statement> > statements;
         for(auto i = n.stmts().begin();
             i != n.stmts().end();
             i++) {
-            auto new_stmt = static_pointer_cast<statement>(
+            auto new_stmt = static_pointer_cast<const statement>(
                 boost::apply_visitor(*this, *i));
             if (m_allocations.size() > 0) {
                 for(auto j = m_allocations.begin();
@@ -38,16 +38,16 @@ allocate::result_type allocate::operator()(const procedure &n) {
             }
             statements.push_back(new_stmt);
         }
-        shared_ptr<suite> stmts = make_shared<suite>(move(statements));
-        shared_ptr<tuple> args =
-            static_pointer_cast<tuple>(
+        auto stmts = make_shared<const suite>(move(statements));
+        auto args =
+            static_pointer_cast<const tuple>(
                 boost::apply_visitor(*this, n.args()));
-        auto t = n.p_type();
-        auto ct = n.p_ctype();
-        shared_ptr<name> id =
-            static_pointer_cast<name>(
+        auto t = n.type().ptr();
+        auto ct = n.ctype().ptr();
+        auto id =
+            static_pointer_cast<const name>(
                 boost::apply_visitor(*this, n.id()));
-        result_type allocated = make_shared<procedure>(
+        result_type allocated = make_shared<const procedure>(
             id, args, stmts, t, ct);
 
         m_in_entry = false;
@@ -72,53 +72,53 @@ allocate::result_type allocate::operator()(const bind &n) {
         //Construct cuarray for result
         const ctype::sequence_t& pre_lhs_ct =
             boost::get<const ctype::sequence_t&>(pre_lhs.ctype());
-        shared_ptr<ctype::type_t> sub_lhs_ct =
-            pre_lhs_ct.p_sub();
-        shared_ptr<ctype::type_t> impl_seq_ct =
-            make_shared<ctype::polytype_t>(
-                make_vector<shared_ptr<ctype::type_t> >
-                (make_shared<ctype::monotype_t>(copperhead::to_string(m_target)))
+        shared_ptr<const ctype::type_t> sub_lhs_ct =
+            pre_lhs_ct.sub().ptr();
+        shared_ptr<const ctype::type_t> impl_seq_ct =
+            make_shared<const ctype::polytype_t>(
+                make_vector<shared_ptr<const ctype::type_t> >
+                (make_shared<const ctype::monotype_t>(copperhead::to_string(m_target)))
                 (sub_lhs_ct),
-                make_shared<ctype::monotype_t>("sequence"));
+                make_shared<const ctype::monotype_t>("sequence"));
         
-        shared_ptr<ctype::tuple_t> tuple_impl_seq_ct =
-            make_shared<ctype::tuple_t>(
-                make_vector<shared_ptr<ctype::type_t> >(impl_seq_ct));
-        shared_ptr<ctype::type_t> result_ct =
-            make_shared<ctype::monotype_t>("sp_cuarray");
-        shared_ptr<type_t> result_t =
-            pre_lhs.p_type();
-        shared_ptr<name> result_name = make_shared<name>(
+        shared_ptr<const ctype::tuple_t> tuple_impl_seq_ct =
+            make_shared<const ctype::tuple_t>(
+                make_vector<shared_ptr<const ctype::type_t> >(impl_seq_ct));
+        shared_ptr<const ctype::type_t> result_ct =
+            make_shared<const ctype::monotype_t>("sp_cuarray");
+        shared_ptr<const type_t> result_t =
+            pre_lhs.type().ptr();
+        shared_ptr<const name> result_name = make_shared<const name>(
             detail::wrap_array_id(pre_lhs.id()),
             result_t,
             result_ct);
 
-        shared_ptr<expression> new_rhs =
-            static_pointer_cast<expression>(
+        shared_ptr<const expression> new_rhs =
+            static_pointer_cast<const expression>(
                 boost::apply_visitor(*this, n.rhs()));
             
-        shared_ptr<bind> allocator = make_shared<bind>(
+        shared_ptr<const bind> allocator = make_shared<const bind>(
             result_name, new_rhs);
         m_allocations.push_back(allocator);
             
 
-        shared_ptr<name> new_lhs = static_pointer_cast<name>(
+        shared_ptr<const name> new_lhs = static_pointer_cast<const name>(
             boost::apply_visitor(*this, n.lhs()));
-        shared_ptr<templated_name> getter_name =
-            make_shared<templated_name>(
+        shared_ptr<const templated_name> getter_name =
+            make_shared<const templated_name>(
                 detail::make_sequence(),
                 tuple_impl_seq_ct);
-        shared_ptr<tuple> getter_args =
-            make_shared<tuple>(
-                make_vector<shared_ptr<expression> >(result_name)
-                (make_shared<apply>(
-                    make_shared<name>(copperhead::to_string(m_target)),
-                    make_shared<tuple>(make_vector<shared_ptr<expression> >())))
-                (make_shared<literal>("true")));
-        shared_ptr<apply> getter_call =
-            make_shared<apply>(getter_name, getter_args);
-        shared_ptr<bind> retriever =
-            make_shared<bind>(new_lhs, getter_call);
+        shared_ptr<const tuple> getter_args =
+            make_shared<const tuple>(
+                make_vector<shared_ptr<const expression> >(result_name)
+                (make_shared<const apply>(
+                    make_shared<const name>(copperhead::to_string(m_target)),
+                    make_shared<const tuple>(make_vector<shared_ptr<const expression> >())))
+                (make_shared<const literal>("true")));
+        shared_ptr<const apply> getter_call =
+            make_shared<const apply>(getter_name, getter_args);
+        shared_ptr<const bind> retriever =
+            make_shared<const bind>(new_lhs, getter_call);
         return retriever;
     } else {
         return this->rewriter::operator()(n);

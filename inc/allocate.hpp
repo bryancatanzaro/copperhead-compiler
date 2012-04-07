@@ -53,7 +53,7 @@ private:
     const copperhead::system_variant& m_target;
     const std::string& m_entry_point;
     bool m_in_entry;
-    std::vector<std::shared_ptr<statement> > m_allocations;
+    std::vector<std::shared_ptr<const statement> > m_allocations;
 public:
 
 /*!   
