@@ -72,7 +72,8 @@ type_base make_type_base(void *ptr, const type_base &other);
   \return 
 */
 class type_t
-    : public detail::type_base
+    : public detail::type_base,
+      public std::enable_shared_from_this<type_t>
 {
 protected:
     typedef detail::type_base super_t;
@@ -88,7 +89,8 @@ protected:
 public:
     //! Copy constructor
     type_t(const type_t &other);
-
+    //! Get pointer holding this type_t object
+    std::shared_ptr<type_t> ptr();
 };
 
 //! Monomorphic type

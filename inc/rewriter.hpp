@@ -59,7 +59,7 @@ namespace backend {
  */
 
 class rewriter
-    : public boost::static_visitor<std::shared_ptr<node> >
+    : public boost::static_visitor<std::shared_ptr<const node> >
 {
 protected:
     //! Get the \p shared_ptr holding an AST \p node

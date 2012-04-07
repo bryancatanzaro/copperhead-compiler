@@ -112,27 +112,15 @@ class node
 protected:
     typedef detail::node_base super_t;
 
-#ifdef DEBUG
-    static int counter;
-    int id;
-#endif
     template<typename Derived>
     node(Derived &self)
         : super_t(std::ref(self)) // use of std::ref disambiguates variant's copy constructor dispatch
-        {
-#ifdef DEBUG
-            id = ++counter;
-            std::cout << "Making node[" << id << "] from ";
-            detail::inspect(self);
-            std::cout << std::endl;
-#endif
-        }
+        {}
 public:
     //copy constructor requires special handling
     node(const node &other);
-#ifdef DEBUG
-    ~node();
-#endif
+    /*! When we need to get at the pointer holding a node */
+    std::shared_ptr<const node> ptr() const;
 };
 
 //! Prints AST \p node objects

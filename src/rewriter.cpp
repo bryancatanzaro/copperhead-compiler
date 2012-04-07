@@ -19,7 +19,7 @@ bool rewriter::is_match() {
 
     
 rewriter::result_type rewriter::operator()(const literal& n) {
-    return get_node_ptr(n);
+    return n.ptr();
 }
 rewriter::result_type rewriter::operator()(const name &n) {
     return get_node_ptr(n);

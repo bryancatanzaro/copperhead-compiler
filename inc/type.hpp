@@ -62,7 +62,8 @@ type_base make_type_base(void *ptr, const type_base &other);
 /*! Not intended to be instantiated directly 
 */
 class type_t
-    : public detail::type_base
+    : public detail::type_base,
+      public std::enable_shared_from_this<type_t>
 {
 protected:
     typedef detail::type_base super_t;
@@ -81,6 +82,8 @@ public:
   \param other type to copy from
 */
     type_t(const type_t &other);
+//! Get the pointer to this type object
+    std::shared_ptr<type_t> ptr();
 };
 
 /*!
