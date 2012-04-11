@@ -1,7 +1,7 @@
 #include "wrap.hpp"
 
 #include "cpp_printer.hpp"
-
+#include "type_printer.hpp"
 using std::string;
 using std::vector;
 using std::shared_ptr;
@@ -147,12 +147,14 @@ wrap::result_type wrap::operator()(const procedure &n) {
         shared_ptr<const name> wrapper_proc_id =
             make_shared<const name>(
                 detail::wrap_proc_id(n.id().id()));
-        auto t = n.type();
-        auto res_t = boost::get<const fn_t&>(t).result().ptr();
-            
+
+        const fn_t& n_fn_t = boost::get<const fn_t>(n.type());
+        const type_t& res_t = n_fn_t.result();
+        
+        
         shared_ptr<const name> result_id =
             make_shared<const name>(
-                "result", res_t, new_res_ct);
+                "result", res_t.ptr(), new_res_ct);
         shared_ptr<const bind> make_the_call =
             make_shared<const bind>(
                 result_id,
@@ -174,7 +176,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
             make_shared<const procedure>(wrapper_proc_id,
                                          wrapper_args_tuple,
                                          wrapper_stmts,
-                                         t.ptr(), new_wrap_ct, "");
+                                         n.type().ptr(), new_wrap_ct, "");
         m_wrapper = completed_wrapper;
                     
         result_type rewritten =

@@ -70,7 +70,7 @@ const tuple_t& fn_t::args() const {
     return *static_pointer_cast<const tuple_t>(m_params[0]);
 }
 const type_t& fn_t::result() const {
-        return *m_params[1];
+    return *m_params[1];
 }
 
 }
