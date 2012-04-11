@@ -22,7 +22,7 @@ find_includes::result_type find_includes::operator()(const suite& n) {
     if (!outer_suite) {
         return rewritten;
     }
-    
+
     //We're the outer suite, add include statements
     vector<shared_ptr<const statement> > augmented_statements;
     for(auto i = m_includes.begin();
@@ -37,7 +37,7 @@ find_includes::result_type find_includes::operator()(const suite& n) {
         i != n.end();
         i++) {
         augmented_statements.push_back(
-            static_pointer_cast<const statement>(n.ptr()));
+            static_pointer_cast<const statement>(i->ptr()));
     }
     return make_shared<const suite>(move(augmented_statements));
 }
