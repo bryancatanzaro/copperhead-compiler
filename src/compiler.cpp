@@ -16,9 +16,11 @@ compiler::compiler(const std::string& entry_point,
 std::shared_ptr<const suite> compiler::operator()(const suite &n) {
     cpp_printer cp(m_backend_tag, m_entry_point, m_registry, std::cout);
 
+    tuple_break tuple_breaker;
+    auto tuple_broken = apply(tuple_breaker, n);
+    
     phase_analyze phase_analyzer(m_entry_point, m_registry);
-    auto phase_analyzed = apply(phase_analyzer, n);
-
+    auto phase_analyzed = apply(phase_analyzer, tuple_broken);
     
     type_convert type_converter;
     auto type_converted = apply(type_converter, phase_analyzed);
