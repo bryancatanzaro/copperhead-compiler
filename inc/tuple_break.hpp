@@ -23,6 +23,7 @@
 #include "utility/name_supply.hpp"
 #include "utility/isinstance.hpp"
 #include "utility/snippets.hpp"
+#include "utility/initializers.hpp"
 
 namespace backend {
 

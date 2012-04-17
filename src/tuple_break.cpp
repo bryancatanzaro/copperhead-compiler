@@ -6,6 +6,8 @@ using std::make_shared;
 using std::static_pointer_cast;
 using std::string;
 using std::move;
+using backend::utility::make_vector;
+
 
 namespace backend {
 
@@ -77,7 +79,63 @@ tuple_break::result_type tuple_break::operator()(const bind& n) {
 }
 
 tuple_break::result_type tuple_break::operator()(const procedure& n) {
-    return this->rewriter::operator()(n);
+    vector<shared_ptr<const expression> > args;
+    vector<shared_ptr<const statement> > stmts;
+    for(auto i = n.args().begin();
+        i != n.args().end();
+        i++) {
+        if (detail::isinstance<name>(*i)) {
+            args.push_back(
+                static_pointer_cast<const expression>(i->ptr()));
+        } else {
+            //We can only allow names and tuples as arguments of a function.
+            assert(detail::isinstance<backend::tuple>(*i));
+            const backend::tuple& tup =
+                boost::get<const backend::tuple&>(*i);
+            
+            shared_ptr<const name> new_name =
+                make_shared<const name>(
+                    m_supply.next(),
+                    tup.type().ptr(),
+                    tup.ctype().ptr());
+            args.push_back(new_name);
+            int number = 0;
+            for(auto j = tup.begin(); j != tup.end(); j++, number++) {
+                stmts.push_back(
+                    make_shared<const bind>(
+                        static_pointer_cast<const expression>(j->ptr()),
+                        make_shared<const apply>(
+                            make_shared<const name>(
+                                detail::snippet_get(number)),
+                            make_shared<const tuple>(
+                                make_vector<shared_ptr<const expression> >(
+                                    new_name)))));
+            }
+        }
+    }
+    if (stmts.size() == 0) {
+        return this->rewriter::operator()(n);
+    } else {
+        shared_ptr<const suite> rewritten_stmts =
+            static_pointer_cast<const suite>(
+                this->rewriter::operator()(n.stmts()));
+        for(auto i = rewritten_stmts->begin();
+            i != rewritten_stmts->end();
+            i++) {
+            stmts.push_back(
+                static_pointer_cast<const statement>(
+                    i->ptr()));
+        }
+        return make_shared<const procedure>(
+            static_pointer_cast<const name>(
+                n.id().ptr()),
+            make_shared<backend::tuple>(std::move(args)),
+            make_shared<backend::suite>(std::move(stmts)),
+            n.type().ptr(),
+            n.ctype().ptr(),
+            n.place());
+    }
+    
 }
 
 tuple_break::result_type tuple_break::operator()(const suite& n) {
