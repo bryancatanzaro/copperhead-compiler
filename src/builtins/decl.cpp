@@ -98,7 +98,10 @@ vector<named_info> cpp_support_fns =
     make_vector<named_info>
     (named_info("wrap_cuarray", nullary_info))
     (named_info("make_scalar", nullary_info))
-    (named_info("unpack_scalar", nullary_info));
+    (named_info("unpack_scalar", nullary_info))
+    //XXX Python infiltration!
+    (named_info("make_python_tuple", nullary_info))
+    (named_info("unpack_tuple", nullary_info));
 
 }
 
