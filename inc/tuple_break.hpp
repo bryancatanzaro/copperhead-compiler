@@ -20,9 +20,9 @@
 #include "ctype.hpp"
 #include "cppnode.hpp"
 #include "rewriter.hpp"
-#include "import/library.hpp"
-#include <set>
-#include <map>
+#include "utility/name_supply.hpp"
+#include "utility/isinstance.hpp"
+#include "utility/snippets.hpp"
 
 namespace backend {
 
@@ -46,7 +46,7 @@ namespace backend {
   \code
   t = thrust::make_tuple(x, y)
   \endcode
-  And
+  Also,
   \code
   x, y = t
   \endcode
@@ -55,6 +55,16 @@ namespace backend {
   x = thrust::get<0>(t)
   y = thrust::get<1>(t)
   \endcode
+  And
+  \code
+  x, y = z, w
+  \endcode
+  becomes
+  \code
+  x = z
+  y = w
+  \endcode
+  
   
   Also, tuples which appear as arguments to a
   function are given a unique id and lowered:
@@ -80,6 +90,9 @@ public:
     using rewriter::operator();
     result_type operator()(const bind& n);
     result_type operator()(const procedure& n);
+    result_type operator()(const suite& n);
+private:
+    detail::name_supply m_supply;
 };
 
 }

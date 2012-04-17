@@ -210,6 +210,14 @@ functorize::functorize(const string& entry_point,
 }
 
 functorize::result_type functorize::operator()(const apply &n) {
+    //If the function being applied has no type, return the apply node
+    //unchanged
+    //This can happen due to synthesized apply nodes that shouldn't be
+    //functorized.
+    if (n.fn().type().ptr() == void_mt) {
+        return n.ptr();
+    }
+    
     //If the function we're applying is polymorphic,
     //Figure out what types it's being instantiated with
     make_type_map(n);

@@ -84,6 +84,8 @@ public:
     void operator()(const cuarray_t &ct);
     
     void operator()(const polytype_t &pt);
+
+    void operator()(const tuple_t &tt);
         
     std::ostream &m_os;
 

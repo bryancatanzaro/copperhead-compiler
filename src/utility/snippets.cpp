@@ -29,5 +29,15 @@ const std::string phase_boundary() {
     return "phase_boundary";
 }
 
+const std::string snippet_get(int x) {
+    std::ostringstream os;
+    os << "thrust::get<" << x << ">";
+    return os.str();
+}
+
+const std::string snippet_make_tuple() {
+    return "thrust::make_tuple";
+}
+
 }
 }

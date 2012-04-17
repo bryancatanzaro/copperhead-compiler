@@ -88,6 +88,24 @@ void ctype_printer::operator()(const polytype_t &pt) {
     m_need_space.top() = true;
     m_os << ">";
 }
+
+void ctype_printer::operator()(const tuple_t& tt) {
+    m_os << "thrust::tuple<";
+    m_need_space.push(false);
+    for (auto i = tt.begin(); i != tt.end(); i++) {
+        boost::apply_visitor(*this, *i);
+        if (std::next(i) != tt.end()) {
+            m_os << ", ";
+        }
+    }
+    if (m_need_space.top())
+        m_os << " ";
+    m_need_space.pop();
+    m_need_space.top() = true;
+    m_os << ">";
+}
+        
+
 void ctype_printer::sep() const {
     m_os << ", ";
 }
