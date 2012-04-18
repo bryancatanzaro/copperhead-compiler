@@ -50,7 +50,7 @@ template<>
 struct numeric_limits<float> {
     __host__ __device__
     static float min() {
-        return FLT_MIN;
+        return -FLT_MAX;
     }
     __host__ __device__
     static float max() {
@@ -62,7 +62,7 @@ template<>
 struct numeric_limits<double> {
     __host__ __device__
     static double min() {
-        return DBL_MIN;
+        return -DBL_MAX;
     }
     __host__ __device__
     static double max() {
