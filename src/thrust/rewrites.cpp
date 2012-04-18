@@ -194,10 +194,8 @@ thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
                 copperhead::to_string(m_target)),
             make_shared<const tuple>(
                 make_vector<shared_ptr<const expression> >()));
-    shared_ptr<const expression> arg1 =
-        static_pointer_cast<const expression>(ap_arg_iterator->ptr());
-    shared_ptr<const expression> arg2 =
-        static_pointer_cast<const expression>((ap_arg_iterator+1)->ptr());
+    shared_ptr<const expression> arg1 = ap_arg_iterator->ptr();
+    shared_ptr<const expression> arg2 = (ap_arg_iterator+1)->ptr();
     shared_ptr<const tuple> targeted_arguments =
         make_shared<const tuple>(
             make_vector<shared_ptr<const expression> >(tag_arg)(arg1)(arg2));
@@ -216,7 +214,7 @@ thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
             make_shared<const ctype::monotype_t>("constant_sequence"));
 
     shared_ptr<const apply> n_rhs =
-        make_shared<const apply>(static_pointer_cast<const name>(rhs.fn().ptr()),
+        make_shared<const apply>(rhs.fn().ptr(),
                                  targeted_arguments);
             
     //Can only handle names on the LHS
@@ -247,8 +245,6 @@ thrust_rewriter::result_type thrust_rewriter::shift_rewrite(const bind& n) {
         make_shared<const ctype::polytype_t>(
             make_vector<shared_ptr<const ctype::type_t> >(val_t),
             make_shared<const ctype::monotype_t>("shifted_sequence"));
-    shared_ptr<const apply> n_rhs =
-        static_pointer_cast<const apply>(n.rhs().ptr());
     //Can only handle names on the LHS
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
@@ -256,7 +252,7 @@ thrust_rewriter::result_type thrust_rewriter::shift_rewrite(const bind& n) {
         make_shared<const name>(lhs.id(),
                                 lhs.type().ptr(),
                                 shifted_t);
-    auto result = make_shared<const bind>(n_lhs, n_rhs);
+    auto result = make_shared<const bind>(n_lhs, rhs.ptr());
     return result;
 }
 
@@ -279,8 +275,6 @@ thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
         make_shared<const ctype::polytype_t>(
             make_vector<shared_ptr<const ctype::type_t> >(val_t),
             make_shared<const ctype::monotype_t>("rotated_sequence"));
-    shared_ptr<const apply> n_rhs =
-        static_pointer_cast<const apply>(n.rhs().ptr());
     //Can only handle names on the LHS
     assert(detail::isinstance<name>(n.lhs()));
     const name& lhs = boost::get<const name&>(n.lhs());
@@ -288,7 +282,7 @@ thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
         make_shared<const name>(lhs.id(),
                                 lhs.type().ptr(),
                                 rotated_t);
-    auto result = make_shared<const bind>(n_lhs, n_rhs);
+    auto result = make_shared<const bind>(n_lhs, rhs.ptr());
     return result;
 }
 

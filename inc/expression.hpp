@@ -76,6 +76,9 @@ public:
     const type_t& type(void) const;
     //! Gets the C++ implementation type of the expression
     const ctype::type_t& ctype(void) const;
+    /*! When we need to get at the pointer holding an expression */
+    std::shared_ptr<const expression> ptr() const;
+
 };
 
 //! The parent class for all Literal expressions
@@ -113,6 +116,8 @@ public:
 
     //! Get the value of this literal
     const std::string& id(void) const;
+    /*! When we need to get at the pointer holding a literal */
+    std::shared_ptr<const literal> ptr() const;
 
 };
 //! AST node for identifiers.
@@ -142,6 +147,10 @@ public:
          const std::shared_ptr<const type_t>& type,
          const std::shared_ptr<const ctype::type_t>& ctype) :
         literal(self, val, type, ctype) {}
+    
+    /*! When we need to get at the pointer holding a name */
+    std::shared_ptr<const name> ptr() const;
+
 };
 //! AST node for tuples.
 /*! We use tuples to represent any sequence of expressions in the
@@ -177,6 +186,9 @@ public:
   \return How many expressions are held by this tuple.
 */
     int arity() const;
+    /*! When we need to get at the pointer holding a tuple */
+    std::shared_ptr<const tuple> ptr() const;
+
 };
 //! AST node for applying a function to a sequence of arguments
 class apply
@@ -197,6 +209,8 @@ public:
     const name &fn(void) const;
     //! Get the arguments given to the function
     const tuple &args(void) const;
+    /*! When we need to get at the pointer holding a apply */
+    std::shared_ptr<const apply> ptr() const;
 
 };
 
@@ -226,6 +240,9 @@ public:
     const tuple &args(void) const;
     //! Get the expression to be evaluated in the \p lambda
     const expression &body(void) const;
+    /*! When we need to get at the pointer holding a lambda */
+    std::shared_ptr<const lambda> ptr() const;
+
 };
 
 //! AST node for closures
@@ -252,6 +269,8 @@ public:
             const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
     const tuple &args(void) const;
     const expression &body(void) const;
+    /*! When we need to get at the pointer holding a closure */
+    std::shared_ptr<const closure> ptr() const;
 
 };
 
@@ -276,6 +295,9 @@ public:
               const std::shared_ptr<const ctype::type_t>& ctype = ctype::void_mt);
     const name &src(void) const;
     const expression &idx(void) const;
+    /*! When we need to get at the pointer holding a subscript */
+    std::shared_ptr<const subscript> ptr() const;
+
 };
 
 /*! 

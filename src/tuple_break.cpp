@@ -34,8 +34,8 @@ tuple_break::result_type tuple_break::operator()(const bind& n) {
             i++, j++) {
             stmts.push_back(
                 make_shared<bind>(
-                    static_pointer_cast<const expression>(i->ptr()),
-                    static_pointer_cast<const expression>(j->ptr())));
+                    i->ptr(),
+                    j->ptr()));
         }
         return make_shared<suite>(move(stmts));
     } else if (lhs_tuple && !rhs_tuple) {
@@ -46,10 +46,10 @@ tuple_break::result_type tuple_break::operator()(const bind& n) {
         int number = 0;
         for(auto i = lhs.begin(); i != lhs.end(); i++, number++) {
             vector<shared_ptr<const expression> > args;
-            args.push_back(static_pointer_cast<const expression>(n.rhs().ptr()));
+            args.push_back(n.rhs().ptr());
             stmts.push_back(
                 make_shared<const bind>(
-                    static_pointer_cast<const expression>(i->ptr()),
+                    i->ptr(),
                     make_shared<const apply>(
                         make_shared<const name>(
                             detail::snippet_get(number)),
@@ -63,12 +63,10 @@ tuple_break::result_type tuple_break::operator()(const bind& n) {
 
         vector<shared_ptr<const expression> > args;
         for(auto i = rhs.begin(); i != rhs.end(); i++) {
-            args.push_back(
-                static_pointer_cast<const expression>(
-                    i->ptr()));
+            args.push_back(i->ptr());
         }
         return make_shared<bind>(
-            static_pointer_cast<const expression>(n.lhs().ptr()),
+            n.lhs().ptr(),
             make_shared<apply>(
                 make_shared<name>(detail::snippet_make_tuple()),
                 make_shared<tuple>(move(args))));
@@ -86,7 +84,7 @@ tuple_break::result_type tuple_break::operator()(const procedure& n) {
         i++) {
         if (detail::isinstance<name>(*i)) {
             args.push_back(
-                static_pointer_cast<const expression>(i->ptr()));
+                i->ptr());
         } else {
             //We can only allow names and tuples as arguments of a function.
             assert(detail::isinstance<backend::tuple>(*i));
@@ -103,7 +101,7 @@ tuple_break::result_type tuple_break::operator()(const procedure& n) {
             for(auto j = tup.begin(); j != tup.end(); j++, number++) {
                 stmts.push_back(
                     make_shared<const bind>(
-                        static_pointer_cast<const expression>(j->ptr()),
+                        j->ptr(),
                         make_shared<const apply>(
                             make_shared<const name>(
                                 detail::snippet_get(number)),
@@ -122,13 +120,10 @@ tuple_break::result_type tuple_break::operator()(const procedure& n) {
         for(auto i = rewritten_stmts->begin();
             i != rewritten_stmts->end();
             i++) {
-            stmts.push_back(
-                static_pointer_cast<const statement>(
-                    i->ptr()));
+            stmts.push_back(i->ptr());
         }
         return make_shared<const procedure>(
-            static_pointer_cast<const name>(
-                n.id().ptr()),
+            n.id().ptr(),
             make_shared<backend::tuple>(std::move(args)),
             make_shared<backend::suite>(std::move(stmts)),
             n.type().ptr(),
@@ -151,8 +146,7 @@ tuple_break::result_type tuple_break::operator()(const suite& n) {
             const suite& s = boost::get<const suite&>(*r);
             for(auto j = s.begin(); j != s.end(); j++) {
                 stmts.push_back(
-                    static_pointer_cast<const statement>(
-                        j->ptr()));
+                    j->ptr());
             }
         } else {
             //The rewritten statement was just one statement,

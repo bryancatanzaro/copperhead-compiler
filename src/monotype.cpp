@@ -31,6 +31,11 @@ monotype_t::const_iterator monotype_t::end() const {
 int monotype_t::size() const {
     return m_params.size();
 }
+
+shared_ptr<const monotype_t> monotype_t::ptr() const {
+    return static_pointer_cast<const monotype_t>(this->shared_from_this());
+}
+
 //! The instantiated type object representing the Int32 type
 shared_ptr<const monotype_t> int32_mt = make_shared<const monotype_t>("Int32");
 //! The instantiated type object representing the Int64 type
@@ -53,12 +58,22 @@ sequence_t::sequence_t(const shared_ptr<const type_t> &sub)
     : monotype_t(*this,
                  "Seq",
                  make_vector<shared_ptr<const type_t> >(sub)) {}
+
 const type_t& sequence_t::sub() const {
     return *m_params[0];
 }
 
+shared_ptr<const sequence_t> sequence_t::ptr() const {
+    return static_pointer_cast<const sequence_t>(this->shared_from_this());
+}
+
+
 tuple_t::tuple_t(vector<shared_ptr<const type_t> > && sub)
     : monotype_t(*this, "Tuple", std::move(sub)) {}
+
+shared_ptr<const tuple_t> tuple_t::ptr() const {
+    return static_pointer_cast<const tuple_t>(this->shared_from_this());
+}
 
 fn_t::fn_t(const shared_ptr<const tuple_t> args,
            const shared_ptr<const type_t> result)
@@ -69,8 +84,14 @@ fn_t::fn_t(const shared_ptr<const tuple_t> args,
 const tuple_t& fn_t::args() const {
     return *static_pointer_cast<const tuple_t>(m_params[0]);
 }
+
 const type_t& fn_t::result() const {
     return *m_params[1];
 }
+
+shared_ptr<const fn_t> fn_t::ptr() const {
+    return static_pointer_cast<const fn_t>(this->shared_from_this());
+}
+
 
 }

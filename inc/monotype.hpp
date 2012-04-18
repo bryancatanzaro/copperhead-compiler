@@ -87,6 +87,8 @@ public:
     const_iterator end() const;
     //! Number of subtypes in this monotype. Returns 0 for non-nested types.
     int size() const;
+    //! Get the pointer to this type object
+    std::shared_ptr<const monotype_t> ptr() const;
 
 };
 
@@ -110,6 +112,9 @@ public:
     sequence_t(const std::shared_ptr<const type_t> &sub);
     //! Gets the type of each element of the Sequence
     const type_t& sub() const;
+    //! Get the pointer to this type object
+    std::shared_ptr<const sequence_t> ptr() const;
+
 };
 
 //! Tuple type.
@@ -140,6 +145,9 @@ public:
                    std::vector<std::shared_ptr<const type_t> > && sub)
         : monotype_t(self, name, std::move(sub))
         {}
+    //! Get the pointer to this type object
+    std::shared_ptr<const tuple_t> ptr() const;
+
 };
 
 
@@ -162,6 +170,9 @@ public:
     const tuple_t& args() const;
     //! Gets the result type
     const type_t& result() const;
+    //! Get the pointer to this type object
+    std::shared_ptr<const fn_t> ptr() const;
+
 };
 
 /*!

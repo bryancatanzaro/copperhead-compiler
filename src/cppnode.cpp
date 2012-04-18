@@ -3,6 +3,7 @@
 using std::shared_ptr;
 using std::make_shared;
 using std::vector;
+using std::static_pointer_cast;
 
 namespace backend {
 
@@ -13,6 +14,7 @@ structure::structure(const std::shared_ptr<const name> &name,
       m_id(name),
       m_stmts(stmts),
       m_typevars(std::move(typevars)) {}
+
 const name& structure::id(void) const {
     return *m_id;
 }
@@ -27,6 +29,11 @@ structure::const_iterator structure::end(void) const {
     return boost::make_indirect_iterator(m_typevars.cend());
 }
 
+shared_ptr<const structure> structure::ptr() const {
+    return static_pointer_cast<const structure>(this->shared_from_this());
+}
+
+
 templated_name::templated_name(const std::string &id,
                                const std::shared_ptr<const ctype::tuple_t> &template_types,
                                const std::shared_ptr<const type_t> &type,
@@ -37,6 +44,11 @@ templated_name::templated_name(const std::string &id,
 const ctype::tuple_t& templated_name::template_types() const {
     return *m_template_types;
 }
+
+shared_ptr<const templated_name> templated_name::ptr() const {
+    return static_pointer_cast<const templated_name>(this->shared_from_this());
+}
+
 
 include::include(const std::shared_ptr<const literal> &id,
                  const char open,
@@ -54,6 +66,11 @@ const char& include::close() const {
     return m_close;
 }
 
+shared_ptr<const include> include::ptr() const {
+    return static_pointer_cast<const include>(this->shared_from_this());
+}
+
+
 typedefn::typedefn(const std::shared_ptr<const ctype::type_t> origin,
                    const std::shared_ptr<const ctype::type_t> rename)
     : statement(*this),
@@ -66,6 +83,11 @@ const ctype::type_t& typedefn::rename() const {
     return *m_rename;
 }
 
+shared_ptr<const typedefn> typedefn::ptr() const {
+    return static_pointer_cast<const typedefn>(this->shared_from_this());
+}
+
+
 namespace_block::namespace_block(const std::string& name,
                                  const std::shared_ptr<const suite>& stmts)
     : statement(*this), m_name(name), m_stmts(stmts) {}
@@ -76,6 +98,10 @@ const std::string& namespace_block::name() const {
 
 const suite& namespace_block::stmts() const {
     return *m_stmts;
+}
+
+shared_ptr<const namespace_block> namespace_block::ptr() const {
+    return static_pointer_cast<const namespace_block>(this->shared_from_this());
 }
 
 

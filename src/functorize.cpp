@@ -291,7 +291,7 @@ functorize::result_type functorize::operator()(const apply &n) {
                 instantiate_fn(closed_fn, *augmented_fn_t);
             n_arg_list.push_back(
                 make_shared<const closure>(
-                    static_pointer_cast<const tuple>(n_closure.args().ptr()),
+                    n_closure.args().ptr(),
                     instantiated_fn,
                     n_closure.type().ptr(),
                     n_closure.ctype().ptr()));

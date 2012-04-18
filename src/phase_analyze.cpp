@@ -66,8 +66,8 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
                 boost::apply_visitor(*this, n.stmts()));
         result_type result =
             make_shared<const procedure>(
-                static_pointer_cast<const name>(n.id().ptr()),
-                static_pointer_cast<const tuple>(n.args().ptr()),
+                n.id().ptr(),
+                n.args().ptr(),
                 stmts,
                 n.type().ptr(),
                 n.ctype().ptr(),
@@ -82,7 +82,7 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
 
 void phase_analyze::add_phase_boundary(const name& n) {
     shared_ptr<const name> p_n =
-        static_pointer_cast<const name>(n.ptr());
+        n.ptr();
     shared_ptr<const name> p_result =
         make_shared<const name>(
             detail::complete(n.id()),
@@ -141,8 +141,7 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
     for(auto i = n.args().begin();
         i != n.args().end();
         i++, j++) {
-        shared_ptr<const name> p_i = static_pointer_cast<const name>(i->ptr());
-        shared_ptr<const expression> new_arg = p_i;
+        shared_ptr<const expression> new_arg = i->ptr();
         //If we have something other than a name, assume it's invariant
         if (detail::isinstance<name>(*i)) {
             const name& id = detail::up_get<name>(*i);
@@ -192,8 +191,8 @@ phase_analyze::result_type phase_analyze::operator()(const ret& n) {
 ;
     //Returns can only be names
     assert(detail::isinstance<name>(n.val()));
-    shared_ptr<const name> new_result =
-        static_pointer_cast<const name>(n.val().ptr());
+    shared_ptr<const expression> new_result =
+        n.val().ptr();
     const name& return_name = detail::up_get<name>(n.val());
     if (m_substitutions.exists(return_name.id())) {
         //Phase boundary already happened, use complete version

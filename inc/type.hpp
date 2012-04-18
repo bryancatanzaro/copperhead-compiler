@@ -82,7 +82,7 @@ public:
   \param other type to copy from
 */
     type_t(const type_t &other);
-//! Get the pointer to this type object
+    //! Get the pointer to this type object
     std::shared_ptr<const type_t> ptr() const;
 };
 

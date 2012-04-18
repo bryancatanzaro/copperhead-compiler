@@ -159,7 +159,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
             make_shared<const bind>(
                 result_id,
                 make_shared<const apply>(
-                    static_pointer_cast<const name>(n.id().ptr()),
+                    n.id().ptr(),
                     make_shared<const tuple>(
                         move(getter_args))));
         shared_ptr<const ret> dynamize = make_shared<const ret>(result_id);

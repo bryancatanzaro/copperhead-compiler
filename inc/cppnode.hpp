@@ -68,6 +68,9 @@ public:
     const_iterator begin(void) const;
     //! Gets iterator to end of template arguments
     const_iterator end(void) const;
+    /*! When we need to get at the pointer holding a structure */
+    std::shared_ptr<const structure> ptr() const;
+
 };
 
 //! A templated name, such as shared_ptr<int>
@@ -100,6 +103,9 @@ public:
   \return A tuple of types which are used to instantiate this name
 */
     const ctype::tuple_t& template_types() const;
+    /*! When we need to get at the pointer holding a templated_name */
+    std::shared_ptr<const templated_name> ptr() const;
+
 };
 
 //! AST node representing a C include statement
@@ -130,6 +136,9 @@ public:
     const char& open() const;
     //! Gets the character which closes the include statement
     const char& close() const;
+    /*! When we need to get at the pointer holding a include */
+    std::shared_ptr<const include> ptr() const;
+
 };
 
 //! AST node representing a C typedef statement
@@ -155,6 +164,9 @@ public:
     const ctype::type_t& origin() const;
     //! Gets the rename type
     const ctype::type_t& rename() const;
+    /*! When we need to get at the pointer holding a typedefn */
+    std::shared_ptr<const typedefn> ptr() const;
+
 };
 
 //! AST node representing a C++ namespace block
@@ -180,6 +192,9 @@ public:
     const std::string& name() const;
     //! Gets the statement contained in the namespace
     const suite& stmts() const;
+    /*! When we need to get at the pointer holding a namespace_block */
+    std::shared_ptr<const namespace_block> ptr() const;
+
 };
 
 /*! 

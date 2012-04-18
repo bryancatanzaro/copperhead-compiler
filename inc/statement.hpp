@@ -39,6 +39,10 @@ protected:
     statement(Derived &self)
         : node(self)
         {}
+public:
+    /*! When we need to get at the pointer holding a statement */
+    std::shared_ptr<const statement> ptr() const;
+
 };
 
 //! AST node for the Return statement.
@@ -56,6 +60,9 @@ protected:
     const std::shared_ptr<const expression> m_val;
 public:
     const expression& val(void) const;
+    /*! When we need to get at the pointer holding a ret */
+    std::shared_ptr<const ret> ptr() const;
+
 };
 //! AST node for the Bind statement.
 /*! "$lhs = $rhs"
@@ -77,6 +84,9 @@ protected:
 public:
     const expression& lhs(void) const;
     const expression& rhs(void) const;
+    /*! When we need to get at the pointer holding a bind */
+    std::shared_ptr<const bind> ptr() const;
+
 };
 
 //! AST node for the Call statement.
@@ -97,6 +107,9 @@ public:
 
     call(const std::shared_ptr<const apply> &n);
     const apply& sub(void) const;
+    /*! When we need to get at the pointer holding a call */
+    std::shared_ptr<const call> ptr() const;
+
 };
         
 //! AST node for the Procedure statement.
@@ -136,6 +149,9 @@ public:
     const type_t& type(void) const;
     const ctype::type_t& ctype(void) const;
     const std::string& place(void) const;
+    /*! When we need to get at the pointer holding a procedure */
+    std::shared_ptr<const procedure> ptr() const;
+
 
 };
 //! AST node for conditional statements
@@ -161,6 +177,9 @@ public:
     const expression& cond(void) const;
     const suite& then(void) const;
     const suite& orelse(void) const;
+    /*! When we need to get at the pointer holding a conditional */
+    std::shared_ptr<const conditional> ptr() const;
+
 };
 
 
@@ -181,6 +200,9 @@ public:
     const_iterator begin() const;
     const_iterator end() const;
     int size() const;
+    /*! When we need to get at the pointer holding a suite */
+    std::shared_ptr<const suite> ptr() const;
+
 };
 
 /*! 

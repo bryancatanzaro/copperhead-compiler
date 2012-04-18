@@ -67,9 +67,12 @@ cu_to_c::result_type cu_to_c::operator()(const polytype_t& p) {
 
 type_convert::type_convert() : m_c() {}
 type_convert::result_type type_convert::operator()(const procedure &p) {
-    shared_ptr<const name> id = static_pointer_cast<const name>(this->operator()(p.id()));
-    shared_ptr<const tuple> args = static_pointer_cast<const tuple>(this->operator()(p.args()));
-    shared_ptr<const suite> stmts = static_pointer_cast<const suite>(this->operator()(p.stmts()));
+    shared_ptr<const name> id =
+        static_pointer_cast<const name>(this->operator()(p.id()));
+    shared_ptr<const tuple> args =
+        static_pointer_cast<const tuple>(this->operator()(p.args()));
+    shared_ptr<const suite> stmts =
+        static_pointer_cast<const suite>(this->operator()(p.stmts()));
     shared_ptr<const type_t> t = p.type().ptr();
         
     //Yes, I really want to make a ctype from a type. That's the point!

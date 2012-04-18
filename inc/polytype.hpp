@@ -36,6 +36,10 @@ public:
     const_iterator begin() const;
 
     const_iterator end() const;
+
+    //! Get the pointer to this type object
+    std::shared_ptr<const polytype_t> ptr() const;
+
 };
 
 }

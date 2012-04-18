@@ -149,6 +149,8 @@ public:
     const_iterator end() const;
     //! Number of subtypes in this monotype. Returns 0 for non-nested types.
     int size() const;
+    //! Get pointer holding this type_t object
+    std::shared_ptr<const monotype_t> ptr() const;
 };
 
 extern std::shared_ptr<const monotype_t> int32_mt;
@@ -190,6 +192,22 @@ public:
     const type_t& sub() const;
     //! Gets a pointer to the type of the element of the Sequence
     std::shared_ptr<const type_t> p_sub() const;
+    //! Get pointer holding this type_t object
+    std::shared_ptr<const sequence_t> ptr() const;
+};
+
+//! cuarray_t functions as a sequence_t, but prints differently
+class cuarray_t :
+        public sequence_t
+{
+public:
+    //! Basic constructor
+/*!   
+  \param sub Type of element of the Sequence
+*/
+    cuarray_t(const std::shared_ptr<const type_t> &sub);
+    //! Get pointer holding this type_t object
+    std::shared_ptr<const cuarray_t> ptr() const;
 };
 
 //! Tuple type.
@@ -201,7 +219,9 @@ public:
 /*! 
   \param sub A vector of types contained in this tuple.
 */
-    tuple_t(std::vector<std::shared_ptr<const type_t> > && sub);  
+    tuple_t(std::vector<std::shared_ptr<const type_t> > && sub);
+    //! Get pointer holding this type_t object
+    std::shared_ptr<const tuple_t> ptr() const;
 };
 
 //! Function type
@@ -220,15 +240,8 @@ public:
     const tuple_t& args() const;
     //! Gets the result type.
     const type_t& result() const;
-};
-
-//! Cuarray type
-/*! This is a sequence type, but is actually a container in C++
-   and has to print differently. */
-class cuarray_t :
-        public sequence_t {
-public:
-    cuarray_t(const std::shared_ptr<const type_t> sub);
+    //! Get pointer holding this type_t object
+    std::shared_ptr<const fn_t> ptr() const;
 };
 
 //! Polymorphic type
@@ -274,6 +287,8 @@ public:
     const_iterator begin() const;
     //! Iterator to end of type variables
     const_iterator end() const;
+    //! Get pointer holding this type_t object
+    std::shared_ptr<const polytype_t> ptr() const;
 };
 
 /*

@@ -26,7 +26,7 @@ type_base make_type_base(void *ptr, const type_base &other) {
 type_t::type_t(const type_t &other)
     : super_t(detail::make_type_base(this, other)) {}
 
-std::shared_ptr<const type_t> type_t::ptr() const {
+shared_ptr<const type_t> type_t::ptr() const {
     return this->shared_from_this();
 }
 
@@ -49,6 +49,10 @@ monotype_t::const_iterator monotype_t::end() const {
 
 int monotype_t::size() const {
     return m_params.size();
+}
+
+shared_ptr<const monotype_t> monotype_t::ptr() const {
+    return static_pointer_cast<const monotype_t>(this->shared_from_this());
 }
 
 
@@ -77,23 +81,35 @@ sequence_t::sequence_t(const shared_ptr<const type_t> &sub)
 template<typename Derived>
 sequence_t::sequence_t(Derived& self,
                        const std::string& name,
-                       const std::shared_ptr<const type_t>& sub)
+                       const shared_ptr<const type_t>& sub)
     : monotype_t(self,
                  name,
-                 utility::make_vector<std::shared_ptr<const type_t> >(sub)) {}
+                 utility::make_vector<shared_ptr<const type_t> >(sub)) {}
 
 const type_t& sequence_t::sub() const {
     return *m_params[0];
 }
 
-shared_ptr<const type_t> sequence_t::p_sub() const {
-    return m_params[0];
+shared_ptr<const sequence_t> sequence_t::ptr() const {
+    return static_pointer_cast<const sequence_t>(this->shared_from_this());
+}
+
+cuarray_t::cuarray_t(const shared_ptr<const type_t>& sub)
+    : sequence_t(*this, "cuarray_t", sub) {}
+
+shared_ptr<const cuarray_t> cuarray_t::ptr() const {
+    return static_pointer_cast<const cuarray_t>(this->shared_from_this());
 }
 
 tuple_t::tuple_t(vector<shared_ptr<const type_t> > && sub)
     : monotype_t(*this,
                  "Tuple",
                  std::move(sub)) {}
+
+shared_ptr<const tuple_t> tuple_t::ptr() const {
+    return static_pointer_cast<const tuple_t>(this->shared_from_this());
+}
+
 
 fn_t::fn_t(const shared_ptr<const tuple_t> args,
            const shared_ptr<const type_t> result)
@@ -110,10 +126,9 @@ const type_t& fn_t::result() const {
     return *m_params[1];
 }
 
-
-cuarray_t::cuarray_t(const shared_ptr<const type_t> sub) :
-    sequence_t(*this, "sp_cuarray", sub) {}
-
+shared_ptr<const fn_t> fn_t::ptr() const {
+    return static_pointer_cast<const fn_t>(this->shared_from_this());
+}
 
 polytype_t::polytype_t(vector<shared_ptr<const type_t> > && vars,
                        const shared_ptr<const monotype_t>& monotype)
@@ -129,6 +144,10 @@ polytype_t::const_iterator polytype_t::begin() const {
 
 polytype_t::const_iterator polytype_t::end() const {
     return boost::make_indirect_iterator(m_vars.cend());
+}
+
+shared_ptr<const polytype_t> polytype_t::ptr() const {
+    return static_pointer_cast<const polytype_t>(this->shared_from_this());
 }
 
 }

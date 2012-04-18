@@ -60,6 +60,7 @@ void ctype_printer::operator()(const sequence_t &st) {
     m_os << ">";
     m_need_space.top() = true;
 }
+
 void ctype_printer::operator()(const cuarray_t &ct) {
     //Because cuarray_t is a variant, we don't want to
     //print out the template definition.

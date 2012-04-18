@@ -36,8 +36,7 @@ find_includes::result_type find_includes::operator()(const suite& n) {
     for(auto i = n.begin();
         i != n.end();
         i++) {
-        augmented_statements.push_back(
-            static_pointer_cast<const statement>(i->ptr()));
+        augmented_statements.push_back(i->ptr());
     }
     return make_shared<const suite>(move(augmented_statements));
 }
