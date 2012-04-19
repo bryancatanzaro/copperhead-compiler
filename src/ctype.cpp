@@ -95,7 +95,7 @@ shared_ptr<const sequence_t> sequence_t::ptr() const {
 }
 
 cuarray_t::cuarray_t(const shared_ptr<const type_t>& sub)
-    : sequence_t(*this, "cuarray_t", sub) {}
+    : sequence_t(*this, "sp_cuarray", sub) {}
 
 shared_ptr<const cuarray_t> cuarray_t::ptr() const {
     return static_pointer_cast<const cuarray_t>(this->shared_from_this());
