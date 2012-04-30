@@ -16,8 +16,7 @@ wrap::wrap(const copperhead::system_variant& target,
            const string& entry_point)
     : m_target(target),
       m_entry_point(entry_point),
-      m_wrapping(false),
-      m_wrapper(){}
+      m_wrapping(false) {}
 
 
 wrap::result_type wrap::operator()(const procedure &n) {
@@ -215,21 +214,6 @@ wrap::result_type wrap::operator()(const ret& n) {
         static_pointer_cast<const ret>(this->rewriter::operator()(n));
     
     return rewritten;
-}
-wrap::result_type wrap::operator()(const suite&n) {
-    vector<shared_ptr<const statement> > stmts;
-    for(auto i = n.begin();
-        i != n.end();
-        i++) {
-        stmts.push_back(
-            static_pointer_cast<const statement>(
-                boost::apply_visitor(*this, *i)));
-    }
-    if (!m_wrapping && m_wrapper) {
-        stmts.push_back(m_wrapper);
-        m_wrapper = shared_ptr<const procedure>();
-    }
-    return result_type(new suite(move(stmts)));
 }
 
 

@@ -48,7 +48,6 @@ private:
     const copperhead::system_variant& m_target;
     const std::string& m_entry_point;
     bool m_wrapping;
-    std::shared_ptr<const procedure> m_wrapper;
 public:
     //! Constructor
 /*! 
@@ -62,8 +61,6 @@ public:
     result_type operator()(const procedure &n);
     //! Rewrite rule for \p ret nodes
     result_type operator()(const ret& n);
-    //! Rewrite rule for \p suite nodes
-    result_type operator()(const suite&n);
 };
 
 /*!
