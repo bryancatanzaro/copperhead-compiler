@@ -2,7 +2,7 @@
  *  \brief The compiler implementation.
  */
 #include "compiler.hpp"
-
+#define TRACE
 namespace backend {
 compiler::compiler(const std::string& entry_point,
                    const copperhead::system_variant& backend_tag)
