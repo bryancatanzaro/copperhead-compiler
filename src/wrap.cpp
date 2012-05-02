@@ -171,7 +171,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
     } else {
         return this->rewriter::operator()(n);
     }
-        
+    
 }
 wrap::result_type wrap::operator()(const ret& n) {
     if (m_wrapping && detail::isinstance<name, node>(n.val())) {
