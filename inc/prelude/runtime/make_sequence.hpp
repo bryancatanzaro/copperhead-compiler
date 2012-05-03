@@ -23,6 +23,8 @@
 
 namespace copperhead {
 
+namespace detail {
+
 template<typename S>
 struct make_seq_impl {};
 
@@ -57,6 +59,8 @@ struct make_seq_impl<sequence<Tag, T, D > > {
     }
 };
 
+}
+
 template<typename S>
 S make_sequence(sp_cuarray& in, system_variant t, bool write) {
     cuarray& r = *in;
@@ -90,7 +94,7 @@ S make_sequence(sp_cuarray& in, system_variant t, bool write) {
             i->second.second = system_variant_equal(i->first, canonical_tag);
         }
     }
-    return make_seq_impl<S>::fun(s.first.begin(), r.m_l.begin(), r.m_o);
+    return detail::make_seq_impl<S>::fun(s.first.begin(), r.m_l.begin(), r.m_o);
 }
 
 }

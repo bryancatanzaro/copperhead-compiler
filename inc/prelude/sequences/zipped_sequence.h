@@ -20,6 +20,7 @@
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/tuple.h>
 #include <thrust/detail/tuple_meta_transform.h>
+#include <thrust/detail/type_traits.h>
 #include <prelude/basic/detail/retagged_iterator_type.h>
 
 namespace copperhead {
@@ -35,16 +36,21 @@ template<typename Seq>
 struct extract_reference {
     typedef typename Seq::value_type& type;
 };
+
 template<typename Seq>
 struct extract_iterator {
     typedef typename Seq::iterator_type type;
 };
+
+template<typename index_type>
 struct index_sequence {
-    int m_index;
-    index_sequence(int index) : m_index(index) {}
-    //XXX Fix references to zipped sequences!
+    index_type m_index;
+    __host__ __device__
+    index_sequence(index_type index) : m_index(index) {}
+
     template<typename Seq>
-    typename Seq::value_type operator()(Seq& in) {
+    __host__ __device__
+    typename Seq::ref_type operator()(Seq in) {
         return in[m_index];
     }
 };
@@ -66,25 +72,24 @@ struct extract_end {
 template<typename S>
 struct zipped_sequence {
     S m_seqs;
+    typedef typename thrust::tuple_element<0, S>::type::index_type index_type;
     typedef typename thrust::tuple_element<0, S>::type::tag tag;
     typedef typename thrust::detail::tuple_meta_transform<
         S, detail::extract_value>::type value_type;
-    //XXX Fix references to zipped sequences!
     typedef typename thrust::detail::tuple_meta_transform<
-        S, detail::extract_value>::type reference_type;
+        S, detail::extract_reference>::type reference_type;
     typedef typename thrust::zip_iterator<
         typename thrust::detail::tuple_meta_transform<
             S, detail::extract_iterator>::type > ZI;
     typedef typename detail::retagged_iterator_type<ZI, tag>::type iterator_type;
-    
+    __host__ __device__
     zipped_sequence(S seqs) : m_seqs(seqs) {}
-    //XXX Can only dereference these on the host!!
-    reference_type operator[](int index) {
-        //XXX Fix references to zipped sequences!
-        return thrust::detail::tuple_host_transform
-            <detail::extract_value, S, detail::index_sequence>(
+    __host__ __device__
+    reference_type operator[](index_type index) {
+        return thrust::detail::tuple_host_device_transform
+            <detail::extract_reference, S, detail::index_sequence<index_type> >(
                 m_seqs,
-                detail::index_sequence(index));
+                detail::index_sequence<index_type>(index));
     }
     //XXX Can only call begin() from host!!
     iterator_type begin() const {
@@ -100,7 +105,8 @@ struct zipped_sequence {
                                          m_seqs,
                                          detail::extract_end())));
     }
-    int size() const {
+    __host__ __device__
+    index_type size() const {
         return thrust::get<0>(m_seqs).size();
     }
 };
