@@ -75,6 +75,10 @@ shared_ptr<const tuple_t> tuple_t::ptr() const {
     return static_pointer_cast<const tuple_t>(this->shared_from_this());
 }
 
+int tuple_t::arity() const {
+    return m_params.size();
+}
+
 fn_t::fn_t(const shared_ptr<const tuple_t> args,
            const shared_ptr<const type_t> result)
     : monotype_t(*this,

@@ -18,23 +18,75 @@
 #pragma once
 
 #include <prelude/runtime/cuarray.hpp>
-#include <prelude/runtime/make_cu_and_c_types.hpp>
+#include <prelude/runtime/make_type_holder.hpp>
 #include <prelude/runtime/tags.h>
 
 namespace copperhead {
 
-template<typename T>
-sp_cuarray make_cuarray(size_t s) {
-    cu_and_c_types* type_holder =
-        make_type_holder(T());
-    sp_cuarray r(new cuarray(type_holder, 0));
-    r->push_back_length(s);    
+namespace detail {
 
-    r->add_chunk(boost::shared_ptr<chunk>(new chunk(cpp_tag(), s * sizeof(T))), true);
+template<typename T>
+struct make_cuarray_impl {
+    static void fun(sp_cuarray r, size_t s) {
+        add_type(r->m_t.get(), T());
+
+        r->add_chunk(boost::shared_ptr<chunk>(new chunk(cpp_tag(), s * sizeof(T))), true);
 #ifdef CUDA_SUPPORT
-    r->add_chunk(boost::shared_ptr<chunk>(new chunk(cuda_tag(), s * sizeof(T))), true);
+        r->add_chunk(boost::shared_ptr<chunk>(new chunk(cuda_tag(), s * sizeof(T))), true);
 #endif
     
+    }
+};
+
+template<typename HT, typename TT>
+struct make_cuarray_impl<thrust::detail::cons<HT, TT> > {
+    static void fun(sp_cuarray r, size_t s) {
+        make_cuarray_impl<HT>::fun(r, s);
+        make_cuarray_impl<TT>::fun(r, s);
+    }
+};
+
+template<typename T0,
+         typename T1,
+         typename T2,
+         typename T3,
+         typename T4,
+         typename T5,
+         typename T6,
+         typename T7,
+         typename T8,
+         typename T9>
+struct make_cuarray_impl<
+    thrust::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> > {
+    typedef thrust::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> result_type;
+    static void fun(
+        sp_cuarray r, size_t s) {
+        detail::begin(r->m_t.get());
+        make_cuarray_impl<
+            thrust::detail::cons<
+                typename result_type::head_type,
+                typename result_type::tail_type> >::fun(r, s);
+        detail::end_tuple(r->m_t.get());
+    }
+};
+
+template<>
+struct make_cuarray_impl<thrust::null_type> {
+    static void fun(sp_cuarray, size_t) {
+    }
+};
+
+}
+
+template<typename T>
+sp_cuarray make_cuarray(size_t s) {
+    type_holder* th = detail::make_type_holder();
+    detail::begin(th);
+    sp_cuarray r(new cuarray(th));
+    r->push_back_length(s);    
+    detail::make_cuarray_impl<T>::fun(r, s);
+    detail::end_sequence(th);
+    detail::finalize_type(th);
     return r;
 }
 

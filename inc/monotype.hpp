@@ -147,7 +147,7 @@ public:
         {}
     //! Get the pointer to this type object
     std::shared_ptr<const tuple_t> ptr() const;
-
+    int arity() const;
 };
 
 
