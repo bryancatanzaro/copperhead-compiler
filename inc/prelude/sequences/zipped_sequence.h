@@ -34,7 +34,7 @@ struct extract_value {
 
 template<typename Seq>
 struct extract_reference {
-    typedef typename Seq::value_type& type;
+    typedef typename Seq::ref_type type;
 };
 
 template<typename Seq>
