@@ -111,36 +111,4 @@ struct zipped_sequence {
     }
 };
 
-template<typename T0>
-zipped_sequence<thrust::tuple<T0> >
-make_zipped_sequence(T0 t0) {
-    return zipped_sequence<
-        thrust::tuple<T0> >(
-            thrust::make_tuple(t0));
-}
-
-template<typename T0, typename T1>
-zipped_sequence<thrust::tuple<T0, T1> >
-make_zipped_sequence(T0 t0, T1 t1) {
-    return zipped_sequence<
-        thrust::tuple<T0, T1> >(
-            thrust::make_tuple(t0, t1));
-}
-
-template<typename T0, typename T1, typename T2>
-zipped_sequence<thrust::tuple<T0, T1, T2> >
-make_zipped_sequence(T0 t0, T1 t1, T2 t2) {
-    return zipped_sequence<
-        thrust::tuple<T0, T1, T2> >(
-            thrust::make_tuple(t0, t1, t2));
-}
-
-template<typename T0, typename T1, typename T2, typename T3>
-zipped_sequence<thrust::tuple<T0, T1, T2, T3> >
-make_zipped_sequence(T0 t0, T1 t1, T2 t2, T3 t3) {
-    return zipped_sequence<
-        thrust::tuple<T0, T1, T2, T3> >(
-            thrust::make_tuple(t0, t1, t2, t3));
-}
-
 }
