@@ -32,14 +32,91 @@ struct extract_value {
     typedef typename Seq::value_type type;
 };
 
+template<typename S0,
+         typename S1,
+         typename S2,
+         typename S3,
+         typename S4,
+         typename S5,
+         typename S6,
+         typename S7,
+         typename S8,
+         typename S9>
+struct extract_value<
+    thrust::tuple<S0, S1, S2, S3, S4,
+                  S5, S6, S7, S8, S9> > {
+    typedef thrust::tuple<S0, S1, S2, S3, S4,
+                          S5, S6, S7, S8, S9> sub_tuple;
+    typedef typename thrust::detail::tuple_meta_transform<
+        sub_tuple, copperhead::detail::extract_value>::type type;
+};
+
+template<>
+struct extract_value<
+    thrust::null_type> {
+    typedef thrust::null_type type;
+};
+
 template<typename Seq>
 struct extract_reference {
     typedef typename Seq::ref_type type;
 };
 
+
+template<typename S0,
+         typename S1,
+         typename S2,
+         typename S3,
+         typename S4,
+         typename S5,
+         typename S6,
+         typename S7,
+         typename S8,
+         typename S9>
+struct extract_reference<
+    thrust::tuple<S0, S1, S2, S3, S4,
+                  S5, S6, S7, S8, S9> > {
+    typedef thrust::tuple<S0, S1, S2, S3, S4,
+                          S5, S6, S7, S8, S9> sub_tuple;
+    typedef typename thrust::detail::tuple_meta_transform<
+        sub_tuple, copperhead::detail::extract_reference>::type type;
+};
+
+template<>
+struct extract_reference<
+    thrust::null_type> {
+    typedef thrust::null_type type;
+};
+
 template<typename Seq>
 struct extract_iterator {
     typedef typename Seq::iterator_type type;
+};
+
+
+template<typename S0,
+         typename S1,
+         typename S2,
+         typename S3,
+         typename S4,
+         typename S5,
+         typename S6,
+         typename S7,
+         typename S8,
+         typename S9>
+struct extract_iterator<
+    thrust::tuple<S0, S1, S2, S3, S4,
+                  S5, S6, S7, S8, S9> > {
+    typedef thrust::tuple<S0, S1, S2, S3, S4,
+                          S5, S6, S7, S8, S9> sub_tuple;
+    typedef typename thrust::detail::tuple_meta_transform<
+        sub_tuple, copperhead::detail::extract_iterator>::type type;
+};
+
+template<>
+struct extract_iterator<
+    thrust::null_type> {
+    typedef thrust::null_type type;
 };
 
 template<typename index_type>
@@ -77,7 +154,7 @@ struct zipped_sequence {
     typedef typename thrust::detail::tuple_meta_transform<
         S, detail::extract_value>::type value_type;
     typedef typename thrust::detail::tuple_meta_transform<
-        S, detail::extract_reference>::type& reference_type;
+        S, detail::extract_reference>::type& ref_type;
     typedef typename thrust::zip_iterator<
         typename thrust::detail::tuple_meta_transform<
             S, detail::extract_iterator>::type > ZI;
@@ -85,7 +162,7 @@ struct zipped_sequence {
     __host__ __device__
     zipped_sequence(S seqs) : m_seqs(seqs) {}
     __host__ __device__
-    reference_type operator[](index_type index) {
+    ref_type operator[](index_type index) {
         return thrust::detail::tuple_host_device_transform
             <detail::extract_reference, S, detail::index_sequence<index_type> >(
                 m_seqs,
