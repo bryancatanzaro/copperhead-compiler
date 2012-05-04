@@ -31,6 +31,7 @@ class sequence_t;
 class tuple_t;
 class fn_t;
 class cuarray_t;
+class zipped_sequence_t;
 
 namespace detail {
 typedef boost::variant<
@@ -39,7 +40,8 @@ typedef boost::variant<
     sequence_t &,
     tuple_t &,
     fn_t &,
-    cuarray_t &
+    cuarray_t &,
+    zipped_sequence_t &
     > type_base;
 
 struct make_type_base_visitor
@@ -208,6 +210,20 @@ public:
     cuarray_t(const std::shared_ptr<const type_t> &sub);
     //! Get pointer holding this type_t object
     std::shared_ptr<const cuarray_t> ptr() const;
+};
+
+//! zipped_sequence_t functions as a sequence_t, but prints differently
+class zipped_sequence_t :
+        public sequence_t
+{
+public:
+    //! Basic constructor
+/*!   
+  \param sub Type of element of the Sequence
+*/
+    zipped_sequence_t(const std::shared_ptr<const tuple_t> &sub);
+    //! Get pointer holding this type_t object
+    std::shared_ptr<const zipped_sequence_t> ptr() const;
 };
 
 //! Tuple type.

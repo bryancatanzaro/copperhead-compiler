@@ -61,6 +61,18 @@ void ctype_printer::operator()(const sequence_t &st) {
     m_need_space.top() = true;
 }
 
+void ctype_printer::operator()(const zipped_sequence_t &zt) {
+    m_os << zt.name() << "<";
+    m_need_space.push(false);
+    boost::apply_visitor(*this, zt.sub());
+    if (m_need_space.top())
+        m_os << " ";
+    m_need_space.pop();
+    m_os << ">";
+    m_need_space.top() = true;
+    
+}
+
 void ctype_printer::operator()(const cuarray_t &ct) {
     //Because cuarray_t is a variant, we don't want to
     //print out the template definition.

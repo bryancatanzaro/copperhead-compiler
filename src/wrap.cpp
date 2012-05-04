@@ -2,6 +2,7 @@
 
 #include "cpp_printer.hpp"
 #include "type_printer.hpp"
+#include "utility/up_get.hpp"
 using std::string;
 using std::vector;
 using std::shared_ptr;
@@ -38,7 +39,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 
                 //Get ctype of argument
                 const ctype::sequence_t& arg_ct =
-                    boost::get<const ctype::sequence_t&>(i->ctype());
+                    detail::up_get<const ctype::sequence_t&>(i->ctype());
                 
                 //Since argument is a sequence, get its c subtype
                 const ctype::type_t& arg_sub_ct = arg_ct.sub();
@@ -134,7 +135,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
         if (detail::isinstance<ctype::sequence_t>(
                 previous_c_res_t)) {
             const ctype::sequence_t& res_seq_t =
-                boost::get<const ctype::sequence_t&>(previous_c_res_t);
+                detail::up_get<const ctype::sequence_t&>(previous_c_res_t);
             shared_ptr<const ctype::type_t> sub_res_t =
                 res_seq_t.sub().ptr();
                 
@@ -171,7 +172,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
     } else {
         return this->rewriter::operator()(n);
     }
-        
+    
 }
 wrap::result_type wrap::operator()(const ret& n) {
     if (m_wrapping && detail::isinstance<name, node>(n.val())) {

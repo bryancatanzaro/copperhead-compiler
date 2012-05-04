@@ -20,8 +20,13 @@
 #include <vector>
 #include <prelude/runtime/chunk.hpp>
 #include <prelude/sequences/sequence.h>
+#include <prelude/sequences/zipped_sequence.h>
+#include <cassert>
+#include <iostream>
 
 namespace copperhead {
+
+namespace detail {
 
 template<typename S>
 struct make_seq_impl {};
@@ -57,6 +62,56 @@ struct make_seq_impl<sequence<Tag, T, D > > {
     }
 };
 
+template<typename HT, typename TT>
+struct make_seq_impl<thrust::detail::cons<HT, TT> > {
+    static thrust::detail::cons<HT, TT> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
+                                            std::vector<size_t>::const_iterator l,
+                                            const size_t o=0) {
+        return thrust::detail::cons<HT, TT>(
+            make_seq_impl<HT>::fun(d, l, o),
+            make_seq_impl<TT>::fun(d+1, l, o));
+    }
+};
+
+template<typename S0,
+         typename S1,
+         typename S2,
+         typename S3,
+         typename S4,
+         typename S5,
+         typename S6,
+         typename S7,
+         typename S8,
+         typename S9>
+struct make_seq_impl<zipped_sequence<
+                         thrust::tuple<S0, S1, S2, S3, S4, S5, S6, S7, S8, S9> > > {
+    typedef thrust::tuple<S0, S1, S2, S3, S4, S5, S6, S7, S8, S9> sequences;
+    static zipped_sequence<sequences> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
+                                          std::vector<size_t>::const_iterator l,
+                                          const size_t o=0) {
+        std::cout << "Calling make_sequence constructor!" << std::endl;
+        sequences s = make_seq_impl<
+            thrust::detail::cons<
+                typename sequences::head_type,
+                typename sequences::tail_type> >::fun(d, l, o);
+        return zipped_sequence<sequences>(s);
+        
+    }
+};
+
+template<>
+struct make_seq_impl<thrust::null_type> {
+    static thrust::null_type fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
+                                 std::vector<size_t>::const_iterator l,
+                                 const size_t o=0) {
+        return thrust::null_type();
+    }
+};
+
+
+
+}
+
 template<typename S>
 S make_sequence(sp_cuarray& in, system_variant t, bool write) {
     cuarray& r = *in;
@@ -90,7 +145,7 @@ S make_sequence(sp_cuarray& in, system_variant t, bool write) {
             i->second.second = system_variant_equal(i->first, canonical_tag);
         }
     }
-    return make_seq_impl<S>::fun(s.first.begin(), r.m_l.begin(), r.m_o);
+    return detail::make_seq_impl<S>::fun(s.first.begin(), r.m_l.begin(), r.m_o);
 }
 
 }

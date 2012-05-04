@@ -1,16 +1,16 @@
 #include <prelude/runtime/cuarray.hpp>
-#include <prelude/runtime/cu_and_c_types.hpp>
+#include <prelude/runtime/type_holder.hpp>
 
 namespace copperhead {
 
-cuarray::cuarray(cu_and_c_types* t,
+cuarray::cuarray(type_holder* t,
                  size_t o)
     : m_t(t), m_o(o) {}
 
 cuarray::~cuarray() {
     //This is done just to move the destructor to somewhere nvcc can't see
     //because boost::scoped_ptr requires a complete type upon destruction
-    //And nvcc can't see the complete type of the cu_and_c_types object
+    //And nvcc can't see the complete type of the type_holder object
 }
 
 void cuarray::push_back_length(size_t l) {

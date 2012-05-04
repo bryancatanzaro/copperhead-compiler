@@ -35,18 +35,19 @@ typedef std::map<system_variant,
                  system_variant_less> data_map;
 
 //Forward declaration of PIMPL for hiding std::shared_ptr from NVCC
-class cu_and_c_types;
+class type_holder;
 
 struct cuarray {
     data_map m_d;
     std::vector<size_t> m_l;
-    boost::scoped_ptr<cu_and_c_types> m_t;
+    boost::scoped_ptr<type_holder> m_t;
     size_t m_o;
 
-    cuarray(cu_and_c_types* t,
-            size_t o);
+    //Assumes ownership of type_holder* t
+    cuarray(type_holder* t,
+            size_t o=0);
     //Must have explicit destructor because scoped_ptr requires type to be complete
-    //And we can't have the cu_and_c_types type be complete.
+    //And we can't have the type_holder type be complete.
     ~cuarray();
     size_t size() const;
     void push_back_length(size_t);
