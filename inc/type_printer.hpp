@@ -82,6 +82,8 @@ public:
     void operator()(const sequence_t &st);
     
     void operator()(const cuarray_t &ct);
+
+    void operator()(const zipped_sequence_t &zt);
     
     void operator()(const polytype_t &pt);
 

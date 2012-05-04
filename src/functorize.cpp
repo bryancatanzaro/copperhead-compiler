@@ -8,6 +8,9 @@ using std::vector;
 using std::move;
 using backend::utility::make_vector;
 
+#include <iostream>
+#include "type_printer.hpp"
+
 namespace backend {
 
 namespace detail {
@@ -34,8 +37,11 @@ void type_corresponder::operator()(const sequence_t &n) {
 }
 
 void type_corresponder::operator()(const tuple_t &n) {
-    //m_working must be a tuple_t or else the typechecking is wrong
-    assert(detail::isinstance<tuple_t>(*m_working));
+    //XXX What should we do if m_working is not a tuple, but n is?
+    //For now, we just don't harvest a correspondence
+    if (!detail::isinstance<tuple_t>(*m_working)) {
+        return;
+    }
     const tuple_t& working_tuple = boost::get<const tuple_t&>(*m_working);
     auto j = working_tuple.begin();
     for(auto i = n.begin();

@@ -20,7 +20,9 @@
 #include <vector>
 #include <prelude/runtime/chunk.hpp>
 #include <prelude/sequences/sequence.h>
+#include <prelude/sequences/zipped_sequence.h>
 #include <cassert>
+#include <iostream>
 
 namespace copperhead {
 
@@ -87,6 +89,7 @@ struct make_seq_impl<zipped_sequence<
     static zipped_sequence<sequences> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
                                           std::vector<size_t>::const_iterator l,
                                           const size_t o=0) {
+        std::cout << "Calling make_sequence constructor!" << std::endl;
         sequences s = make_seq_impl<
             thrust::detail::cons<
                 typename sequences::head_type,

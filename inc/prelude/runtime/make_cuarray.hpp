@@ -29,7 +29,6 @@ template<typename T>
 struct make_cuarray_impl {
     static void fun(sp_cuarray r, size_t s) {
         add_type(r->m_t.get(), T());
-
         r->add_chunk(boost::shared_ptr<chunk>(new chunk(cpp_tag(), s * sizeof(T))), true);
 #ifdef CUDA_SUPPORT
         r->add_chunk(boost::shared_ptr<chunk>(new chunk(cuda_tag(), s * sizeof(T))), true);

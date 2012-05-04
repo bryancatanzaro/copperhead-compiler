@@ -1,4 +1,5 @@
 #include "allocate.hpp"
+#include "utility/up_get.hpp"
 
 using std::vector;
 using std::shared_ptr;
@@ -63,23 +64,23 @@ allocate::result_type allocate::operator()(const bind &n) {
             n.lhs().ctype()) &&
         detail::isinstance<apply>(n.rhs())) {
 
-        //We can only deal with names on the LHS of a bind
-        //TUPLE FIX
         bool lhs_is_name = detail::isinstance<name>(n.lhs());
         assert(lhs_is_name);
         const name& pre_lhs = boost::get<const name&>(n.lhs());
 
         //Construct cuarray for result
-        const ctype::sequence_t& pre_lhs_ct =
-            boost::get<const ctype::sequence_t&>(pre_lhs.ctype());
-        shared_ptr<const ctype::type_t> sub_lhs_ct =
-            pre_lhs_ct.sub().ptr();
         shared_ptr<const ctype::type_t> impl_seq_ct =
-            make_shared<const ctype::polytype_t>(
-                make_vector<shared_ptr<const ctype::type_t> >
-                (make_shared<const ctype::monotype_t>(copperhead::to_string(m_target)))
-                (sub_lhs_ct),
-                make_shared<const ctype::monotype_t>("sequence"));
+            pre_lhs.ctype().ptr();
+        // const ctype::sequence_t& pre_lhs_ct =
+        //     detail::up_get<const ctype::sequence_t&>(pre_lhs.ctype());
+        // shared_ptr<const ctype::type_t> sub_lhs_ct =
+        //     pre_lhs_ct.sub().ptr();
+        // shared_ptr<const ctype::type_t> impl_seq_ct =
+        //     make_shared<const ctype::polytype_t>(
+        //         make_vector<shared_ptr<const ctype::type_t> >
+        //         (make_shared<const ctype::monotype_t>(copperhead::to_string(m_target)))
+        //         (sub_lhs_ct),
+        //         make_shared<const ctype::monotype_t>("sequence"));
         
         shared_ptr<const ctype::tuple_t> tuple_impl_seq_ct =
             make_shared<const ctype::tuple_t>(
