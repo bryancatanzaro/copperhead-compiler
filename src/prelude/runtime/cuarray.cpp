@@ -41,8 +41,38 @@ size_t cuarray::size() const {
     return s;
 }
 
-std::vector<boost::shared_ptr<chunk> >& cuarray::get_chunks(const system_variant& t) {
-    return m_d[t].first;
+std::vector<boost::shared_ptr<chunk> >& cuarray::get_chunks(const system_variant& t, bool write) {
+    system_variant canonical_tag = canonical_memory_tag(t);
+    std::pair<std::vector<boost::shared_ptr<chunk> >, bool>& s = m_d[canonical_tag];
+    //Do we need to copy?
+    if (!s.second) {
+        //Find a valid representation
+        std::pair<std::vector<boost::shared_ptr<chunk> >, bool> x;
+        x.second = false;
+        for(typename data_map::iterator i = m_d.begin();
+            (x.second == false) && (i != m_d.end());
+            i++) {
+            x = i->second;
+        }
+        assert(x.second == true);
+        //Copy from valid representation
+        for(std::vector<boost::shared_ptr<chunk> >::iterator i = s.first.begin(),
+                j = x.first.begin();
+            i != s.first.end();
+            i++, j++) {
+            (*i)->copy_from(**j);
+        }
+        s.second = true;
+    }
+    //Do we need to invalidate?
+    if (write) {
+        for(typename data_map::iterator i = m_d.begin();
+            i != m_d.end();
+            i++) {
+            i->second.second = system_variant_equal(i->first, canonical_tag);
+        }
+    }
+    return s.first;
 }
 
 bool cuarray::clean(const system_variant& t) {

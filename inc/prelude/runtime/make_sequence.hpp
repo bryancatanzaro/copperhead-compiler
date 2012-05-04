@@ -22,7 +22,6 @@
 #include <prelude/sequences/sequence.h>
 #include <prelude/sequences/zipped_sequence.h>
 #include <cassert>
-#include <iostream>
 
 namespace copperhead {
 
@@ -89,7 +88,6 @@ struct make_seq_impl<zipped_sequence<
     static zipped_sequence<sequences> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
                                           std::vector<size_t>::const_iterator l,
                                           const size_t o=0) {
-        std::cout << "Calling make_sequence constructor!" << std::endl;
         sequences s = make_seq_impl<
             thrust::detail::cons<
                 typename sequences::head_type,
@@ -115,37 +113,8 @@ struct make_seq_impl<thrust::null_type> {
 template<typename S>
 S make_sequence(sp_cuarray& in, system_variant t, bool write) {
     cuarray& r = *in;
-    system_variant canonical_tag = canonical_memory_tag(t);
-    std::pair<std::vector<boost::shared_ptr<chunk> >, bool>& s = r.m_d[canonical_tag];
-    //Do we need to copy?
-    if (!s.second) {
-        //Find a valid representation
-        std::pair<std::vector<boost::shared_ptr<chunk> >, bool> x;
-        x.second = false;
-        for(typename data_map::iterator i = r.m_d.begin();
-            (x.second == false) && (i != r.m_d.end());
-            i++) {
-            x = i->second;
-        }
-        assert(x.second == true);
-        //Copy from valid representation
-        for(std::vector<boost::shared_ptr<chunk> >::iterator i = s.first.begin(),
-                j = x.first.begin();
-            i != s.first.end();
-            i++, j++) {
-            (*i)->copy_from(**j);
-        }
-        s.second = true;
-    }
-    //Do we need to invalidate?
-    if (write) {
-        for(typename data_map::iterator i = r.m_d.begin();
-            i != r.m_d.end();
-            i++) {
-            i->second.second = system_variant_equal(i->first, canonical_tag);
-        }
-    }
-    return detail::make_seq_impl<S>::fun(s.first.begin(), r.m_l.begin(), r.m_o);
+    std::vector<boost::shared_ptr<chunk> >& chunks = r.get_chunks(t, write);
+    return detail::make_seq_impl<S>::fun(chunks.begin(), r.m_l.begin(), r.m_o);
 }
 
 }
