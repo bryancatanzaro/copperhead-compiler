@@ -46,7 +46,9 @@ struct sequenceize
         for(auto i = t.begin(); i != t.end(); i++) {
             subs.push_back(boost::apply_visitor(*this, *i));
         }
-        return make_shared<const ctype::tuple_t>(move(subs));
+        return make_shared<const ctype::zipped_sequence_t>(
+            make_shared<const ctype::tuple_t>(
+                move(subs)));
     }
     
 };
@@ -57,10 +59,7 @@ cu_to_c::result_type cu_to_c::operator()(const sequence_t & st) {
     //This is the conversion:
     if (isinstance<ctype::tuple_t>(*sub)) {
         //Convert leaf subtypes to sequences
-        return result_type(
-            new ctype::zipped_sequence_t(
-                static_pointer_cast<const ctype::tuple_t>(
-                    boost::apply_visitor(sequenceize(), *sub))));
+        return boost::apply_visitor(sequenceize(), *sub);
     }
     return result_type(new ctype::sequence_t(sub));
 }

@@ -53,7 +53,7 @@ struct cuarray {
     void push_back_length(size_t);
     void add_chunk(boost::shared_ptr<chunk> c,
                       const bool& v);
-    std::vector<boost::shared_ptr<chunk> >& get_chunks(const system_variant& t);
+    std::vector<boost::shared_ptr<chunk> >& get_chunks(const system_variant& t, bool write);
     bool clean(const system_variant& t);
     
 };
