@@ -27,6 +27,9 @@ namespace copperhead {
 
 namespace detail {
 
+//XXX A lot of this machinery could probably be replaced by using
+//thrust::zip_iterator more intelligently
+
 template<typename Seq>
 struct extract_value {
     typedef typename Seq::value_type type;
