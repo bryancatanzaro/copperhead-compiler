@@ -199,10 +199,13 @@ struct transformed_sequence {
     typedef typename zipped_sequence<S>::tag tag;
     typedef typename thrust::transform_iterator<detail::map_adapter<F>, I> TI;
     typedef typename detail::retagged_iterator_type<TI, tag>::type iterator_type;
+    typedef value_type& ref_type;
+    typedef typename zipped_sequence<S>::index_type index_type;
     transformed_sequence(F fn,
                          S seqs)
         : m_fn(detail::map_adapter<F>(fn)), m_seq(seqs) {}
-    value_type& operator[](int index) {
+    __host__ __device__
+    ref_type& operator[](int index) {
         return m_fn(m_seq[index]);
     }
     iterator_type begin() const {
@@ -211,7 +214,8 @@ struct transformed_sequence {
     iterator_type end() const {
         return thrust::retag<tag>(TI(m_seq.end(), m_fn));
     }
-    int size() const {
+    __host__ __device__
+    index_type size() const {
         return m_seq.size();
     }
 };
