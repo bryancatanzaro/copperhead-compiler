@@ -67,11 +67,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 
                 //Build type of implementation sequence
                 shared_ptr<const ctype::type_t> p_impl_seq_ct =
-                    make_shared<const ctype::polytype_t>(
-                        make_vector<shared_ptr<const ctype::type_t> >
-                        (make_shared<const ctype::monotype_t>(copperhead::to_string(m_target)))
-                        (arg_sub_ct.ptr()),
-                        make_shared<const ctype::monotype_t>("sequence"));
+                    arg_name.ctype().ptr();
 
                 //Stick it in a tuple for the templated_name
                 shared_ptr<const ctype::tuple_t> p_tuple_impl_seq_ct =

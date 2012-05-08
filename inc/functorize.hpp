@@ -26,14 +26,14 @@
 #include "type_convert.hpp"
 
 #include "type_printer.hpp"
-
+#include "environment.hpp"
 
 namespace backend {
 
 namespace detail {
 //! Matches two types
 /*! This class is used to match two Copperhead types, to discover how
-  they are related. This can be used for type propagation
+they are related. This can be used for type propagation
 */
 class type_corresponder
     : public boost::static_visitor<> {
@@ -43,19 +43,13 @@ private:
 
     std::shared_ptr<const type_t> m_working;
     type_map& m_corresponded;
-    //! Helper function to find return type of a procedure
-/*! 
-  \param n Procedure to be inspected
-  \return A pointer to the C++ implementation type of the procedure
-*/
-    std::shared_ptr<const ctype::type_t> get_return_type(const procedure& n);
+
 public:
     //! Constructor
-/*! 
-  
-  \param input Input type to be matched
-  \param corresponded Type map that will be amended with correspondence
-  \return 
+/*!
+\param input Input type to be matched
+\param corresponded Type map that will be amended with correspondence
+\return
 */
     type_corresponder(const std::shared_ptr<const type_t>& input,
                       type_map& corresponded);
@@ -73,38 +67,8 @@ public:
     //! Don't harvest correspondences from any other types
     template<typename N>
     void operator()(const N &n) {
-    }  
+    }
 };
-
-//!Updates types from a type map
-/*! After constructing a type map, we need to translate types with the
- *  type map.  For example:
- *
- *  Let's say we discovered that a -> Int
- *  Then we need to translate Seq(a) to Seq(Int)
- */
-class type_translator
-    : public boost::static_visitor<std::shared_ptr<const type_t> > {
-private:
-    typedef std::map<std::string,
-                     std::shared_ptr<const type_t> > type_map;
-    
-    const type_map& m_corresponded;
-public:
-    //! Constructor
-/*! 
-  
-  \param corresponded Type map constructed previously
-*/
-    type_translator(const type_map& corresponded);
-    result_type operator()(const monotype_t &m) const;
-    result_type operator()(const polytype_t &p) const;
-    result_type operator()(const sequence_t &s) const;
-    result_type operator()(const tuple_t &t) const;
-    result_type operator()(const fn_t &f) const;
-    
-};
-
 
 }
 
@@ -129,19 +93,14 @@ class functorize
 private:
     const std::string& m_entry_point;
     std::vector<result_type> m_additionals;
-    std::set<std::string> m_fns;
     const registry& m_reg;
-
-
-    typedef std::map<std::string,
-                     std::shared_ptr<const type_t> > type_map;
-
-    type_map m_type_map;
-
-    void make_type_map(const apply& n);
+    std::set<std::string> m_fns;
 
     std::shared_ptr<const expression> instantiate_fn(const name& n,
                                                      const type_t& t);
+
+     typedef std::map<std::string,
+                      std::shared_ptr<const type_t> > type_map;
 public:
     //! Constructor
     /*! \param entry_point The name of the entry point procedure

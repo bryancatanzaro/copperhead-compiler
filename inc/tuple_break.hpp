@@ -94,6 +94,12 @@ public:
     result_type operator()(const suite& n);
 private:
     detail::name_supply m_supply;
+    
+    typedef std::tuple<std::vector<int>,
+                       std::shared_ptr<const expression> > tuple_element;
+    typedef std::vector<tuple_element> flattened_tuple;
+    void flatten_tuple(const tuple&, const std::vector<int> path, flattened_tuple& ft);
+
 };
 
 }

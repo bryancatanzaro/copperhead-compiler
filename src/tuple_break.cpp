@@ -76,6 +76,36 @@ tuple_break::result_type tuple_break::operator()(const bind& n) {
     }
 }
 
+void tuple_break::flatten_tuple(const tuple& t,
+                                const std::vector<int> path,
+                                flattened_tuple& ft) {
+    int j = 0;
+    for(auto i = t.begin();
+        i != t.end();
+        i++, j++) {
+        if (detail::isinstance<tuple>(*i)) {
+            std::vector<int> this_path = path;
+            this_path.push_back(j);
+            flatten_tuple(boost::get<const tuple&>(*i),
+                          this_path,
+                          ft);
+        } else {
+            assert(detail::isinstance<name>(*i));
+            const name& n = boost::get<const name&>(*i);
+            //Copy path
+            std::vector<int> this_path = path;
+            //Add path id
+            this_path.push_back(j);
+            //Record
+            ft.push_back(
+                std::make_tuple(std::move(this_path),
+                                n.ptr()));
+                    
+        }
+    }
+}
+
+
 tuple_break::result_type tuple_break::operator()(const procedure& n) {
     vector<shared_ptr<const expression> > args;
     vector<shared_ptr<const statement> > stmts;
@@ -97,17 +127,29 @@ tuple_break::result_type tuple_break::operator()(const procedure& n) {
                     tup.type().ptr(),
                     tup.ctype().ptr());
             args.push_back(new_name);
-            int number = 0;
-            for(auto j = tup.begin(); j != tup.end(); j++, number++) {
+            flattened_tuple ft;
+            flatten_tuple(tup, std::vector<int>(), ft);
+            for(auto j = ft.cbegin();
+                j != ft.cend();
+                j++) {
+
+                std::shared_ptr<const expression> gets = new_name;
+                const std::vector<int>& path = std::get<0>(*j);
+                for(auto k = path.cbegin();
+                    k != path.cend();
+                    k++) {
+                    gets = make_shared<const apply>(
+                        make_shared<const name>(
+                            detail::snippet_get(*k)),
+                        make_shared<const tuple>(
+                            make_vector<shared_ptr<const expression> >(
+                                gets)));
+                }
+                
                 stmts.push_back(
                     make_shared<const bind>(
-                        j->ptr(),
-                        make_shared<const apply>(
-                            make_shared<const name>(
-                                detail::snippet_get(number)),
-                            make_shared<const tuple>(
-                                make_vector<shared_ptr<const expression> >(
-                                    new_name)))));
+                        std::get<1>(*j),
+                        gets));
             }
         }
     }

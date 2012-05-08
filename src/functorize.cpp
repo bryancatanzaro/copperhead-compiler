@@ -37,11 +37,7 @@ void type_corresponder::operator()(const sequence_t &n) {
 }
 
 void type_corresponder::operator()(const tuple_t &n) {
-    //XXX What should we do if m_working is not a tuple, but n is?
-    //For now, we just don't harvest a correspondence
-    if (!detail::isinstance<tuple_t>(*m_working)) {
-        return;
-    }
+    assert(detail::isinstance<tuple_t>(*m_working));
     const tuple_t& working_tuple = boost::get<const tuple_t&>(*m_working);
     auto j = working_tuple.begin();
     for(auto i = n.begin();
@@ -66,87 +62,13 @@ void type_corresponder::operator()(const fn_t &n) {
     boost::apply_visitor(*this, n.result());
 }
 
-type_translator::type_translator(const type_translator::type_map& corresponded)
-    : m_corresponded(corresponded) {}
-
-type_translator::result_type
-type_translator::operator()(const monotype_t& m) const {
-    //Is monotype_t in type map?
-    if(m_corresponded.find(m.name()) != m_corresponded.end()) {
-        return m_corresponded.find(m.name())->second;
-    } else {
-        return result_type(new monotype_t(m.name()));
-    }
 }
-
-type_translator::result_type
-type_translator::operator()(const polytype_t& m) const {
-    //Shouldn't be called
-    assert(false);
-    return void_mt;
-}
-
-type_translator::result_type
-type_translator::operator()(const tuple_t& m) const {
-    vector<shared_ptr<const type_t> > subs;
-    for(auto i = m.begin();
-        i != m.end();
-        i++) {
-        subs.push_back(boost::apply_visitor(*this, *i));
-    }
-    return result_type(new tuple_t(move(subs)));
-}
-
-type_translator::result_type
-type_translator::operator()(const sequence_t& m) const {
-    return result_type(new sequence_t(boost::apply_visitor(*this, m.sub())));
-}
-
-type_translator::result_type
-type_translator::operator()(const fn_t& m) const {
-    shared_ptr<const tuple_t> new_args = static_pointer_cast<const tuple_t>(
-        boost::apply_visitor(*this, m.args()));
-    shared_ptr<const type_t> new_result = boost::apply_visitor(*this, m.result());
-    return result_type(new fn_t(new_args, new_result));
-}
-
-}
-
-
-
-void functorize::make_type_map(const apply& n) {
-    m_type_map.clear();
-    const name& fn_name = n.fn();
-
-    //If function name is not a polytype, the type map should be empty
-    if (!detail::isinstance<polytype_t>(fn_name.type()))
-        return;
-    const polytype_t& fn_polytype = boost::get<const polytype_t&>(fn_name.type());
-    //Polytype must contain a function type
-    assert(detail::isinstance<fn_t>(fn_polytype.monotype()));
-    const fn_t& fn_monotype = boost::get<const fn_t&>(fn_polytype.monotype());
-    const tuple_t& fn_arg_t = fn_monotype.args();
-    vector<shared_ptr<const type_t> > arg_types;
-    for(auto i = n.args().begin();
-        i != n.args().end();
-        i++) {
-        arg_types.push_back(i->type().ptr());
-    }
-    shared_ptr<const tuple_t> arg_t =
-        make_shared<const tuple_t>(move(arg_types));
-
-    
-    detail::type_corresponder tc(arg_t, m_type_map);
-    boost::apply_visitor(tc, fn_arg_t);
-        
-}
-
-
 
 shared_ptr<const expression> functorize::instantiate_fn(const name& n,
                                                         const type_t &t) {
     string id = n.id();
     const type_t& n_t = n.type();
+
     if (!detail::isinstance<polytype_t>(n_t)) {
         //The function is monomorphic. Instantiate a functor.
         return make_shared<const apply>(
@@ -154,19 +76,10 @@ shared_ptr<const expression> functorize::instantiate_fn(const name& n,
             make_shared<const tuple>(
                 make_vector<shared_ptr<const expression> >()));
     }
-    //Use already populated type map to instantiate the
-    //Polymorphic functor with the types it needs in situ
-
-    //The function type is polymorphic
-    //Find the monomorphic type
+    type_map tm;
     const polytype_t& n_pt = boost::get<const polytype_t&>(n_t);
-    const type_t& n_mt = n_pt.monotype();
-        
-    //First, create a type map relating the types of the
-    //polymorphic function being instantiated to the
-    //types in the apply which is instantiating this function.
-    type_map fn_to_apl;
-    detail::type_corresponder tc(t.ptr(), fn_to_apl);
+    const monotype_t& n_mt = n_pt.monotype();
+    detail::type_corresponder tc(t.ptr(), tm);
     boost::apply_visitor(tc, n_mt);
 
     vector<shared_ptr<const type_t> > instantiated_types;
@@ -175,13 +88,8 @@ shared_ptr<const expression> functorize::instantiate_fn(const name& n,
         i++) {
         string fn_t_name = i->name();
         //The name of this type should be in the type map
-        assert(fn_to_apl.find(fn_t_name)!=fn_to_apl.end());
-        shared_ptr<const type_t> apl_t = fn_to_apl.find(fn_t_name)->second;
-        //Instantiate this type with the other type map
-        instantiated_types.push_back(
-            boost::apply_visitor(
-                detail::type_translator(m_type_map),
-                *apl_t));
+        assert(tm.find(fn_t_name)!=tm.end());
+        instantiated_types.push_back(tm.find(fn_t_name)->second);
     }
     vector<shared_ptr<const ctype::type_t> > instantiated_ctypes;
     detail::cu_to_c ctc;
@@ -199,7 +107,6 @@ shared_ptr<const expression> functorize::instantiate_fn(const name& n,
             n.ctype().ptr()),
         make_shared<const tuple>(
             make_vector<shared_ptr<const expression> >()));
-
 }
     
 functorize::functorize(const string& entry_point,
@@ -224,10 +131,6 @@ functorize::result_type functorize::operator()(const apply &n) {
         return n.ptr();
     }
     
-    //If the function we're applying is polymorphic,
-    //Figure out what types it's being instantiated with
-    make_type_map(n);
-
         
     vector<shared_ptr<const expression> > n_arg_list;
     const tuple& n_args = n.args();
@@ -281,11 +184,9 @@ functorize::result_type functorize::operator()(const apply &n) {
             for(auto i = n_closure.args().begin();
                 i != n_closure.args().end();
                 i++) {
+                //XXX TRANSLATION DELETED
                 augmented_args_t.push_back(
-                    boost::apply_visitor(
-                        detail::type_translator(
-                            m_type_map),
-                        i->type()));
+                    i->type().ptr());
             }
             shared_ptr<const fn_t> augmented_fn_t =
                 make_shared<const fn_t>(
@@ -365,6 +266,8 @@ shared_ptr<const ctype::type_t> get_return_type(const procedure& n) {
 functorize::result_type functorize::operator()(const procedure &n) {
     auto n_proc = static_pointer_cast<const procedure>(this->rewriter::operator()(n));
     if (n_proc->id().id() != m_entry_point) {
+        //Wrap every non entry point function in a functor struct.
+        
         //Add result_type declaration
         shared_ptr<const ctype::type_t> origin = get_return_type(n);
         shared_ptr<const ctype::type_t> rename(
