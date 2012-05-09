@@ -23,6 +23,7 @@
 #include <prelude/runtime/make_sequence.hpp>
 #include <prelude/runtime/tags.h>
 #include <thrust/iterator/retag.h>
+#include <prelude/primitives/stored_sequence.h>
 
 namespace copperhead {
 
@@ -31,10 +32,13 @@ sp_cuarray
 scan(const F& fn, Seq& x) {
     typedef typename F::result_type T;
     typedef typename Seq::tag Tag;
-    sp_cuarray result_ary = make_cuarray<T>(x.size());
-    sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                               Tag(),
-                                                               true);
+    typedef typename detail::stored_sequence<Tag, T>::type sequence_type;
+    boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
+    sequence_type result =
+        make_sequence<sequence_type>(result_ary,
+                                     Tag(),
+                                     true);
+   
     thrust::inclusive_scan(x.begin(),
                            x.end(),
                            result.begin(),
@@ -50,10 +54,12 @@ rscan(const F& fn, Seq& x) {
     typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
     iterator_type drbegin(x.end());
     iterator_type drend(x.begin());
-    sp_cuarray result_ary = make_cuarray<T>(x.size());
-    sequence<Tag, T> result = make_sequence<sequence<Tag, T> >(result_ary,
-                                                               Tag(),
-                                                               true);
+    typedef typename detail::stored_sequence<Tag, T>::type sequence_type;
+    boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
+    sequence_type result =
+        make_sequence<sequence_type>(result_ary,
+                                     Tag(),
+                                     true);
     thrust::reverse_iterator<thrust::pointer<T, Tag> > orbegin(result.end());
     thrust::inclusive_scan(drbegin, drend, orbegin, fn);
     return result_ary;
