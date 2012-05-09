@@ -26,19 +26,21 @@
 
 namespace copperhead {
 
-template<typename Tag, typename I>
+template<typename Tag, typename I, typename IT=long>
 struct iterator_sequence
 {
     typedef Tag tag;
+    typedef IT index_type;
+    typedef typename I::value_type& ref_type;
     typedef typename I::value_type value_type;
     typedef typename I::value_type T;
     typedef typename detail::retagged_iterator_type<I, tag>::type iterator_type;
     
     I data;
-    int length;
+    index_type length;
   
     __host__ __device__
-    iterator_sequence(I _data, int _length) : data(_data), length(_length) {}
+    iterator_sequence(I _data, index_type _length) : data(_data), length(_length) {}
 
     __host__ __device__
     iterator_sequence(I begin, I end) : data(begin), length(end-begin) {}
@@ -61,12 +63,12 @@ struct iterator_sequence
     // Methods supporting sequence interface
     //
     __host__ __device__
-    T        operator[](int index)       { return data[index]; }
+    T        operator[](index_type index)       { return data[index]; }
     __host__ __device__
-    const T  operator[](int index) const { return data[index]; }
+    const T  operator[](index_type index) const { return data[index]; }
 
     __host__ __device__
-    int size() const { return length; }
+    index_type size() const { return length; }
 
     __host__ __device__
     iterator_type begin() const {

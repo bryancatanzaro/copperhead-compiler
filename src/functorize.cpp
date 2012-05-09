@@ -67,8 +67,10 @@ void type_corresponder::operator()(const fn_t &n) {
 shared_ptr<const expression> functorize::instantiate_fn(const name& n,
                                                         const type_t &t) {
     string id = n.id();
-    const type_t& n_t = n.type();
-
+    //Function id must exist in type registry
+    assert(m_fns.find(id) != m_fns.end());
+    const type_t& n_t = *m_fns[id];
+    
     if (!detail::isinstance<polytype_t>(n_t)) {
         //The function is monomorphic. Instantiate a functor.
         return make_shared<const apply>(
@@ -118,7 +120,8 @@ functorize::functorize(const string& entry_point,
         i++) {
         auto id = i->first;
         string fn_name = std::get<0>(id);
-        m_fns.insert(fn_name);
+        std::shared_ptr<const type_t> fn_t = i->second.type().ptr();
+        m_fns.insert(std::make_pair(fn_name, fn_t));
     }
 }
 
@@ -313,7 +316,9 @@ functorize::result_type functorize::operator()(const procedure &n) {
             st = make_shared<const structure>(st_id, st_body);
         }
         m_additionals.push_back(st);
-        m_fns.insert(n_proc->id().id());
+        m_fns.insert(std::make_pair(
+                         n_proc->id().id(),
+                         n_proc->type().ptr()));
     }
     return n_proc;
 

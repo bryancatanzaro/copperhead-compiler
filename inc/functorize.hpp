@@ -94,7 +94,8 @@ private:
     const std::string& m_entry_point;
     std::vector<result_type> m_additionals;
     const registry& m_reg;
-    std::set<std::string> m_fns;
+    std::map<std::string,
+             std::shared_ptr<const type_t> > m_fns;
 
     std::shared_ptr<const expression> instantiate_fn(const name& n,
                                                      const type_t& t);
