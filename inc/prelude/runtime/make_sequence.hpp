@@ -63,12 +63,12 @@ struct make_seq_impl<sequence<Tag, T, D > > {
 
 template<typename HT, typename TT>
 struct make_seq_impl<thrust::detail::cons<HT, TT> > {
-    static thrust::detail::cons<HT, TT> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
-                                            std::vector<size_t>::const_iterator l,
+    static thrust::detail::cons<HT, TT> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator& d,
+                                            std::vector<size_t>::const_iterator& l,
                                             const size_t o=0) {
-        return thrust::detail::cons<HT, TT>(
-            make_seq_impl<HT>::fun(d, l, o),
-            make_seq_impl<TT>::fun(d+1, l, o));
+        HT head = make_seq_impl<HT>::fun(d, l, o);
+        TT tail = make_seq_impl<TT>::fun(++d, l, o);
+        return thrust::detail::cons<HT, TT>(head, tail);
     }
 };
 
@@ -85,8 +85,8 @@ template<typename S0,
 struct make_seq_impl<zipped_sequence<
                          thrust::tuple<S0, S1, S2, S3, S4, S5, S6, S7, S8, S9> > > {
     typedef thrust::tuple<S0, S1, S2, S3, S4, S5, S6, S7, S8, S9> sequences;
-    static zipped_sequence<sequences> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
-                                          std::vector<size_t>::const_iterator l,
+    static zipped_sequence<sequences> fun(typename std::vector<boost::shared_ptr<chunk> >::iterator& d,
+                                          std::vector<size_t>::const_iterator& l,
                                           const size_t o=0) {
         sequences s = make_seq_impl<
             thrust::detail::cons<
@@ -99,9 +99,10 @@ struct make_seq_impl<zipped_sequence<
 
 template<>
 struct make_seq_impl<thrust::null_type> {
-    static thrust::null_type fun(typename std::vector<boost::shared_ptr<chunk> >::iterator d,
-                                 std::vector<size_t>::const_iterator l,
+    static thrust::null_type fun(typename std::vector<boost::shared_ptr<chunk> >::iterator& d,
+                                 std::vector<size_t>::const_iterator& l,
                                  const size_t o=0) {
+        --d;
         return thrust::null_type();
     }
 };
@@ -114,7 +115,9 @@ template<typename S>
 S make_sequence(sp_cuarray& in, system_variant t, bool write) {
     cuarray& r = *in;
     std::vector<boost::shared_ptr<chunk> >& chunks = r.get_chunks(t, write);
-    return detail::make_seq_impl<S>::fun(chunks.begin(), r.m_l.begin(), r.m_o);
+    typename std::vector<boost::shared_ptr<chunk> >::iterator ci = chunks.begin();
+    std::vector<size_t>::const_iterator li = r.m_l.begin();
+    return detail::make_seq_impl<S>::fun(ci, li, r.m_o);
 }
 
 }

@@ -157,7 +157,7 @@ struct zipped_sequence {
     typedef typename thrust::detail::tuple_meta_transform<
         S, detail::extract_value>::type value_type;
     typedef typename thrust::detail::tuple_meta_transform<
-        S, detail::extract_reference>::type& ref_type;
+        S, detail::extract_reference>::type ref_type;
     typedef typename thrust::zip_iterator<
         typename thrust::detail::tuple_meta_transform<
             S, detail::extract_iterator>::type > ZI;
