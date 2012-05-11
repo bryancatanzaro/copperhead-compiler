@@ -98,6 +98,77 @@ void declare_maps(int max_arity,
                         
 }
 
+void declare_zips(int max_arity,
+                  map<ident, fn_info>& fns,
+                  map<string, string>& fn_includes) {
+    vector<string> zip_ids;
+    for(int i = 1; i <= max_arity; i++) {
+        stringstream strm;
+        strm << "zip" << i;
+        zip_ids.push_back(strm.str());
+    }
+    vector<shared_ptr<const monotype_t> > a_types;
+    vector<shared_ptr<const monotype_t> > a_seq_types;
+    for(int i = 0; i < max_arity; i++) {
+        stringstream strm;
+        strm << "a" << i;
+        auto t_an = make_shared<const monotype_t>(strm.str());
+        auto t_seq_an = make_shared<const sequence_t>(t_an);
+        a_types.push_back(t_an);
+        a_seq_types.push_back(t_seq_an);
+    }
+
+    vector<shared_ptr<const fn_t> > fn_mts;
+    for(int i = 0; i < max_arity; i++) {
+        vector<shared_ptr<const type_t> > args;
+        vector<shared_ptr<const type_t> > results;
+        for(int j = 0; j <= i; j++) {
+            args.push_back(a_seq_types[j]);
+            results.push_back(a_types[j]);
+        }
+        auto tuple_args =
+            make_shared<const tuple_t>(
+                std::move(args));
+        auto tuple_results =
+            make_shared<const tuple_t>(
+                std::move(results));
+        auto result =
+            make_shared<const sequence_t>(tuple_results);
+        auto fn_mt = make_shared<const fn_t>(tuple_args,
+                                             result);
+        fn_mts.push_back(fn_mt);
+    }
+    vector<shared_ptr<const type_t> > zip_types;
+    for(int i = 0; i < max_arity; i++) {
+        vector<shared_ptr<const monotype_t> > quantifiers;
+        for(int j = 0; j <= i; j++) {
+            quantifiers.push_back(a_types[j]);
+        }
+        auto fn_pt = make_shared<const polytype_t>(
+            std::move(quantifiers),
+            fn_mts[i]);
+        zip_types.push_back(fn_pt);
+    }
+    vector<shared_ptr<const phase_t> > zip_phases;
+    for(int i = 0; i < max_arity; i++) {
+        vector<completion> inputs;
+        for(int j = 0; j <= i; j++) {
+            inputs.push_back(completion::local);
+        }
+        auto zip_phase = make_shared<const phase_t>(
+            std::move(inputs),
+            completion::local);
+        zip_phases.push_back(zip_phase);
+    }
+    for(int i = 0; i < max_arity; i++) {
+        fns.insert(make_pair(
+                       make_pair(zip_ids[i], iteration_structure::independent),
+                       fn_info(zip_types[i], zip_phases[i])));
+        fn_includes.insert(make_pair(zip_ids[i], "prelude/primitives/zip.h"));
+    }
+                        
+}
+
 void declare_scans(map<ident, fn_info>& fns,
                    map<string, string>& fn_includes) {
     shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
