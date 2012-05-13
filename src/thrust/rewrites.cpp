@@ -286,6 +286,41 @@ thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
     return result;
 }
 
+thrust_rewriter::result_type thrust_rewriter::zip_rewrite(const bind& n) {
+    //The rhs must be an apply
+    assert(detail::isinstance<apply>(n.rhs()));
+    
+    const apply& rhs = boost::get<const apply&>(n.rhs());
+    //The rhs must apply "zip"
+    assert(rhs.fn().id().substr(0, 3) == string("zip"));
+
+    const name& lhs = boost::get<const name&>(n.lhs());
+
+    //Construct a zipped_sequence
+    vector<shared_ptr<const ctype::type_t> > arg_types;
+    for(auto i = rhs.args().begin(), e = rhs.args().end(); i != e; i++) {
+        arg_types.push_back(
+            make_shared<const ctype::monotype_t>(
+                detail::typify(boost::get<const name&>(*i).id())));
+    }
+    shared_ptr<const ctype::polytype_t> thrust_tupled =
+        make_shared<const ctype::polytype_t>(
+            std::move(arg_types),
+            make_shared<const ctype::monotype_t>("thrust::tuple"));
+    shared_ptr<const ctype::polytype_t> zip_t =
+        make_shared<const ctype::polytype_t>(
+            make_vector<shared_ptr<const ctype::type_t> >
+            (thrust_tupled),
+            make_shared<const ctype::monotype_t>("zipped_sequence"));
+            
+    shared_ptr<const name> n_lhs =
+        make_shared<const name>(lhs.id(),
+                                lhs.type().ptr(),
+                                zip_t);
+    auto result = make_shared<const bind>(n_lhs, rhs.ptr());
+    return result;
+}
+
 
 thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     const expression& rhs = n.rhs();
@@ -294,15 +329,18 @@ thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     }
     const apply& rhs_apply = boost::get<const apply&>(rhs);
     const name& fn_name = rhs_apply.fn();
-    if (fn_name.id().substr(0, 3) == "map") {
+    const string& fn_id = fn_name.id();
+    if (fn_id.substr(0, 3) == "map") {
         return map_rewrite(n);
-    } else if (fn_name.id() == "indices") {
+    } else if(fn_id.substr(0, 3) == "zip") {
+        return zip_rewrite(n);
+    } else if (fn_id == "indices") {
         return indices_rewrite(n);
-    } else if (fn_name.id() == "replicate") {
+    } else if (fn_id == "replicate") {
         return replicate_rewrite(n);
-    } else if (fn_name.id() == "rotate") {
+    } else if (fn_id == "rotate") {
         return rotate_rewrite(n);
-    } else if (fn_name.id() == "shift") {
+    } else if (fn_id == "shift") {
         return shift_rewrite(n);
     } else {
         return n.ptr();

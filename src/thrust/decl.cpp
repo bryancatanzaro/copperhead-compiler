@@ -406,6 +406,7 @@ shared_ptr<library> get_thrust() {
     thrust::detail::declare_transforms(exported_fns, fn_includes);
     thrust::detail::declare_reductions(exported_fns, fn_includes);
     thrust::detail::declare_sorts(exported_fns, fn_includes);
+    thrust::detail::declare_zips(max_arity, exported_fns, fn_includes);
     //XXX HACK.  NEED boost::filesystem path manipulation
     string library_path(string(detail::get_path(PRELUDE_PATH)) +
                              "/../thrust");
