@@ -171,6 +171,14 @@ struct zipped_sequence {
                 m_seqs,
                 detail::index_sequence<index_type>(index));
     }
+    __host__ __device__
+    value_type operator[](index_type index) const {
+        return thrust::detail::tuple_host_device_transform
+            <detail::extract_reference, S, detail::index_sequence<index_type> >(
+                m_seqs,
+                detail::index_sequence<index_type>(index));
+    }
+    
     //XXX Can only call begin() from host!!
     iterator_type begin() const {
         return thrust::retag<tag>(ZI(thrust::detail::tuple_host_transform
