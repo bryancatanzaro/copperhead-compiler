@@ -94,6 +94,13 @@ vector<named_info> unary_scalar_operators =
     (named_info("op_neg",    un_op_info))
     (named_info("op_not",    un_op_info));
 
+vector<named_info> unary_math_operators =
+    make_vector<named_info>
+    (named_info("sqrt", un_op_info))
+    (named_info("abs", un_op_info))
+    (named_info("exp", un_op_info))
+    (named_info("log", un_op_info));
+
 vector<named_info> cpp_support_fns =
     make_vector<named_info>
     (named_info("wrap_cuarray", nullary_info))
@@ -125,9 +132,11 @@ void load_scalars(
 
 shared_ptr<library> get_builtins() {
     map<ident, fn_info> fns;
+    builtins::load_scalars(fns, builtins::detail::unary_math_operators);
     builtins::load_scalars(fns, builtins::detail::unary_scalar_operators);
     builtins::load_scalars(fns, builtins::detail::binary_scalar_operators);
     builtins::load_scalars(fns, builtins::detail::cpp_support_fns);
+    
     string path(detail::get_path(PRELUDE_PATH));
     set<string> include_paths;
     if (path.length() > 0) {

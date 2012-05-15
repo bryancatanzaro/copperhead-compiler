@@ -169,6 +169,75 @@ void declare_zips(int max_arity,
                         
 }
 
+void declare_unzips(int max_arity,
+                  map<ident, fn_info>& fns,
+                  map<string, string>& fn_includes) {
+    vector<string> unzip_ids;
+    for(int i = 1; i <= max_arity; i++) {
+        stringstream strm;
+        strm << "unzip" << i;
+        unzip_ids.push_back(strm.str());
+    }
+    vector<shared_ptr<const monotype_t> > a_types;
+    vector<shared_ptr<const monotype_t> > a_seq_types;
+    for(int i = 0; i < max_arity; i++) {
+        stringstream strm;
+        strm << "a" << i;
+        auto t_an = make_shared<const monotype_t>(strm.str());
+        auto t_seq_an = make_shared<const sequence_t>(t_an);
+        a_types.push_back(t_an);
+        a_seq_types.push_back(t_seq_an);
+    }
+
+    vector<shared_ptr<const fn_t> > fn_mts;
+    for(int i = 0; i < max_arity; i++) {
+        vector<shared_ptr<const type_t> > args;
+        vector<shared_ptr<const type_t> > results;
+        for(int j = 0; j <= i; j++) {
+            args.push_back(a_types[j]);
+            results.push_back(a_seq_types[j]);
+        }
+        auto tuple_args =
+            make_shared<const tuple_t>(
+                make_vector<shared_ptr<const type_t> >(
+                    make_shared<const sequence_t>(
+                        make_shared<const tuple_t>(
+                            move(args)))));
+        auto tuple_results =
+            make_shared<const tuple_t>(
+                std::move(results));
+        auto fn_mt = make_shared<const fn_t>(tuple_args,
+                                             tuple_results);
+        fn_mts.push_back(fn_mt);
+    }
+    vector<shared_ptr<const type_t> > unzip_types;
+    for(int i = 0; i < max_arity; i++) {
+        vector<shared_ptr<const monotype_t> > quantifiers;
+        for(int j = 0; j <= i; j++) {
+            quantifiers.push_back(a_types[j]);
+        }
+        auto fn_pt = make_shared<const polytype_t>(
+            std::move(quantifiers),
+            fn_mts[i]);
+        unzip_types.push_back(fn_pt);
+    }
+    vector<shared_ptr<const phase_t> > unzip_phases;
+    for(int i = 0; i < max_arity; i++) {
+        vector<completion> inputs;
+        auto unzip_phase = make_shared<const phase_t>(
+            make_vector<completion>(completion::local),
+            completion::local);
+        unzip_phases.push_back(unzip_phase);
+    }
+    for(int i = 0; i < max_arity; i++) {
+        fns.insert(make_pair(
+                       make_pair(unzip_ids[i], iteration_structure::independent),
+                       fn_info(unzip_types[i], unzip_phases[i])));
+        fn_includes.insert(make_pair(unzip_ids[i], "prelude/primitives/unzip.h"));
+    }
+                        
+}
+
 void declare_scans(map<ident, fn_info>& fns,
                    map<string, string>& fn_includes) {
     shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
@@ -407,6 +476,8 @@ shared_ptr<library> get_thrust() {
     thrust::detail::declare_reductions(exported_fns, fn_includes);
     thrust::detail::declare_sorts(exported_fns, fn_includes);
     thrust::detail::declare_zips(max_arity, exported_fns, fn_includes);
+    thrust::detail::declare_unzips(max_arity, exported_fns, fn_includes);
+
     //XXX HACK.  NEED boost::filesystem path manipulation
     string library_path(string(detail::get_path(PRELUDE_PATH)) +
                              "/../thrust");

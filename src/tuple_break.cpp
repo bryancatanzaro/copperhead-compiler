@@ -41,12 +41,25 @@ tuple_break::result_type tuple_break::operator()(const bind& n) {
     } else if (lhs_tuple && !rhs_tuple) {
         //Unpacking a tuple
         const tuple& lhs = boost::get<const tuple&>(n.lhs());
-
         vector<shared_ptr<const statement> > stmts;
+        shared_ptr<const expression> p_rhs;
+        if (detail::isinstance<apply>(n.rhs())) {
+            //The RHS is a function call.  Call it, store the result,
+            //then break it.  Here we call it and store the result.
+            shared_ptr<const name> result = make_shared<const name>(
+                m_supply.next(),
+                lhs.type().ptr(),
+                lhs.ctype().ptr());
+            shared_ptr<const bind> call_stmt = make_shared<const bind>(result, 
+                                                                       n.rhs().ptr());
+            stmts.push_back(call_stmt);
+            p_rhs = result;
+        } else {
+            //The RHS is not a function call, just use it directly
+            p_rhs = n.rhs().ptr();
+        }
         int number = 0;
         for(auto i = lhs.begin(); i != lhs.end(); i++, number++) {
-            vector<shared_ptr<const expression> > args;
-            args.push_back(n.rhs().ptr());
             stmts.push_back(
                 make_shared<const bind>(
                     i->ptr(),
@@ -54,13 +67,13 @@ tuple_break::result_type tuple_break::operator()(const bind& n) {
                         make_shared<const name>(
                             detail::snippet_get(number)),
                         make_shared<const tuple>(
-                            move(args)))));
+                            make_vector<shared_ptr<const expression> >(p_rhs)))));
         }
         return make_shared<suite>(move(stmts));
     } else if (!lhs_tuple && rhs_tuple) {
         //Packing a tuple
         const tuple& rhs = boost::get<const tuple&>(n.rhs());
-
+        
         vector<shared_ptr<const expression> > args;
         for(auto i = rhs.begin(); i != rhs.end(); i++) {
             args.push_back(i->ptr());

@@ -78,7 +78,7 @@ __host__ __device__ T min_bound(const T&) {
 }
 
 template<typename T>
-struct fnmin_bound {
+struct fn_min_bound {
     typedef T result_type;
     __host__ __device__ T operator()(const T& t) {
         return min_bound(t);
@@ -92,7 +92,7 @@ __host__ __device__ T max_bound(const T&) {
 
 
 template<typename T>
-struct fnmax_bound {
+struct fn_max_bound {
     typedef T result_type;
     __host__ __device__ T operator()(const T& t) {
         return max_bound(t);

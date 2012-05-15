@@ -20,52 +20,52 @@
 
 namespace copperhead {
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip1(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip2(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip3(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip4(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip5(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip6(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip7(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip8(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip9(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }
 
-template<Seqs>
+template<typename Seqs>
 Seqs unzip10(zipped_sequence<Seqs>& x) {
     return x.m_seqs;
 }

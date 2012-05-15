@@ -240,7 +240,7 @@ struct closure2 {
     __host__ __device__ closure2(const K0& k0,
                                  const K1& k1,
                                  const F& f)
-        : m_k0(k0),
+        : m_k0(k0), m_k1(k1),
           m_f(f) {}
 
     template<typename T0>
