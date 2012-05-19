@@ -289,7 +289,43 @@ void declare_permutes(map<ident, fn_info>& fns,
     fns.insert(make_pair(
                    make_pair("permute", iteration_structure::independent),
                    fn_info(permute_t, permute_phase_t)));
-    fn_includes.insert(make_pair("permute", "prelude/primitives/permute.h"));
+    fn_includes.insert(make_pair("permute", "prelude/primitives/scatter.h"));
+
+
+    shared_ptr<const polytype_t> scatter_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(seq_t_a)(seq_int)(seq_t_a)),
+                seq_t_a));
+    shared_ptr<const phase_t> scatter_phase_t =
+        make_shared<const phase_t>(
+            make_vector<completion>(completion::total)(completion::local)(completion::local),
+            completion::total);
+    fns.insert(make_pair(
+                   make_pair("scatter", iteration_structure::independent),
+                   fn_info(scatter_t, scatter_phase_t)));
+    fn_includes.insert(make_pair("scatter", "prelude/primitives/scatter.h"));
+
+    shared_ptr<const polytype_t> gather_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(seq_t_a)(seq_int)),
+                seq_t_a));
+    shared_ptr<const phase_t> gather_phase_t =
+        make_shared<const phase_t>(
+            make_vector<completion>(completion::total)(completion::local),
+            completion::local);
+    fns.insert(make_pair(
+                   make_pair("gather", iteration_structure::independent),
+                   fn_info(gather_t, gather_phase_t)));
+    fn_includes.insert(make_pair("gather", "prelude/primitives/gather.h"));
+
+    
+    
 }
 
 void declare_special_sequences(map<ident, fn_info>& fns,

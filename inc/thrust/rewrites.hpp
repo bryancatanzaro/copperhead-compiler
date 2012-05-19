@@ -58,6 +58,8 @@ private:
     result_type replicate_rewrite(const bind& n);
 
     result_type zip_rewrite(const bind& n);
+
+    result_type gather_rewrite(const bind& n);
     
 public:
     //! Constructor
