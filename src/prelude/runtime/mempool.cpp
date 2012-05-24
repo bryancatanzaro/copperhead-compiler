@@ -1,54 +1,29 @@
-#include <thrust/system/cuda/vector.h>
-#include <thrust/host_vector.h>
-#include <thrust/generate.h>
-#include <thrust/sort.h>
-#include <thrust/pair.h>
 #include <cstdlib>
-#include <iostream>
 #include <map>
 #include <cassert>
-#include <prelude/runtime/tag_malloc_and_free.h>
+#include <prelude/runtime/mempool.hpp>
 
-// create a tag derived from system::cuda::tag for distinguishing
-// our overloads of get_temporary_buffer and return_temporary_buffer
-struct cuda_tag : thrust::system::cuda::tag {};
-struct cpp_tag : thrust::system::cpp::tag {};
-
-template<typename Tag>
-struct underlying_tag {};
-
-template<>
-struct underlying_tag<cuda_tag> {
-    typedef thrust::system::cuda::tag tag;
-};
-
-
-template<>
-struct underlying_tag<cpp_tag> {
-    typedef thrust::system::cpp::tag tag;
-};
+namespace copperhead {
+namespace detail {
 
 // cached_allocator: a simple allocator for caching allocation
-// requests
+// requests.  Adapted from thrust's custom_temporary_allocator example
 template<typename Tag>
 struct cached_allocator
 {
-    typedef typename underlying_tag<Tag>::tag thrust_tag;
-    cached_allocator() {}
+    typedef typename thrust_memory_tag<Tag>::tag thrust_tag;
+    bool m_live;
+    cached_allocator() : m_live(true) {}
 
     void *allocate(std::ptrdiff_t num_bytes)
         {
             void *result = 0;
-
-            std::cout << "Searching for " << num_bytes << " bytes; cache has " << free_blocks.size() << " entries" << std::endl;
             
             // search the cache for a free block
             free_blocks_type::iterator free_block = free_blocks.find(num_bytes);
 
             if(free_block != free_blocks.end())
             {
-                std::cout << "cached_allocator::allocator(): found a hit" << std::endl;
-
                 // get the pointer
                 result = free_block->second;
 
@@ -62,8 +37,6 @@ struct cached_allocator
                 // throw if cuda::malloc can't satisfy the request
                 try
                 {
-                    std::cout << "cached_allocator::allocate(): no free block found for size " << num_bytes << "; calling cuda::malloc" << std::endl;
-
                     result = thrust::detail::tag_malloc(thrust_tag(),
                                                         num_bytes);
                 }
@@ -71,8 +44,6 @@ struct cached_allocator
                 {
                     //Allocation failed
                     //Nuke the cache and try again
-                    std::cout << "cached_allocator::allocator(): memory full, purging cache" << std::endl;
-                    
                     free_free();
                     
                     try {
@@ -92,7 +63,10 @@ struct cached_allocator
 
     void deallocate(void *ptr)
         {
-            std::cout << "cached_allocator::deallocate() " << std::endl;
+            //Check to see if allocator has been closed
+            if (!m_live) {
+                return;
+            }
             // erase the allocated block from the allocated blocks map
             allocated_blocks_type::iterator iter = allocated_blocks.find(ptr);
             std::ptrdiff_t num_bytes = iter->second;
@@ -125,6 +99,10 @@ struct cached_allocator
             allocated_blocks.clear();
         }
 
+    void close() {
+        free_all();
+        m_live = false;
+    }
     typedef std::multimap<std::ptrdiff_t, void*> free_blocks_type;
     typedef std::map<void *, std::ptrdiff_t>     allocated_blocks_type;
 
@@ -133,61 +111,39 @@ struct cached_allocator
 };
 
 
-// the cache is simply a global variable
-// XXX ideally this variable is declared thread_local
-cached_allocator<cuda_tag> g_cuda_allocator;
+//XXX Need to protect access to these with mutex
 cached_allocator<cpp_tag> g_cpp_allocator;
 
+//XXX Need to protect access to these with mutex
+#ifdef CUDA_SUPPORT
+cached_allocator<cuda_tag> g_cuda_allocator;
+#endif
 
-void* malloc(cuda_tag, size_t cnt) {
-    return g_cuda_allocator.allocate(cnt);
 }
 
 void* malloc(cpp_tag, size_t cnt) {
-    return g_cpp_allocator.allocate(cnt);
-}
-
-void free(cuda_tag, void* ptr) {
-    return g_cuda_allocator.deallocate(ptr);
+    return detail::g_cpp_allocator.allocate(cnt);
 }
 
 void free(cpp_tag, void* ptr) {
-    return g_cpp_allocator.deallocate(ptr);
+    return detail::g_cpp_allocator.deallocate(ptr);
 }
 
-int main()
-{
-    size_t n = 1 << 22;
+#ifdef CUDA_SUPPORT
+void* malloc(cuda_tag, size_t cnt) {
+    return detail::g_cuda_allocator.allocate(cnt);
+}
 
-    thrust::host_vector<int> h_input(n);
+void free(cuda_tag, void* ptr) {
+    return detail::g_cuda_allocator.deallocate(ptr);
+}
+#endif
 
-    // generate random input
-    thrust::generate(h_input.begin(), h_input.end(), rand);
+void take_down() {
+    detail::g_cpp_allocator.close();
+    #ifdef CUDA_SUPPORT
+    detail::g_cuda_allocator.close();
+    #endif
+}
 
-    thrust::system::cuda::vector<int> d_input = h_input;
-    thrust::system::cuda::vector<int> d_result(n);
-
-    size_t num_trials = 5;
-
-    for(size_t i = 0; i < num_trials; ++i)
-    {
-        // initialize data to sort
-        d_result = d_input;
-
-        // tag iterators with my_tag to cause invocations of our
-        // get_temporary_buffer and return_temporary_buffer
-        // during sort
-        thrust::sort(thrust::retag<cuda_tag>(d_result.begin()),
-                     thrust::retag<cuda_tag>(d_result.end()));
-
-        // ensure the result is sorted
-        assert(thrust::is_sorted(d_result.begin(), d_result.end()));
-    }
-
-    // free all allocations before the underlying
-    // device backend (e.g., CUDART) goes out of scope
-    g_cuda_allocator.free_all();
-    g_cpp_allocator.free_all();
-    
-    return 0;
 }

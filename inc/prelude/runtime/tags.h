@@ -39,19 +39,19 @@
 #endif
 
 namespace copperhead {
-   
-typedef thrust::system::cpp::tag cpp_tag;
+
+struct cpp_tag : thrust::system::cpp::tag{};
 
 #ifdef OMP_SUPPORT
-typedef thrust::system::omp::tag omp_tag;
+struct omp_tag : thrust::system::omp::tag{};
 #endif
 
 #ifdef TBB_SUPPORT
-typedef thrust::system::tbb::tag tbb_tag;
+struct tbb_tag : thrust::system::tbb::tag{};
 #endif
 
 #ifdef CUDA_SUPPORT
-typedef thrust::system::cuda::tag cuda_tag;
+struct cuda_tag : thrust::system::cuda::tag{};
 #endif
 
 
@@ -94,6 +94,26 @@ struct canonical_memory_tag<tbb_tag> {
     typedef cpp_tag tag;
 };
 #endif
+
+
+//Computes the Thrust tag
+template<typename T>
+struct thrust_memory_tag {
+    typedef typename thrust_memory_tag<
+        typename canonical_memory_tag<T>::tag>::tag tag;
+};
+
+template<>
+struct thrust_memory_tag<cpp_tag> {
+    typedef thrust::system::cpp::tag tag;
+};
+
+#ifdef CUDA_SUPPORT
+template<>
+struct thrust_memory_tag<cuda_tag> {
+    typedef thrust::system::cuda::tag tag;
+};
+#endif
 }
 
 
@@ -126,5 +146,32 @@ struct system_variant_to_string
 std::string to_string(const system_variant& x);
 
 system_variant canonical_memory_tag(const system_variant& x);
+
+void* malloc(cpp_tag, size_t);
+void free(cpp_tag, void* ptr);
+template<typename T>
+void free(cpp_tag, T* ptr) {
+    return free(cpp_tag(), (void*)ptr);
+}
+
+template<typename P>
+void free(cpp_tag, P ptr) {
+    return free(cpp_tag(), ptr.get());
+}
+
+#ifdef CUDA_SUPPORT
+void* malloc(cuda_tag, size_t);
+void free(cuda_tag, void* ptr);
+template<typename T>
+void free(cuda_tag, T* ptr) {
+    return free(cuda_tag(), (void*)ptr);
+}
+template<typename P>
+void free(cuda_tag, P ptr) {
+    return free(cuda_tag(), ptr.get());
+}
+
+#endif
+
 
 }
