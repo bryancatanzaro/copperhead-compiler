@@ -77,13 +77,20 @@ void cpp_printer::operator()(const closure &n) {
         boost::apply_visitor(tp, i->ctype());
         m_os << ", ";
     }
-    //functorize has ensured that the body of the
-    //closure is an instantiated functor object.
-    //Disassemble it to get the function type name
-    assert(detail::isinstance<apply>(n.body()));
-    boost::apply_visitor(
-        *this,
-        boost::get<const apply&>(n.body()).fn());
+
+
+    //If we're printing before functorization, the body of the closure
+    //is a name, otherwise it's a closure.  If it's none of the above,
+    //it's an error
+    if (detail::isinstance<name>(n.body())) {
+        boost::apply_visitor(*this, n.body());
+    } else if (detail::isinstance<apply>(n.body())) {
+        boost::apply_visitor(*this,
+                              boost::get<const apply&>(n.body()).fn());
+    } else {
+        //Invalid AST - body of closure must be a name or an apply
+        assert(false);
+    }
     m_os << " >(";
     for(auto i = n.args().begin();
         i != n.args().end();

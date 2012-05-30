@@ -18,10 +18,18 @@ std::shared_ptr<const suite> compiler::operator()(const suite &n) {
 
     tuple_break tuple_breaker;
     auto tuple_broken = apply(tuple_breaker, n);
+#ifdef TRACE
+    std::cout << "Tuple broken" << std::endl;
+    boost::apply_visitor(cp, *tuple_broken);
+#endif
     
     phase_analyze phase_analyzer(m_entry_point, m_registry);
     auto phase_analyzed = apply(phase_analyzer, tuple_broken);
-    
+#ifdef TRACE
+    std::cout << "Phase analyzed" << std::endl;
+    boost::apply_visitor(cp, *phase_analyzed);
+#endif
+
     type_convert type_converter;
     auto type_converted = apply(type_converter, phase_analyzed);
 #ifdef TRACE
