@@ -143,6 +143,11 @@ sequence<Tag, T, D> slice(sequence<Tag, T, D> seq, size_t base, size_t len) {
     return sequence<Tag, T, D>(slice(seq.m_d, base, len+1), seq.m_s);
 }
     
+template<typename Tag, typename T, int D>
+__host__ __device__
+size_t len(const sequence<Tag, T, D>& seq) {
+    return seq.size();
+}
 
 }
 
