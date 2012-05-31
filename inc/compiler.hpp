@@ -33,6 +33,7 @@
 #include "phase_analyze.hpp"
 #include "find_includes.hpp"
 #include "tuple_break.hpp"
+#include "dereference.hpp"
 
 #include "prelude/runtime/tags.h"
 

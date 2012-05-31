@@ -149,5 +149,24 @@ size_t len(const sequence<Tag, T, D>& seq) {
     return seq.size();
 }
 
+
+template<typename Tag, typename T, int D>
+__host__
+sequence<Tag, T, D-1> dereference(const sequence<Tag, T, D>& seq,
+                                  typename sequence<Tag, T, D>::index_type i) {
+    return seq[i];
+}
+
+template<typename Tag, typename T>
+__host__
+thrust::reference<T, thrust::pointer<T, Tag> >
+dereference(const sequence<Tag, T, 0>& seq,
+            typename sequence<Tag, T, 0>::index_type i) {
+    return thrust::reference<T, thrust::pointer<T, Tag> >(
+        thrust::pointer<T, Tag>(seq.m_d + i));
+}
+
+
+
 }
 
