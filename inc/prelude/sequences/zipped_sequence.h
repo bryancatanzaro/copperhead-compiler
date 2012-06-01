@@ -22,6 +22,9 @@
 #include <thrust/detail/tuple_meta_transform.h>
 #include <thrust/detail/type_traits.h>
 #include <prelude/basic/detail/retagged_iterator_type.h>
+#include <thrust/detail/reference.h>
+#include <thrust/detail/pointer.h>
+
 
 namespace copperhead {
 
@@ -198,5 +201,81 @@ struct zipped_sequence {
         return thrust::get<0>(m_seqs).size();
     }
 };
+
+namespace detail {
+
+template<typename Seq>
+struct extract_thrust_ref {
+    typedef typename Seq::tag tag;
+    typedef typename Seq::value_type value;
+    typedef thrust::pointer<value, tag> pointer;
+    typedef thrust::reference<value, pointer> type;
+};
+
+
+template<typename S0,
+         typename S1,
+         typename S2,
+         typename S3,
+         typename S4,
+         typename S5,
+         typename S6,
+         typename S7,
+         typename S8,
+         typename S9>
+struct extract_thrust_ref<
+    thrust::tuple<S0, S1, S2, S3, S4,
+                  S5, S6, S7, S8, S9> > {
+    typedef thrust::tuple<S0, S1, S2, S3, S4,
+                          S5, S6, S7, S8, S9> sub_tuple;
+    typedef typename thrust::detail::tuple_meta_transform<
+        sub_tuple, copperhead::detail::extract_thrust_ref>::type type;
+};
+
+template<>
+struct extract_thrust_ref<
+    thrust::null_type> {
+    typedef thrust::null_type type;
+};
+
+template<typename S>
+struct extract_thrust_ref<zipped_sequence<S> > {
+    typedef typename extract_thrust_ref<S>::type type;
+};
+
+template<typename I>
+struct extract_dereference {
+    I idx;
+    extract_dereference(const I& i) : idx(i) {}
+    
+    template<typename Tag, typename T>
+    typename extract_thrust_ref<sequence<Tag, T> >::type operator()(const sequence<Tag, T>& in) const {
+        return dereference(in, idx);
+    }
+
+    template<typename S>
+    typename extract_thrust_ref<zipped_sequence<S> >::type operator()(const zipped_sequence<S>& in) const {
+        return thrust::detail::tuple_host_transform<
+            extract_thrust_ref,
+            S,
+            extract_dereference<I> >(
+                in.m_seqs,
+                *this);
+        
+    }
+};
+
+}
+
+template<typename S>
+__host__
+typename detail::extract_thrust_ref<zipped_sequence<S> >::type
+dereference(const zipped_sequence<S>& s,
+            typename zipped_sequence<S>::index_type i) {
+    return detail::extract_dereference<typename zipped_sequence<S>::index_type>(i)(s);
+}
+
+
+
 
 }

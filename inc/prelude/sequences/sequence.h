@@ -166,7 +166,5 @@ dereference(const sequence<Tag, T, 0>& seq,
         thrust::pointer<T, Tag>(seq.m_d + i));
 }
 
-
-
 }
 
