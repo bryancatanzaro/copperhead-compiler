@@ -168,14 +168,28 @@ wrap::result_type wrap::operator()(const procedure &n) {
     } else {
         return this->rewriter::operator()(n);
     }
-    
 }
+
+bool wrap::ret_container(const type_t& t) {
+    if (detail::isinstance<sequence_t>(t)) {
+        return true;
+    } else if (detail::isinstance<tuple_t>(t)) {
+        bool result = false;
+        const tuple_t& tup = boost::get<const tuple_t&>(t);
+        for(auto i = tup.begin(); i != tup.end(); i++) {
+            result = result || ret_container(*i);
+        }
+        return result;
+    } else {
+        return false;
+    }
+}
+
 wrap::result_type wrap::operator()(const ret& n) {
     if (m_wrapping && detail::isinstance<name, node>(n.val())) {
         const name& val =
             boost::get<const name&>(n.val());
-        if (detail::isinstance<ctype::sequence_t,
-                               ctype::type_t>(val.ctype())) {
+        if (ret_container(val.type())) {
             shared_ptr<const name> array_wrapped =
                 make_shared<const name>(
                     detail::wrap_array_id(val.id()),

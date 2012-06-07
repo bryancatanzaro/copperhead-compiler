@@ -60,14 +60,20 @@ std::shared_ptr<const suite> compiler::operator()(const suite &n) {
     std::cout << "Allocated" << std::endl;
     boost::apply_visitor(cp, *allocated);
 #endif
+    containerize containerizer(m_entry_point);
+    auto containerized = apply(containerizer, allocated);
+#ifdef TRACE
+    std::cout << "Containerized" << std::endl;
+    boost::apply_visitor(cp, *containerized);
+#endif
     typedefify typedefifier;
-    auto typedefified = apply(typedefifier, allocated);
+    auto typedefified = apply(typedefifier, containerized);
 #ifdef TRACE
     std::cout << "Typedefified" << std::endl;
     boost::apply_visitor(cp, *typedefified);
-#endif        
+#endif
     wrap wrapper(m_backend_tag, m_entry_point);
-    auto wrapped = apply(wrapper, typedefified);
+    auto wrapped = apply(wrapper, containerized);
 #ifdef TRACE
     std::cout << "Wrapped" << std::endl;
     boost::apply_visitor(cp, *wrapped);
