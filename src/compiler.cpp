@@ -19,35 +19,34 @@ compiler::compiler(const std::string& entry_point,
 
 namespace detail {
 
-//XXX Variadic templates will not work on Visual Studio
 template<int N, bool D=false>
 struct pipeline_helper {
     typedef std::shared_ptr<const suite> result_type;
-    template<class... Args>
+    template<class Tuple>
     static inline result_type impl(
-        std::tuple<Args...>& t,
+        Tuple& t,
         const result_type& i,
         cpp_printer& cp) {
         result_type rewritten =
             std::static_pointer_cast<const suite>(
                 boost::apply_visitor(
-                    std::get<sizeof...(Args)-N>(t),
+                    std::get<std::tuple_size<Tuple>::value-N>(t),
                     *i));
         if (D) {
-            std::cout << "After " << typeid(std::get<sizeof...(Args)-N>(t)).name() << std::endl;
+            std::cout << "After " <<
+                typeid(std::get<std::tuple_size<Tuple>::value-N>(t)).name() << std::endl;
             boost::apply_visitor(cp, *rewritten);
         }
         return pipeline_helper<N-1, D>::impl(t, rewritten, cp);
     }        
 };
 
-//XXX Variadic templates will not work on Visual Studio
 template<bool D>
 struct pipeline_helper<0, D> {
     typedef std::shared_ptr<const suite> result_type;
-    template<class... Args>
+    template<typename Tuple>
     static inline result_type impl(
-        std::tuple<Args...> const& t,
+        Tuple const& t,
         const result_type& i,
         cpp_printer&) {
         return i;
@@ -56,12 +55,14 @@ struct pipeline_helper<0, D> {
 
 }
 
-//XXX Variadic templates will not work on Visual Studio
-template<class... Args>
-static inline std::shared_ptr<const suite> apply(std::tuple<Args...>& t,
+template<class Tuple>
+static inline std::shared_ptr<const suite> apply(Tuple& t,
                                    const suite& n,
                                    cpp_printer& cp) {
-    return detail::pipeline_helper<sizeof...(Args), TRACE>::impl(t, n.ptr(), cp);
+    return detail::
+        pipeline_helper<std::tuple_size<Tuple>::value,
+                        TRACE>::
+        impl(t, n.ptr(), cp);
 }
 
 
