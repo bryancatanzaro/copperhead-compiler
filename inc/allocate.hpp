@@ -47,7 +47,7 @@ namespace backend {
   allocated. This rewrite pass makes this explicit in the program text.
 */
 class allocate
-    : public rewriter
+    : public rewriter<allocate>
 {
 private:
     const copperhead::system_variant& m_target;
@@ -61,7 +61,7 @@ public:
 */
     allocate(const copperhead::system_variant&, const std::string& entry_point);
     
-    using rewriter::operator();
+    using rewriter<allocate>::operator();
 
 //! Rewrite rule for \p procedure nodes
 

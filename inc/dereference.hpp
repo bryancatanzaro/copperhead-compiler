@@ -35,7 +35,7 @@ namespace backend {
   protected to ensure that data transfers are performed when necessary
 */
 class dereference
-    : public rewriter
+    : public rewriter<dereference>
 {
 private:
     const std::string& m_entry_point;
@@ -45,7 +45,7 @@ public:
     //* @param entry_point Name of the entry point procedure
     dereference(const std::string& entry_point);
     
-    using rewriter::operator();
+    using rewriter<dereference>::operator();
     //! Rewrite rule for \p procedure nodes
     result_type operator()(const procedure &p);
     //! Rewrite rule for \p subscript nodes

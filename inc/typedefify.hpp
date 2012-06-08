@@ -43,7 +43,7 @@ T_a _a; \endverbatim
   having to know exactly what it was instantiated as.
 */
 class typedefify
-    : public rewriter
+    : public rewriter<typedefify>
 {
 private:
     std::shared_ptr<const statement> m_typedef;
@@ -51,7 +51,7 @@ public:
     //! Constructor
     typedefify();
     
-    using rewriter::operator();
+    using rewriter<typedefify>::operator();
     //! Rewrite rule for \p suite nodes
     result_type operator()(const suite &n);
     //! Rewrite rule for \p bind nodes

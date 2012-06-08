@@ -59,7 +59,7 @@ public:
   from the Copperhead types embedded in the input AST.
 */
 class type_convert
-    : public rewriter
+    : public rewriter<type_convert>
 {
 private:
     detail::cu_to_c m_c;
@@ -67,7 +67,7 @@ public:
     //! Constructor
     type_convert();
 
-    using rewriter::operator();
+    using rewriter<type_convert>::operator();
     //! Rewrite rule for \p procedure nodes
     result_type operator()(const procedure &p);
     //! Rewrite rule for \p name nodes

@@ -44,7 +44,7 @@ namespace backend {
   will be done in a future version.
 */
 class phase_analyze
-    : public rewriter {
+    : public rewriter<phase_analyze> {
 private:
     const std::string m_entry_point;
     bool m_in_entry;
@@ -56,7 +56,7 @@ private:
     completion m_result_completion;
     void add_phase_boundary(const name& n);
 public:
-    using rewriter::operator();
+    using rewriter<phase_analyze>::operator();
     //! Constructor
 /*! 
   

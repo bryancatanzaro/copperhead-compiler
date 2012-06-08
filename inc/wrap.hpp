@@ -42,7 +42,7 @@ namespace backend {
   
 */
 class wrap
-    : public rewriter
+    : public rewriter<wrap>
 {
 private:
     const copperhead::system_variant& m_target;
@@ -56,7 +56,7 @@ public:
 */
     wrap(const copperhead::system_variant&, const std::string& entry_point);
     
-    using rewriter::operator();
+    using rewriter<wrap>::operator();
     //! Rewrite rule for \p procedure nodes
     result_type operator()(const procedure &n);
     //! Rewrite rule for \p ret nodes

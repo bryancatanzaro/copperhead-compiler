@@ -88,7 +88,7 @@ public:
   type variables in the polytype of the functor object should be.
  */
 class functorize
-    : public rewriter
+    : public rewriter<functorize>
 {
 private:
     const std::string& m_entry_point;
@@ -110,7 +110,7 @@ public:
     functorize(const std::string& entry_point,
                const registry& reg);
     
-    using rewriter::operator();
+    using rewriter<functorize>::operator();
 
     result_type operator()(const apply &n);
     

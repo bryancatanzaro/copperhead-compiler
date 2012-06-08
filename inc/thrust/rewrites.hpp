@@ -43,7 +43,7 @@ namespace backend {
   C++ implementation type.
 */
 class thrust_rewriter
-    : public rewriter {
+    : public rewriter<thrust_rewriter> {
 private:
     const copperhead::system_variant& m_target;
     
@@ -65,7 +65,7 @@ public:
     //! Constructor
     thrust_rewriter(const copperhead::system_variant&);
     
-    using rewriter::operator();
+    using rewriter<thrust_rewriter>::operator();
     
     result_type operator()(const bind& n);
     

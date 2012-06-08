@@ -38,7 +38,7 @@ namespace backend {
   
 */
 class find_includes
-    : public rewriter
+    : public rewriter<find_includes>
 {
 private:
     const registry& m_reg;
@@ -49,7 +49,7 @@ public:
     /*! \param reg The registry maintained by the compiler
      */
     find_includes(const registry& reg);
-    using rewriter::operator();
+    using rewriter<find_includes>::operator();
     result_type operator()(const suite& n);
     result_type operator()(const apply& n);
 };

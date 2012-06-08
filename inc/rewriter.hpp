@@ -44,8 +44,9 @@ namespace backend {
 //! Parent visitor class for all AST rewrites.
 /*! 
   \p rewriter traverses an AST and copies it to produce a new AST.
-  Its rewrite methods are virtual and should be redefined by
-  rewrite passes which selectively transform the AST.
+  Its rewrite methods should be redefined by
+  rewrite passes which selectively transform the AST.  Uses the
+  Curiously Recurring Template Pattern in lieu of virtual methods.
   
   Importantly, \p rewriter does not actually copy AST nodes.
   Instead, as the rewrite proceeds,
@@ -58,6 +59,7 @@ namespace backend {
   This optimization works because AST nodes are immutable.
  */
 
+template<typename Derived>
 class rewriter
     : public boost::static_visitor<std::shared_ptr<const node> >
 {
@@ -92,41 +94,41 @@ protected:
     bool is_match();
 
 public:
-    virtual result_type operator()(const literal& n);
+    result_type operator()(const literal& n);
 
-    virtual result_type operator()(const name &n);
+    result_type operator()(const name &n);
     
-    virtual result_type operator()(const tuple &n);
+    result_type operator()(const tuple &n);
     
-    virtual result_type operator()(const apply &n);
+    result_type operator()(const apply &n);
     
-    virtual result_type operator()(const lambda &n);
+    result_type operator()(const lambda &n);
     
-    virtual result_type operator()(const closure &n);
+    result_type operator()(const closure &n);
 
-    virtual result_type operator()(const subscript &n);
+    result_type operator()(const subscript &n);
         
-    virtual result_type operator()(const conditional &n);
+    result_type operator()(const conditional &n);
     
-    virtual result_type operator()(const ret &n);
+    result_type operator()(const ret &n);
     
-    virtual result_type operator()(const bind &n);
+    result_type operator()(const bind &n);
     
-    virtual result_type operator()(const call &n);
+    result_type operator()(const call &n);
     
-    virtual result_type operator()(const procedure &n);
+    result_type operator()(const procedure &n);
     
-    virtual result_type operator()(const suite &n);
+    result_type operator()(const suite &n);
     
-    virtual result_type operator()(const structure &n);
+    result_type operator()(const structure &n);
     
-    virtual result_type operator()(const templated_name &n);
+    result_type operator()(const templated_name &n);
     
-    virtual result_type operator()(const include &n);
+    result_type operator()(const include &n);
     
-    virtual result_type operator()(const typedefn &n);
+    result_type operator()(const typedefn &n);
 
-    virtual result_type operator()(const namespace_block &n);
+    result_type operator()(const namespace_block &n);
     
 };
 /*! 
@@ -134,3 +136,5 @@ public:
  */
 
 }
+
+#include "rewriter.inl"

@@ -84,12 +84,12 @@ namespace backend {
   
 */
 class tuple_break
-    : public rewriter
+    : public rewriter<tuple_break>
 {
 public:
     //! Constructor
     tuple_break();
-    using rewriter::operator();
+    using rewriter<tuple_break>::operator();
     result_type operator()(const bind& n);
     result_type operator()(const procedure& n);
     result_type operator()(const suite& n);
