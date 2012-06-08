@@ -34,6 +34,7 @@
 #include "find_includes.hpp"
 #include "tuple_break.hpp"
 #include "dereference.hpp"
+#include "containerize.hpp"
 
 #include "prelude/runtime/tags.h"
 
