@@ -19,11 +19,12 @@ compiler::compiler(const std::string& entry_point,
 
 namespace detail {
 
+//XXX Variadic templates will not work on Visual Studio
 template<int N, bool D=false>
 struct pipeline_helper {
     typedef std::shared_ptr<const suite> result_type;
     template<class... Args>
-    static result_type impl(
+    static inline result_type impl(
         std::tuple<Args...>& t,
         const result_type& i,
         cpp_printer& cp) {
@@ -40,11 +41,12 @@ struct pipeline_helper {
     }        
 };
 
+//XXX Variadic templates will not work on Visual Studio
 template<bool D>
 struct pipeline_helper<0, D> {
     typedef std::shared_ptr<const suite> result_type;
     template<class... Args>
-    static result_type impl(
+    static inline result_type impl(
         std::tuple<Args...> const& t,
         const result_type& i,
         cpp_printer&) {
@@ -54,8 +56,9 @@ struct pipeline_helper<0, D> {
 
 }
 
+//XXX Variadic templates will not work on Visual Studio
 template<class... Args>
-std::shared_ptr<const suite> apply(std::tuple<Args...>& t,
+static inline std::shared_ptr<const suite> apply(std::tuple<Args...>& t,
                                    const suite& n,
                                    cpp_printer& cp) {
     return detail::pipeline_helper<sizeof...(Args), TRACE>::impl(t, n.ptr(), cp);
@@ -63,6 +66,8 @@ std::shared_ptr<const suite> apply(std::tuple<Args...>& t,
 
 
 std::shared_ptr<const suite> compiler::operator()(const suite &n) {
+    //Defines the compiler pipeline
+    //Passes will be processed sequentially, with outputs chained to inputs
     auto passes = std::make_tuple(
         tuple_break(),
         phase_analyze(m_entry_point, m_registry),
