@@ -2,6 +2,9 @@
  *  \brief The compiler implementation.
  */
 #include "compiler.hpp"
+#include <typeinfo>
+
+#define TRACE false //true
 
 namespace backend {
 compiler::compiler(const std::string& entry_point,
@@ -13,79 +16,70 @@ compiler::compiler(const std::string& entry_point,
     m_registry.add_library(prelude);
 
 }
-std::shared_ptr<const suite> compiler::operator()(const suite &n) {
-    cpp_printer cp(m_backend_tag, m_entry_point, m_registry, std::cout);
 
-    tuple_break tuple_breaker;
-    auto tuple_broken = apply(tuple_breaker, n);
-#ifdef TRACE
-    std::cout << "Tuple broken" << std::endl;
-    boost::apply_visitor(cp, *tuple_broken);
-#endif
-    
-    phase_analyze phase_analyzer(m_entry_point, m_registry);
-    auto phase_analyzed = apply(phase_analyzer, tuple_broken);
-#ifdef TRACE
-    std::cout << "Phase analyzed" << std::endl;
-    boost::apply_visitor(cp, *phase_analyzed);
-#endif
+namespace detail {
 
-    type_convert type_converter;
-    auto type_converted = apply(type_converter, phase_analyzed);
-#ifdef TRACE
-    std::cout << "Type converted" << std::endl;
-    boost::apply_visitor(cp, *type_converted);
-#endif
-    functorize functorizer(m_entry_point, m_registry);
-    auto functorized = apply(functorizer, type_converted);
-#ifdef TRACE
-    std::cout << "Functorized" << std::endl;
-    boost::apply_visitor(cp, *functorized);
-#endif
-    thrust_rewriter thrustizer(m_backend_tag);
-    auto thrust_rewritten = apply(thrustizer, functorized);
-#ifdef TRACE
-    std::cout << "Thrust rewritten" << std::endl;
-    boost::apply_visitor(cp, *thrust_rewritten);
-#endif
-    dereference dereferencer(m_entry_point);
-    auto dereferenced = apply(dereferencer, thrust_rewritten);
-#ifdef TRACE
-    std::cout << "Dereferenced" << std::endl;
-    boost::apply_visitor(cp, *dereferenced);
-#endif
-    allocate allocator(m_backend_tag, m_entry_point);
-    auto allocated = apply(allocator, dereferenced);
-#ifdef TRACE
-    std::cout << "Allocated" << std::endl;
-    boost::apply_visitor(cp, *allocated);
-#endif
-    containerize containerizer(m_entry_point);
-    auto containerized = apply(containerizer, allocated);
-#ifdef TRACE
-    std::cout << "Containerized" << std::endl;
-    boost::apply_visitor(cp, *containerized);
-#endif
-    typedefify typedefifier;
-    auto typedefified = apply(typedefifier, containerized);
-#ifdef TRACE
-    std::cout << "Typedefified" << std::endl;
-    boost::apply_visitor(cp, *typedefified);
-#endif
-    wrap wrapper(m_backend_tag, m_entry_point);
-    auto wrapped = apply(wrapper, containerized);
-#ifdef TRACE
-    std::cout << "Wrapped" << std::endl;
-    boost::apply_visitor(cp, *wrapped);
-#endif
-    find_includes include_finder(m_registry);
-    auto included = apply(include_finder, wrapped);
-#ifdef TRACE
-    std::cout << "Included" << std::endl;
-    boost::apply_visitor(cp, *included);
-#endif
-    return included;
+template<int N, bool D=false>
+struct pipeline_helper {
+    typedef std::shared_ptr<const suite> result_type;
+    template<class... Args>
+    static result_type impl(
+        std::tuple<Args...>& t,
+        const result_type& i,
+        cpp_printer& cp) {
+        result_type rewritten =
+            std::static_pointer_cast<const suite>(
+                boost::apply_visitor(
+                    std::get<sizeof...(Args)-N>(t),
+                    *i));
+        if (D) {
+            std::cout << "After " << typeid(std::get<sizeof...(Args)-N>(t)).name() << std::endl;
+            boost::apply_visitor(cp, *rewritten);
+        }
+        return pipeline_helper<N-1, D>::impl(t, rewritten, cp);
+    }        
+};
+
+template<bool D>
+struct pipeline_helper<0, D> {
+    typedef std::shared_ptr<const suite> result_type;
+    template<class... Args>
+    static result_type impl(
+        std::tuple<Args...> const& t,
+        const result_type& i,
+        cpp_printer&) {
+        return i;
+    }        
+};
+
 }
+
+template<class... Args>
+std::shared_ptr<const suite> apply(std::tuple<Args...>& t,
+                                   const suite& n,
+                                   cpp_printer& cp) {
+    return detail::pipeline_helper<sizeof...(Args), TRACE>::impl(t, n.ptr(), cp);
+}
+
+
+std::shared_ptr<const suite> compiler::operator()(const suite &n) {
+    auto passes = std::make_tuple(
+        tuple_break(),
+        phase_analyze(m_entry_point, m_registry),
+        type_convert(),
+        functorize(m_entry_point, m_registry),
+        thrust_rewriter(m_backend_tag),
+        dereference(m_entry_point),
+        allocate(m_backend_tag, m_entry_point),
+        wrap(m_backend_tag, m_entry_point),
+        containerize(m_entry_point),
+        typedefify(),
+        find_includes(m_registry));
+
+    cpp_printer cp(m_backend_tag, m_entry_point, m_registry, std::cout);
+    return apply(passes, n, cp);
+}
+
 const std::string& compiler::entry_point() const {
     return m_entry_point;
 }

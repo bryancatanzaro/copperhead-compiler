@@ -63,6 +63,9 @@ template<typename Derived>
 class rewriter
     : public boost::static_visitor<std::shared_ptr<const node> >
 {
+private:
+    Derived& get_sub();
+    
 protected:
     /*! Used for bookkeeping to discover straight copies */
     std::stack<bool> m_matches;

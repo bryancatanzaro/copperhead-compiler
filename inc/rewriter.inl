@@ -20,6 +20,11 @@
 namespace backend {
 
 template<typename Derived>
+Derived& rewriter<Derived>::get_sub() {
+    return static_cast<Derived&>(*this);
+}
+
+template<typename Derived>
 void rewriter<Derived>::start_match() {
     m_matches.push(true);
 }
@@ -49,7 +54,7 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const tupl
     for(auto i = n.begin(); i != n.end(); i++) {
         auto n_i =
             std::static_pointer_cast<const expression>(
-                boost::apply_visitor(*static_cast<Derived*>(this), *i));
+                boost::apply_visitor(get_sub(), *i));
         update_match(n_i, *i);
         n_values.push_back(n_i);
     }
@@ -66,9 +71,9 @@ template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const apply &n) {
     auto n_fn = std::static_pointer_cast<const name>(
         boost::apply_visitor(
-            *static_cast<Derived*>(this), n.fn()));
+            get_sub(), n.fn()));
     auto n_args = std::static_pointer_cast<const tuple>(
-        (*static_cast<Derived*>(this))(n.args()));
+        (get_sub())(n.args()));
     start_match();
     update_match(n_fn, n.fn());
     update_match(n_args, n.args()); 
@@ -81,9 +86,9 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const appl
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const lambda &n) {
     auto n_args = std::static_pointer_cast<const tuple>(
-        (*static_cast<Derived*>(this))(n.args()));
+        (get_sub())(n.args()));
     auto n_body = std::static_pointer_cast<const expression>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.body()));
+        boost::apply_visitor(get_sub(), n.body()));
     start_match();
     update_match(n_args, n.args());
     update_match(n_body, n.body());
@@ -97,9 +102,9 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const lamb
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const closure &n) {
     auto n_args = std::static_pointer_cast<const tuple>(
-        (*static_cast<Derived*>(this))(n.args()));
+        (get_sub())(n.args()));
     auto n_body = std::static_pointer_cast<const expression>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.body()));
+        boost::apply_visitor(get_sub(), n.body()));
     start_match();
     update_match(n_args, n.args());
     update_match(n_body, n.body());
@@ -113,9 +118,9 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const clos
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const subscript &n) {
     auto n_src = std::static_pointer_cast<const name>(
-        (*static_cast<Derived*>(this))(n.src()));
+        (get_sub())(n.src()));
     auto n_idx = std::static_pointer_cast<const expression>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.idx()));
+        boost::apply_visitor(get_sub(), n.idx()));
     start_match();
     update_match(n_src, n.src());
     update_match(n_idx, n.idx());
@@ -129,11 +134,11 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const subs
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const conditional &n) {
     auto n_cond = std::static_pointer_cast<const expression>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.cond()));
+        boost::apply_visitor(get_sub(), n.cond()));
     auto n_then = std::static_pointer_cast<const suite>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.then()));
+        boost::apply_visitor(get_sub(), n.then()));
     auto n_orelse = std::static_pointer_cast<const suite>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.orelse()));
+        boost::apply_visitor(get_sub(), n.orelse()));
     start_match();
     update_match(n_cond, n.cond());
     update_match(n_then, n.then());
@@ -146,7 +151,7 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const cond
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const ret &n) {
     auto n_val = std::static_pointer_cast<const expression>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.val()));
+        boost::apply_visitor(get_sub(), n.val()));
     start_match();
     update_match(n_val, n.val());
     if (is_match())
@@ -157,9 +162,9 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const ret 
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const bind &n) {
     auto n_lhs = std::static_pointer_cast<const expression>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.lhs()));
+        boost::apply_visitor(get_sub(), n.lhs()));
     auto n_rhs = std::static_pointer_cast<const expression>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.rhs()));
+        boost::apply_visitor(get_sub(), n.rhs()));
     start_match();
     update_match(n_lhs, n.lhs());
     update_match(n_rhs, n.rhs());
@@ -171,7 +176,7 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const bind
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const call &n) {
     auto n_sub = std::static_pointer_cast<const apply>(
-        boost::apply_visitor(*static_cast<Derived*>(this), n.sub()));
+        boost::apply_visitor(get_sub(), n.sub()));
     start_match();
     update_match(n_sub, n.sub());
     if (is_match())
@@ -181,9 +186,9 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const call
 
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const procedure &n) {
-    auto n_id = std::static_pointer_cast<const name>((*static_cast<Derived*>(this))(n.id()));
-    auto n_args = std::static_pointer_cast<const tuple>((*static_cast<Derived*>(this))(n.args()));
-    auto n_stmts = std::static_pointer_cast<const suite>((*static_cast<Derived*>(this))(n.stmts()));
+    auto n_id = std::static_pointer_cast<const name>((get_sub())(n.id()));
+    auto n_args = std::static_pointer_cast<const tuple>((get_sub())(n.args()));
+    auto n_stmts = std::static_pointer_cast<const suite>((get_sub())(n.stmts()));
     start_match();
     update_match(n_id, n.id());
     update_match(n_args, n.args());
@@ -201,7 +206,7 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const suit
     start_match();
     std::vector<std::shared_ptr<const statement> > n_stmts;
     for(auto i = n.begin(); i != n.end(); i++) {
-        auto n_stmt = std::static_pointer_cast<const statement>(boost::apply_visitor(*static_cast<Derived*>(this), *i));
+        auto n_stmt = std::static_pointer_cast<const statement>(boost::apply_visitor(get_sub(), *i));
         update_match(n_stmt, *i);
         n_stmts.push_back(n_stmt);
     }
@@ -212,8 +217,8 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const suit
 
 template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const structure &n) {
-    auto n_id = std::static_pointer_cast<const name>((*static_cast<Derived*>(this))(n.id()));
-    auto n_stmts = std::static_pointer_cast<const suite>((*static_cast<Derived*>(this))(n.stmts()));
+    auto n_id = std::static_pointer_cast<const name>((get_sub())(n.id()));
+    auto n_stmts = std::static_pointer_cast<const suite>((get_sub())(n.stmts()));
     start_match();
     update_match(n_id, n.id());
     update_match(n_stmts, n.stmts());

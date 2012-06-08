@@ -87,16 +87,7 @@ private:
     
     /*! The registry used by the compiler.*/
     registry m_registry;
-    /*! A helper function to apply a compiler pass.*/
-    template<typename P>
-    std::shared_ptr<const suite> apply(P& pass, const suite &n) {
-        return std::static_pointer_cast<const suite>(pass(n));
-    }
-    /*! A helper function to apply a compiler pass.*/
-    template<typename P>
-    std::shared_ptr<const suite> apply(P& pass, const std::shared_ptr<const suite> n) {
-        return apply(pass, *n);
-    }
+
 public:
     //! Constructor.
     /*!\param entry_point The name of the entry point function.

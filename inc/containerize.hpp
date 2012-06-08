@@ -37,7 +37,7 @@ namespace backend {
  *  always exist, and so must be constructed to ensure they can be returned
 */
 class containerize
-    : public rewriter
+    : public rewriter<containerize>
 {
 private:
     const std::string& m_entry_point;
@@ -49,7 +49,7 @@ public:
     //* @param entry_point Name of the entry point procedure
     containerize(const std::string& entry_point);
     
-    using rewriter::operator();
+    using rewriter<containerize>::operator();
     //! Rewrite rule for \p suite nodes
     result_type operator()(const suite &p);
     //! Rewrite rule for \p procedure nodes
