@@ -46,9 +46,9 @@ struct pipeline_helper<0, D> {
     typedef std::shared_ptr<const suite> result_type;
     template<typename Tuple>
     static inline result_type impl(
-        Tuple const& t,
+        const Tuple& t,
         const result_type& i,
-        cpp_printer&) {
+        const cpp_printer&) {
         return i;
     }        
 };

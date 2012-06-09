@@ -21,6 +21,7 @@
 #include "utility/isinstance.hpp"
 #include "utility/snippets.hpp"
 #include "utility/markers.hpp"
+#include "environment.hpp"
 
 #include <iostream>
 #include <cassert>
@@ -42,6 +43,7 @@ class containerize
 private:
     const std::string& m_entry_point;
     bool m_in_entry;
+    environment<std::string> m_decl_containers;
     std::shared_ptr<const ctype::type_t> container_type(const ctype::type_t&);
     std::shared_ptr<const expression> container_args(const expression&);
 public:
@@ -56,6 +58,8 @@ public:
     result_type operator()(const procedure &p);
     //! Rewrite rule for \p subscript nodes
     result_type operator()(const bind &n);
+    //! Rewrite rule for \p name nodes
+    result_type operator()(const name &n);
 };
 
 /*!

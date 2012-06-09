@@ -69,14 +69,16 @@ allocate::result_type allocate::operator()(const bind &n) {
         const name& pre_lhs = boost::get<const name&>(n.lhs());
 
         //Construct cuarray for result
-        shared_ptr<const ctype::type_t> impl_seq_ct =
-            pre_lhs.ctype().ptr();
+        //This cast is valid because we already tested the ctype in
+        //the condition
+        shared_ptr<const ctype::sequence_t> impl_seq_ct =
+            static_pointer_cast<const ctype::sequence_t>(pre_lhs.ctype().ptr());
        
         shared_ptr<const ctype::tuple_t> tuple_impl_seq_ct =
             make_shared<const ctype::tuple_t>(
                 make_vector<shared_ptr<const ctype::type_t> >(impl_seq_ct));
         shared_ptr<const ctype::type_t> result_ct =
-            make_shared<const ctype::monotype_t>("sp_cuarray");
+            make_shared<const ctype::cuarray_t>(impl_seq_ct->sub().ptr());
         shared_ptr<const type_t> result_t =
             pre_lhs.type().ptr();
         shared_ptr<const name> result_name = make_shared<const name>(

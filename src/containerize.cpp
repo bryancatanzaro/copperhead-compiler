@@ -29,6 +29,12 @@ namespace backend {
 containerize::containerize(const string& entry_point) : m_entry_point(entry_point), m_in_entry(false) {}
 
 
+containerize::result_type containerize::operator()(const name &n) {
+    if (detail::isinstance<ctype::cuarray_t>(n.ctype())) {
+        m_decl_containers.insert(n.id());
+    }
+}
+
 containerize::result_type containerize::operator()(const suite &n) {
     vector<shared_ptr<const statement> > stmts;
     bool match = true;
@@ -56,7 +62,10 @@ containerize::result_type containerize::operator()(const suite &n) {
 
 containerize::result_type containerize::operator()(const procedure &s) {
     m_in_entry = (s.id().id() == m_entry_point);
-    return this->rewriter::operator()(s);
+    m_decl_containers.begin_scope();
+    containerize::result_type r = this->rewriter::operator()(s);
+    m_decl_containers.end_scope();
+    return r;
 }
 
 shared_ptr<const ctype::type_t> containerize::container_type(const ctype::type_t& t) {
