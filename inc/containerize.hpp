@@ -21,6 +21,7 @@
 #include "utility/isinstance.hpp"
 #include "utility/snippets.hpp"
 #include "utility/markers.hpp"
+#include "utility/up_get.hpp"
 #include "environment.hpp"
 
 #include <iostream>

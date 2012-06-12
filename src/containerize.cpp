@@ -29,20 +29,6 @@ using std::vector;
 
 namespace backend {
 
-// template<>
-// typename rewriter<containerize>::result_type rewriter<containerize>::operator()(const ret &n) {
-//     repr_printer rp(std::cout);
-//     boost::apply_visitor(rp, n);
-//     std::cout << std::endl;
-//     auto n_val = std::static_pointer_cast<const expression>(
-//         boost::apply_visitor(get_sub(), n.val()));
-//     start_match();
-//     update_match(n_val, n.val());
-//     if (is_match())
-//         return n.ptr();
-//     return result_type(new ret(n_val));
-// }
-
 containerize::containerize(const string& entry_point) : m_entry_point(entry_point), m_in_entry(false) {}
 
 
@@ -155,7 +141,14 @@ containerize::result_type containerize::operator()(const bind &n) {
         }
 
         //Does this make_tuple need to be containerized?
-        shared_ptr<const ctype::type_t> cont_type = container_type(n.lhs().ctype());
+        vector<shared_ptr<const ctype::type_t> > arg_c_types;
+        for(auto i = rhs_apply.args().begin(); i != rhs_apply.args().end(); i++) {
+            arg_c_types.push_back(i->ctype().ptr());
+        }
+            
+            
+        shared_ptr<const ctype::type_t> cont_type = container_type(
+            *make_shared<const ctype::tuple_t>(move(arg_c_types)));
         //If the container is the same as the ctype, no - because this
         //means that no containers were necessary for the original
         if (cont_type == n.lhs().ctype().ptr()) {
@@ -174,9 +167,9 @@ containerize::result_type containerize::operator()(const bind &n) {
         const tuple& cont_args = boost::get<const tuple&>(cont_args_expr);
         bool need_container = false;
         for(auto i = cont_args.begin(); i != cont_args.end(); i++) {
-            assert(detail::isinstance<name>(*i));
+            assert(detail::isinstance<literal>(*i));
             
-            const name& i_name = boost::get<const name&>(*i);
+            const literal& i_name = detail::up_get<const literal&>(*i);
             need_container = need_container || (m_decl_containers.exists(i_name.id()));
         }
         if (!need_container) {

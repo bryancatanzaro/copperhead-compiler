@@ -25,6 +25,7 @@
 #include "rewriter.hpp"
 #include "utility/isinstance.hpp"
 #include "utility/markers.hpp"
+#include "utility/snippets.hpp"
 #include "utility/initializers.hpp"
 #include "type_printer.hpp"
 #include <prelude/runtime/tags.h>

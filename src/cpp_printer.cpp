@@ -24,7 +24,7 @@ cpp_printer::cpp_printer(
         i++) {
         declared.insert(std::get<0>(i->first));
     }
-    declared.insert(detail::mark_generated_id(entry_point));
+    declared.insert("_" + entry_point);
         
 }
     

@@ -368,8 +368,38 @@ thrust_rewriter::result_type thrust_rewriter::gather_rewrite(const bind& n) {
     return result;
 }
 
-thrust_rewriter::result_type thrust_rewriter::tuple_rewrite(const bind& n) {
+thrust_rewriter::result_type thrust_rewriter::make_tuple_rewrite(const bind& n) {
+    //The rhs must be an apply
+    assert(detail::isinstance<apply>(n.rhs()));
     
+    const apply& rhs = boost::get<const apply&>(n.rhs());
+    //The rhs must apply "thrust::make_tuple"
+    assert(rhs.fn().id() == detail::snippet_make_tuple());
+    
+    //Derive the types of all the inputs
+    vector<shared_ptr<const ctype::type_t> > typified;
+    for(auto i = rhs.args().begin(); i != rhs.args().end(); i++) {
+        //Argument to make_tuple must be a name or a literal
+        if (detail::isinstance<name>(*i)) {
+            const name& name_i = boost::get<const name&>(*i);
+            typified.push_back(
+                make_shared<const ctype::monotype_t>(
+                    detail::typify(
+                        name_i.id())));
+        } else {
+            typified.push_back(i->ctype().ptr());
+        }
+                    
+    }
+
+    const name& lhs = boost::get<const name&>(n.lhs());
+    shared_ptr<const name> n_lhs =
+        make_shared<const name>(lhs.id(),
+                                lhs.type().ptr(),
+                                make_shared<const ctype::tuple_t>(
+                                    move(typified)));
+    return make_shared<const bind>(
+        n_lhs, rhs.ptr());
 }
 
 
@@ -396,7 +426,7 @@ thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
     } else if (fn_id == "shift") {
         return shift_rewrite(n);
     } else if (fn_id == detail::snippet_make_tuple()) {
-        return tuple_rewrite(n);
+        return make_tuple_rewrite(n);
     } else {
         return n.ptr();
     }
