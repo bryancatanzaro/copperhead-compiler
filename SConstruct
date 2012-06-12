@@ -134,12 +134,6 @@ except:
     
 conf.Finish()
 
-        
-#Parallelize the build maximally
-import multiprocessing
-n_jobs = multiprocessing.cpu_count()
-SetOption('num_jobs', n_jobs)
-
 Export('env')
 Export('cuda_support')
 

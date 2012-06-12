@@ -60,6 +60,8 @@ private:
     result_type zip_rewrite(const bind& n);
 
     result_type gather_rewrite(const bind& n);
+
+    result_type make_tuple_rewrite(const bind& n);
     
 public:
     //! Constructor

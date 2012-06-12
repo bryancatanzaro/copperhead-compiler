@@ -368,6 +368,9 @@ thrust_rewriter::result_type thrust_rewriter::gather_rewrite(const bind& n) {
     return result;
 }
 
+thrust_rewriter::result_type thrust_rewriter::tuple_rewrite(const bind& n) {
+    
+}
 
 
 thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
@@ -392,6 +395,8 @@ thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
         return rotate_rewrite(n);
     } else if (fn_id == "shift") {
         return shift_rewrite(n);
+    } else if (fn_id == detail::snippet_make_tuple()) {
+        return tuple_rewrite(n);
     } else {
         return n.ptr();
     }

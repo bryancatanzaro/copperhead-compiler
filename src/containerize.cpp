@@ -24,7 +24,24 @@ using std::static_pointer_cast;
 using backend::utility::make_vector;
 using std::vector;
 
+#include "repr_printer.hpp"
+
+
 namespace backend {
+
+// template<>
+// typename rewriter<containerize>::result_type rewriter<containerize>::operator()(const ret &n) {
+//     repr_printer rp(std::cout);
+//     boost::apply_visitor(rp, n);
+//     std::cout << std::endl;
+//     auto n_val = std::static_pointer_cast<const expression>(
+//         boost::apply_visitor(get_sub(), n.val()));
+//     start_match();
+//     update_match(n_val, n.val());
+//     if (is_match())
+//         return n.ptr();
+//     return result_type(new ret(n_val));
+// }
 
 containerize::containerize(const string& entry_point) : m_entry_point(entry_point), m_in_entry(false) {}
 
@@ -33,6 +50,7 @@ containerize::result_type containerize::operator()(const name &n) {
     if (detail::isinstance<ctype::cuarray_t>(n.ctype())) {
         m_decl_containers.insert(n.id());
     }
+    return n.ptr();
 }
 
 containerize::result_type containerize::operator()(const suite &n) {
@@ -138,12 +156,36 @@ containerize::result_type containerize::operator()(const bind &n) {
 
         //Does this make_tuple need to be containerized?
         shared_ptr<const ctype::type_t> cont_type = container_type(n.lhs().ctype());
-        //If the container is the same as the ctype, no
+        //If the container is the same as the ctype, no - because this
+        //means that no containers were necessary for the original
         if (cont_type == n.lhs().ctype().ptr()) {
             return n.ptr();
         }
-        assert(detail::isinstance<name>(n.lhs()));
+        //If none of the containers needed to construct this tuple are not
+        //extant, no - this means that we're creating a tuple from
+        //temporary sequences that won't ever be returned.
+        //It is the responsibility of phase analysis to realize
+        //temporary results as containers when an entry point is
+        //returning.  This means we can assume all externally visible
+        //containers will have their input containers materialized at
+        //this point in the compiler.
+        shared_ptr<const expression> p_cont_args_expr = container_args(rhs_apply.args());
+        const expression& cont_args_expr = *p_cont_args_expr;
+        const tuple& cont_args = boost::get<const tuple&>(cont_args_expr);
+        bool need_container = false;
+        for(auto i = cont_args.begin(); i != cont_args.end(); i++) {
+            assert(detail::isinstance<name>(*i));
+            
+            const name& i_name = boost::get<const name&>(*i);
+            need_container = need_container || (m_decl_containers.exists(i_name.id()));
+        }
+        if (!need_container) {
+            return n.ptr();
+        }
         
+
+        
+        assert(detail::isinstance<name>(n.lhs()));
         const name& lhs = boost::get<const name&>(n.lhs());
         shared_ptr<const name> new_lhs =
             make_shared<const name>(
@@ -154,13 +196,16 @@ containerize::result_type containerize::operator()(const bind &n) {
         shared_ptr<const apply> new_rhs =
             make_shared<const apply>(
                 apply_fn.ptr(),
-                static_pointer_cast<const tuple>(container_args(rhs_apply.args())));
+                cont_args.ptr());
 
-                return make_shared<const suite>(
-                    make_vector<shared_ptr<const statement> >(n.ptr())
-                    (make_shared<const bind>(
-                        new_lhs,
-                        new_rhs)));
+        //Add new container to declared containers
+        m_decl_containers.insert(new_lhs->id());
+        
+        return make_shared<const suite>(
+            make_vector<shared_ptr<const statement> >(n.ptr())
+            (make_shared<const bind>(
+                new_lhs,
+                new_rhs)));
     }
     return n.ptr();
 }
