@@ -33,9 +33,7 @@ containerize::containerize(const string& entry_point) : m_entry_point(entry_poin
 
 
 containerize::result_type containerize::operator()(const name &n) {
-    if (detail::isinstance<ctype::cuarray_t>(n.ctype())) {
-        m_decl_containers.insert(n.id());
-    }
+    m_decl_containers.insert(n.id());
     return n.ptr();
 }
 
@@ -127,6 +125,10 @@ containerize::result_type containerize::operator()(const bind &n) {
     if (!m_in_entry) {
         return n.ptr();
     } else {
+
+        //Record name in lhs
+        boost::apply_visitor(*this, n.lhs());
+        
         const expression& rhs = n.rhs();
         if (!detail::isinstance<apply>(rhs)) {
             return n.ptr();
@@ -151,12 +153,14 @@ containerize::result_type containerize::operator()(const bind &n) {
             *make_shared<const ctype::tuple_t>(move(arg_c_types)));
         //If the container is the same as the ctype, no - because this
         //means that no containers were necessary for the original
+        //e.g. a tuple of scalars
         if (cont_type == n.lhs().ctype().ptr()) {
             return n.ptr();
         }
-        //If none of the containers needed to construct this tuple are not
+        //If any of the containers needed to construct this tuple are not
         //extant, no - this means that we're creating a tuple from
         //temporary sequences that won't ever be returned.
+
         //It is the responsibility of phase analysis to realize
         //temporary results as containers when an entry point is
         //returning.  This means we can assume all externally visible
@@ -165,12 +169,13 @@ containerize::result_type containerize::operator()(const bind &n) {
         shared_ptr<const expression> p_cont_args_expr = container_args(rhs_apply.args());
         const expression& cont_args_expr = *p_cont_args_expr;
         const tuple& cont_args = boost::get<const tuple&>(cont_args_expr);
-        bool need_container = false;
+        bool need_container = true;
         for(auto i = cont_args.begin(); i != cont_args.end(); i++) {
             assert(detail::isinstance<literal>(*i));
             
             const literal& i_name = detail::up_get<const literal&>(*i);
-            need_container = need_container || (m_decl_containers.exists(i_name.id()));
+            bool container_defined = m_decl_containers.exists(i_name.id());
+            need_container = need_container && container_defined;
         }
         if (!need_container) {
             return n.ptr();

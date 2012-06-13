@@ -4,7 +4,7 @@
 #include "compiler.hpp"
 #include <typeinfo>
 
-#define TRACE false //true
+#define TRACE false
 
 namespace backend {
 compiler::compiler(const std::string& entry_point,
