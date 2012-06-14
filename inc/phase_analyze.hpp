@@ -55,6 +55,7 @@ private:
     std::vector<result_type> m_additionals;
     completion m_result_completion;
     void add_phase_boundary(const name& n);
+    environment<std::string, std::set<std::shared_ptr<const name> > > m_sources;
 public:
     using rewriter<phase_analyze>::operator();
     //! Constructor

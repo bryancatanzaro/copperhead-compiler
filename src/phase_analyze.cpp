@@ -9,6 +9,8 @@ using std::vector;
 using std::static_pointer_cast;
 using std::make_pair;
 using backend::utility::make_vector;
+using backend::utility::make_set;
+using std::set;
 
 namespace backend {
 
@@ -57,9 +59,18 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
             //Otherwise it's invariantly formed (scalars)
             if (detail::isinstance<sequence_t>(arg_name.type())) {
                 m_completions.insert(make_pair(arg_id, completion::total));
+                m_sources.insert(
+                    make_pair(
+                        arg_id,
+                        make_set<shared_ptr<const name> >(arg_name.ptr())));
             } else {
                 m_completions.insert(make_pair(arg_id, completion::invariant));
+                m_sources.insert(
+                    make_pair(
+                        arg_id,
+                        make_set<shared_ptr<const name> >()));
             }
+            
         }
         shared_ptr<const suite> stmts =
             static_pointer_cast<const suite>(
@@ -81,52 +92,66 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
 }
 
 void phase_analyze::add_phase_boundary(const name& n) {
-    shared_ptr<const name> p_n =
-        n.ptr();
-    shared_ptr<const name> p_result =
-        make_shared<const name>(
-            detail::complete(n.id()),
-            n.type().ptr());
+    std::cout << "Adding phase boundary for " << n.id() << std::endl;
+    if (!m_sources.exists(n.id())) {
+        return;
+    }
     
-    shared_ptr<const tuple_t> pb_args_t =
-        make_shared<const tuple_t>(
-            make_vector<shared_ptr<const type_t> >(n.type().ptr()));
-    shared_ptr<const tuple> pb_args =
-        make_shared<const tuple>(
-            make_vector<shared_ptr<const expression> >(p_n),
-            pb_args_t);
-    shared_ptr<const monotype_t> a_mt = make_shared<const monotype_t>("a");
-    shared_ptr<const monotype_t> seq_a_mt = make_shared<const sequence_t>(a_mt);
-    shared_ptr<const type_t> pb_type =
-        make_shared<const polytype_t>(
-            make_vector<shared_ptr<const monotype_t> >(a_mt),
-            make_shared<const fn_t>(
-                make_shared<const tuple_t>(
-                    make_vector<shared_ptr<const type_t> >(seq_a_mt)),
-                seq_a_mt));
-    shared_ptr<const name> pb_name =
-        make_shared<const name>(detail::phase_boundary(), pb_type);
-    shared_ptr<const apply> pb_apply =
-        make_shared<const apply>(pb_name, pb_args);
-    shared_ptr<const bind> result =
-        make_shared<const bind>(p_result, pb_apply);
-    m_additionals.push_back(result);
+    const set<shared_ptr<const name> >& sources =
+        m_sources.find(n.id())->second;
+    std::cout << "  Found sources, there are " << sources.size() << std::endl;
 
-    //Register completion
+
+    for(auto i = sources.begin();
+        i != sources.end();
+        i++) {
+        const shared_ptr<const name> p_s = *i;
+        const name& s = *p_s;
+        std::cout << "    " << s.id() << std::endl;
+        if (m_completions.exists(s.id())) {
+            completion c = m_completions.find(s.id())->second;
+            if ((c == completion::invariant) ||
+                (c == completion::total))
+                continue;
+        }
+            
+        shared_ptr<const name> p_result =
+            make_shared<const name>(
+                detail::complete(s.id()),
+                s.type().ptr());
+        
+        shared_ptr<const tuple> pb_args =
+            make_shared<const tuple>(
+                make_vector<shared_ptr<const expression> >(p_s));
+        shared_ptr<const name> pb_name =
+            make_shared<const name>(detail::phase_boundary());
+        shared_ptr<const apply> pb_apply =
+            make_shared<const apply>(pb_name, pb_args);
+        shared_ptr<const bind> result =
+            make_shared<const bind>(p_result, pb_apply);
+        m_additionals.push_back(result);
+        
+        //Register completion
+        m_completions.insert(
+            make_pair(p_result->id(), completion::total));
+        
+        //Register substitution
+        m_substitutions.insert(
+            make_pair(s.id(), p_result));
+    }
+
     m_completions.insert(
-        make_pair(p_result->id(), completion::total));
-
-    //Register substitution
-    m_substitutions.insert(
-        make_pair(n.id(), p_result));
+        make_pair(n.id(), completion::total));
+        
 }
 
 phase_analyze::result_type phase_analyze::operator()(const apply& n) {
     if (!m_in_entry) {
         return n.ptr();
     }
+    
     const name& fn_name = n.fn();
-
+    
     //If function not declared, assume it can't trigger a phase boundary
     if (m_fns.find(fn_name.id()) == m_fns.end()) {
         return n.ptr();
@@ -150,17 +175,19 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
                 //HEURISTIC HAZARD:
                 //This might not always be the right choice
                 new_arg = m_substitutions.find(id.id())->second;
-            } else {        
-                //If completion hasn't been recorded, assume it's invariant
-                if (m_completions.exists(id.id())) {
-                    completion arg_completion =
-                        m_completions.find(id.id())->second;
-                    //Do we need a phase boundary for this argument?
-                    if (arg_completion < (*j)) {
-                        add_phase_boundary(id);
-                        new_arg = m_substitutions.find(id.id())->second;
-                    }
-                }
+            } else {
+                //XXX need to add check back.
+                add_phase_boundary(id);
+                // //If completion hasn't been recorded, assume it's invariant
+                // if (m_completions.exists(id.id())) {
+                //     completion arg_completion =
+                //         m_completions.find(id.id())->second;
+                //     //Do we need a phase boundary for this argument?
+                //     if (arg_completion < (*j)) {
+                //         add_phase_boundary(id);
+                //         new_arg = m_substitutions.find(id.id())->second;
+                //     }
+                // }
             } 
         }
         new_args.push_back(new_arg);
@@ -181,6 +208,68 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
         m_completions.insert(make_pair(lhs_name.id(),
                                        m_result_completion));
     }
+
+    //Update sources
+    if (detail::isinstance<name>(n.lhs())) {
+        const name& lhs_name = detail::up_get<name>(n.lhs());
+        
+        if (detail::isinstance<sequence_t>(lhs_name.type())) {
+            //If the lhs is a sequence, it sources itself
+
+            m_sources.insert(
+                make_pair(
+                    lhs_name.id(),
+                    make_set<shared_ptr<const name> >(lhs_name.ptr())));
+        } else if (detail::isinstance<tuple_t>(lhs_name.type())) {
+            //Sourcing a tuple.
+            if (detail::isinstance<name>(n.rhs())) {
+                //Copy all sources of my input
+                const name& rhs_name = boost::get<const name&>(n.rhs());
+                m_sources.insert(
+                    make_pair(lhs_name.id(),
+                              m_sources.find(
+                                  rhs_name.id())->second));
+            } else if (detail::isinstance<apply>(n.rhs())) {
+                const apply& rhs_apply = boost::get<const apply&>(n.rhs());
+                const string& fn_id = rhs_apply.fn().id();
+                if (fn_id == detail::snippet_make_tuple()) {
+                    std::cout << "Sourcing from make_tuple!" << std::endl;
+                    set<shared_ptr<const name> > input_sources;
+                    for(auto i = rhs_apply.args().begin();
+                        i != rhs_apply.args().end();
+                        i++) {
+                        //Copy all the sources of my inputs
+                        //This builds up the transitive closure
+                        //of all sources this tuple draws from
+                        if (detail::isinstance<name>(*i)) {
+                            const name& arg = boost::get<const name&>(*i);
+                            std::cout << "  " << arg.id() << std::endl;
+
+                            const set<shared_ptr<const name> >& arg_sources =
+                                m_sources.find(arg.id())->second;
+                            input_sources.insert(
+                                arg_sources.begin(),
+                                arg_sources.end());
+                        }
+                    }
+                    m_sources.insert(
+                        make_pair(lhs_name.id(),
+                                  std::move(input_sources)));
+                } 
+            }
+        }
+
+        //If we haven't found a sources set for this lhs, it sources
+        //nothing
+        //This is true for scalars
+        //As well as tuples of literals, etc.
+        if (!m_sources.exists(lhs_name.id())) {
+            m_sources.insert(
+                make_pair(lhs_name.id(),
+                          make_set<shared_ptr<const name> >()));
+        }
+    }
+        
     return rewritten;
 }
 
@@ -198,15 +287,21 @@ phase_analyze::result_type phase_analyze::operator()(const ret& n) {
         //Phase boundary already happened, use complete version
         new_result = m_substitutions.find(return_name.id())->second;
     } else {
-        if (m_completions.exists(return_name.id())) {
-            completion result_completion =
-                m_completions.find(return_name.id())->second;
-            //Results must be totally complete!!
-            if (result_completion < completion::total) {
-                add_phase_boundary(return_name);
-                new_result = m_substitutions.find(return_name.id())->second;
-            }
+        add_phase_boundary(return_name);
+        if (m_substitutions.exists(return_name.id())) {
+            new_result = m_substitutions.find(return_name.id())->second;
+        } else {
+            new_result = return_name.ptr();
         }
+        // if (m_completions.exists(return_name.id())) {
+        //     completion result_completion =
+        //         m_completions.find(return_name.id())->second;
+        //     //Results must be totally complete!!
+        //     if (result_completion < completion::total) {
+        //         add_phase_boundary(return_name);
+        //         new_result = m_substitutions.find(return_name.id())->second;
+        //     }
+        // }
     }
     return make_shared<const ret>(new_result);
 }
