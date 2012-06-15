@@ -101,7 +101,7 @@ void phase_analyze::add_phase_boundary(const name& n) {
         m_sources.find(n.id())->second;
     std::cout << "  Found sources, there are " << sources.size() << std::endl;
 
-
+    bool added_boundary = false;
     for(auto i = sources.begin();
         i != sources.end();
         i++) {
@@ -114,7 +114,7 @@ void phase_analyze::add_phase_boundary(const name& n) {
                 (c == completion::total))
                 continue;
         }
-            
+        added_boundary = true;
         shared_ptr<const name> p_result =
             make_shared<const name>(
                 detail::complete(s.id()),
@@ -139,10 +139,6 @@ void phase_analyze::add_phase_boundary(const name& n) {
         m_substitutions.insert(
             make_pair(s.id(), p_result));
     }
-
-    m_completions.insert(
-        make_pair(n.id(), completion::total));
-        
 }
 
 phase_analyze::result_type phase_analyze::operator()(const apply& n) {
@@ -151,11 +147,25 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
     }
     
     const name& fn_name = n.fn();
+
+    //XXX
+    //If function is make_tuple, handle it separately
+    //Reason: make_tuple's phase type is not representable
+    //at present. When we redo phase inference, we'll want to
+    //fix this.
+    //The problem is that it needs to be a LUB type
+    //And we don't have a way to represent LUB types in the phase
+    //type system
+    if (fn_name.id() == detail::snippet_make_tuple) {
+        return make_tuple_analyze(n.args());
+    }
+
     
     //If function not declared, assume it can't trigger a phase boundary
     if (m_fns.find(fn_name.id()) == m_fns.end()) {
         return n.ptr();
     }
+    
     shared_ptr<const phase_t> fn_phase = m_fns.find(fn_name.id())->second;
     phase_t::iterator j = fn_phase->begin();
     //The phase type for the function must match the args given to it
@@ -176,18 +186,16 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
                 //This might not always be the right choice
                 new_arg = m_substitutions.find(id.id())->second;
             } else {
-                //XXX need to add check back.
-                add_phase_boundary(id);
-                // //If completion hasn't been recorded, assume it's invariant
-                // if (m_completions.exists(id.id())) {
-                //     completion arg_completion =
-                //         m_completions.find(id.id())->second;
-                //     //Do we need a phase boundary for this argument?
-                //     if (arg_completion < (*j)) {
-                //         add_phase_boundary(id);
-                //         new_arg = m_substitutions.find(id.id())->second;
-                //     }
-                // }
+                //If completion hasn't been recorded, assume it's invariant
+                if (m_completions.exists(id.id())) {
+                    completion arg_completion =
+                        m_completions.find(id.id())->second;
+                    //Do we need a phase boundary for this argument?
+                    if (arg_completion < (*j)) {
+                        add_phase_boundary(id);
+                        new_arg = m_substitutions.find(id.id())->second;
+                    }
+                }
             } 
         }
         new_args.push_back(new_arg);
@@ -223,12 +231,11 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
         } else if (detail::isinstance<tuple_t>(lhs_name.type())) {
             //Sourcing a tuple.
             if (detail::isinstance<name>(n.rhs())) {
-                //Copy all sources of my input
+                //If it is from another tuple, just depend on that source
                 const name& rhs_name = boost::get<const name&>(n.rhs());
                 m_sources.insert(
                     make_pair(lhs_name.id(),
-                              m_sources.find(
-                                  rhs_name.id())->second));
+                              make_set<shared_ptr<const name> >(lhs_name.ptr())));
             } else if (detail::isinstance<apply>(n.rhs())) {
                 const apply& rhs_apply = boost::get<const apply&>(n.rhs());
                 const string& fn_id = rhs_apply.fn().id();
@@ -238,18 +245,12 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
                     for(auto i = rhs_apply.args().begin();
                         i != rhs_apply.args().end();
                         i++) {
-                        //Copy all the sources of my inputs
-                        //This builds up the transitive closure
-                        //of all sources this tuple draws from
+                        //Depend on all inputs to make tuple
                         if (detail::isinstance<name>(*i)) {
                             const name& arg = boost::get<const name&>(*i);
                             std::cout << "  " << arg.id() << std::endl;
-
-                            const set<shared_ptr<const name> >& arg_sources =
-                                m_sources.find(arg.id())->second;
                             input_sources.insert(
-                                arg_sources.begin(),
-                                arg_sources.end());
+                                make_pair(arg.id());
                         }
                     }
                     m_sources.insert(
