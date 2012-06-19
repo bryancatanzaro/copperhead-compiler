@@ -85,12 +85,15 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
 bool phase_analyze::add_phase_boundary_tuple(const name& n) {
     assert(m_tuples.exists(n.id()));
     bool need_boundary = false;
-    const vector<shared_ptr<const name> >& sources =
+    const vector<shared_ptr<const literal> >& sources =
         m_tuples.find(n.id())->second;
     for(auto i = sources.begin();
         i != sources.end();
         i++) {
-        need_boundary |= add_phase_boundary(**i);
+        if (detail::isinstance<name>(**i)) {
+            const name& i_name = boost::get<const name&>(**i);
+            need_boundary |= add_phase_boundary(i_name);
+        }
     }
     if (!need_boundary) {
         return false;
@@ -104,9 +107,14 @@ bool phase_analyze::add_phase_boundary_tuple(const name& n) {
     for(auto i = sources.begin();
         i != sources.end();
         i++) {
-        if (m_substitutions.exists((*i)->id())) {
-            expr_sources.push_back(
-                m_substitutions.find((*i)->id())->second->ptr());
+        if (detail::isinstance<name>(**i)) {
+            const name& i_name = boost::get<const name&>(**i);
+            if (m_substitutions.exists(i_name.id())) {
+                expr_sources.push_back(
+                    m_substitutions.find(i_name.id())->second->ptr());
+            } else {
+                expr_sources.push_back(*i);
+            }
         } else {
             expr_sources.push_back(*i);
         }
@@ -230,10 +238,10 @@ phase_analyze::result_type phase_analyze::make_tuple_analyze(const bind& n) {
     const apply& rhs = boost::get<const apply&>(n.rhs());
     const name& fn_name = rhs.fn();
     assert(fn_name.id() == detail::snippet_make_tuple());
-    vector<shared_ptr<const name> > sources;
+    vector<shared_ptr<const literal> > sources;
     for(auto i = rhs.args().begin(); i != rhs.args().end(); i++) {
-        assert(detail::isinstance<name>(*i));
-        const name& i_name = boost::get<const name&>(*i);
+        assert(detail::isinstance<literal>(*i));
+        const literal& i_name = detail::up_get<const literal&>(*i);
         sources.push_back(i_name.ptr());
     }
     completion glb = completion::invariant;
