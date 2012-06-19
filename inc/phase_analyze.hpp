@@ -51,12 +51,12 @@ private:
     std::map<std::string, std::shared_ptr<const phase_t> > m_fns;
     environment<std::string, completion> m_completions;
     environment<std::string, std::shared_ptr<const name> > m_substitutions;
-    //Should this be implemented with std::stack<result_type>?
-    std::vector<result_type> m_additionals;
+    std::vector<std::shared_ptr<const statement> > m_additionals;
     completion m_result_completion;
-    void add_phase_boundary(const name& n);
-    result_type make_tuple_analyze(const tuple& n);
-    environment<std::string, std::set<std::shared_ptr<const name> > > m_sources;
+    bool add_phase_boundary(const name& n);
+    bool add_phase_boundary_tuple(const name& n);
+    result_type make_tuple_analyze(const bind& n);
+    environment<std::string, std::vector<std::shared_ptr<const name> > > m_tuples;
 public:
     using rewriter<phase_analyze>::operator();
     //! Constructor
