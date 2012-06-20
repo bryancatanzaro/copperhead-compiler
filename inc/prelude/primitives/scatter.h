@@ -30,6 +30,7 @@ template<typename SeqX, typename SeqI>
 sp_cuarray
 permute(const SeqX& x, const SeqI& i) {
     typedef typename SeqX::tag Tag;
+    typedef typename SeqX::value_type T;
     typedef typename detail::stored_sequence<Tag, T>::type sequence_type;
     
     boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
@@ -41,7 +42,7 @@ permute(const SeqX& x, const SeqI& i) {
     typedef typename SeqI::iterator_type IndexIterator;
     thrust::permutation_iterator<ElementIterator,
                                  IndexIterator> pi(
-                                     result_ary.begin(),
+                                     result.begin(),
                                      i.begin());
     thrust::copy(x.begin(), x.end(), pi);
     return result_ary;
@@ -51,20 +52,21 @@ template<typename SeqX, typename SeqI, typename SeqD>
 sp_cuarray
 scatter(const SeqX& x, const SeqI& i, const SeqD& d) {
     typedef typename SeqX::tag Tag;
+    typedef typename SeqX::value_type T;
     typedef typename detail::stored_sequence<Tag, T>::type sequence_type;
     
-    boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
+    boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(d.size());
     sequence_type result =
         make_sequence<sequence_type>(result_ary,
                                      Tag(),
                                      true);
     //Copy d to preserve value semantics
-    thrust::copy(d.begin(), d.end(), result.begin();
+    thrust::copy(d.begin(), d.end(), result.begin());
     typedef typename sequence_type::iterator_type ElementIterator;
     typedef typename SeqI::iterator_type IndexIterator;
     thrust::permutation_iterator<ElementIterator,
                                  IndexIterator> pi(
-                                     result_ary.begin(),
+                                     result.begin(),
                                      i.begin());
     thrust::copy(x.begin(), x.end(), pi);
     return result_ary;
