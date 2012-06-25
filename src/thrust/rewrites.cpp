@@ -60,19 +60,12 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
         const closure& close = boost::get<const closure&>(
             *init);
         int arity = close.args().arity();
-        //The closure must enclose something
-        assert(arity > 0);
         stringstream ss;
-        ss << "closure" << arity;
+        ss << "closure";
         string closure_t_name = ss.str();
         shared_ptr<const ctype::monotype_t> closure_mt =
             make_shared<const ctype::monotype_t>(closure_t_name);
         vector<shared_ptr<const ctype::type_t> > cts;
-        for(auto i = close.args().begin();
-            i != close.args().end();
-            i++) {
-            cts.push_back(i->ctype().ptr());
-        }
         //By this point, the body of the closure is an
         //instantiated functor (which must be an apply node)
         assert(detail::isinstance<apply>(close.body()));
@@ -105,10 +98,22 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
                 boost::get<const name&>(inst_fctor.fn());
             os << fnn.id();
         }
-        
         cts.push_back(
             make_shared<const ctype::monotype_t>(
                 os.str()));
+        
+        vector<shared_ptr<const ctype::type_t> > tuple_sub_cts;
+        for(auto i = close.args().begin();
+            i != close.args().end();
+            i++) {
+            tuple_sub_cts.push_back(i->ctype().ptr());
+        }
+        cts.push_back(
+            make_shared<const ctype::polytype_t>(
+                std::move(tuple_sub_cts),
+                make_shared<const ctype::monotype_t>(
+                    "thrust::tuple")));
+        
         fn_t = make_shared<const ctype::polytype_t>(
             std::move(cts),
             closure_mt);

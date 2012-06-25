@@ -108,15 +108,19 @@ shared_ptr<const zipped_sequence_t> zipped_sequence_t::ptr() const {
     return static_pointer_cast<const zipped_sequence_t>(this->shared_from_this());
 }
 
-tuple_t::tuple_t(vector<shared_ptr<const type_t> > && sub)
+tuple_t::tuple_t(vector<shared_ptr<const type_t> > && sub,
+    bool boost_impl)
     : monotype_t(*this,
                  "Tuple",
-                 std::move(sub)) {}
+                 std::move(sub)), m_boost(boost_impl) {}
 
 shared_ptr<const tuple_t> tuple_t::ptr() const {
     return static_pointer_cast<const tuple_t>(this->shared_from_this());
 }
 
+bool tuple_t::boost_impl() const {
+    return m_boost;
+}
 
 fn_t::fn_t(const shared_ptr<const tuple_t> args,
            const shared_ptr<const type_t> result)

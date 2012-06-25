@@ -103,7 +103,11 @@ void ctype_printer::operator()(const polytype_t &pt) {
 }
 
 void ctype_printer::operator()(const tuple_t& tt) {
-    m_os << "thrust::tuple<";
+    if (!tt.boost_impl()) {
+        m_os << "thrust::tuple<";
+    } else {
+        m_os << "boost::tuple<";
+    }
     m_need_space.push(false);
     for (auto i = tt.begin(); i != tt.end(); i++) {
         boost::apply_visitor(*this, *i);

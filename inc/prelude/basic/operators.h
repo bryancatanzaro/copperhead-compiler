@@ -59,6 +59,10 @@ __host__ __device__ a op_or(const a &l, const a &r) {
     return l | r;
 }
 
+__host__ __device__ bool op_bor(const bool &l, const bool &r) {
+    return l || r;
+}
+
 template<typename a>
 __host__ __device__ a op_xor(const a &l, const a &r) {
     return l ^ r;
@@ -67,6 +71,10 @@ __host__ __device__ a op_xor(const a &l, const a &r) {
 template<typename a>
 __host__ __device__ a op_and(const a &l, const a &r) {
     return l & r;
+}
+
+__host__ __device__ bool op_band(const bool &l, const bool &r) {
+    return l && r;
 }
 
 template<typename a>

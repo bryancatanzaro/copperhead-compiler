@@ -17,17 +17,17 @@
 #pragma once
 
 #include <prelude/sequences/zipped_sequence.h>
-
+#include <prelude/primitives/stored_sequence.h>
 namespace copperhead {
 
 template<typename Seqs>
-Seqs unzip1(zipped_sequence<Seqs>& x) {
-    return x.m_seqs;
+thrust::tuple<sp_cuarray> unzip1(zipped_sequence<Seqs>& x) {
+    return phase_boundary(x.m_seqs);
 }
 
 template<typename Seqs>
-Seqs unzip2(zipped_sequence<Seqs>& x) {
-    return x.m_seqs;
+thrust::tuple<sp_cuarray, sp_cuarray> unzip2(zipped_sequence<Seqs>& x) {
+    return phase_boundary(x.m_seqs);
 }
 
 template<typename Seqs>

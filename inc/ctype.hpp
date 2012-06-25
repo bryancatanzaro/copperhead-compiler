@@ -230,14 +230,18 @@ public:
 class tuple_t :
         public monotype_t
 {
+private:
+    bool m_boost;
 public:
     //! Constructor
 /*! 
   \param sub A vector of types contained in this tuple.
 */
-    tuple_t(std::vector<std::shared_ptr<const type_t> > && sub);
+    tuple_t(std::vector<std::shared_ptr<const type_t> > && sub,
+            bool boost_impl=false);
     //! Get pointer holding this type_t object
     std::shared_ptr<const tuple_t> ptr() const;
+    bool boost_impl() const;
 };
 
 //! Function type

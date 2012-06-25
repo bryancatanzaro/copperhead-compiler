@@ -67,17 +67,7 @@ void cpp_printer::operator()(const apply &n) {
     (*this)(n.args());
 }
 void cpp_printer::operator()(const closure &n) {
-    m_os << "closure";
-    int arity = n.args().arity();
-    assert(arity > 0);
-    m_os << arity << "<";
-    for(auto i = n.args().begin();
-        i != n.args().end();
-        i++) {
-        boost::apply_visitor(tp, i->ctype());
-        m_os << ", ";
-    }
-
+    m_os << "closure<";
 
     //If we're printing before functorization, the body of the closure
     //is a name, otherwise it's a closure.  If it's none of the above,
@@ -86,21 +76,35 @@ void cpp_printer::operator()(const closure &n) {
         boost::apply_visitor(*this, n.body());
     } else if (detail::isinstance<apply>(n.body())) {
         boost::apply_visitor(*this,
-                              boost::get<const apply&>(n.body()).fn());
+                             boost::get<const apply&>(n.body()).fn());
     } else {
         //Invalid AST - body of closure must be a name or an apply
         assert(false);
     }
-    m_os << " >(";
+    m_os << ", thrust::tuple<";
+    for(auto i = n.args().begin();
+        i != n.args().end();
+        i++) {
+        boost::apply_visitor(tp, i->ctype());
+        if (std::next(i) != n.args().end()) {
+            m_os << ", ";
+        }
+    }
+    
+    m_os << "> >(";
+    boost::apply_visitor(*this, n.body());
+    m_os << ", thrust::make_tuple(";
     for(auto i = n.args().begin();
         i != n.args().end();
         i++) {
         boost::apply_visitor(*this, *i);
-        m_os << ", ";
+        if (std::next(i) != n.args().end()) {
+            m_os << ", ";
+        }
     }
-    boost::apply_visitor(*this, n.body());
-    m_os << ")";
+    m_os << "))";
 }
+    
 void cpp_printer::operator()(const conditional &n) {
     m_os << "if (";
     boost::apply_visitor(*this, n.cond());

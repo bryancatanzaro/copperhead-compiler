@@ -226,7 +226,7 @@ void declare_unzips(int max_arity,
         vector<completion> inputs;
         auto unzip_phase = make_shared<const phase_t>(
             make_vector<completion>(completion::local),
-            completion::local);
+            completion::total);
         unzip_phases.push_back(unzip_phase);
     }
     for(int i = 0; i < max_arity; i++) {

@@ -85,6 +85,13 @@ struct fn_op_or {
     }
 };
 
+struct fn_op_bor {
+    typedef bool result_type;
+    __host__ __device__ bool operator()(const bool &l, const bool &r) {
+        return op_bor(l, r);
+    }
+};
+
 template<typename a>
 struct fn_op_xor {
     typedef a result_type;
@@ -98,6 +105,13 @@ struct fn_op_and {
     typedef a result_type;
     __host__ __device__ a operator()(const a &l, const a &r) {
         return op_and(l, r);
+    }
+};
+
+struct fn_op_band {
+    typedef bool result_type;
+    __host__ __device__ bool operator()(const bool &l, const bool &r) {
+        return op_band(l, r);
     }
 };
 

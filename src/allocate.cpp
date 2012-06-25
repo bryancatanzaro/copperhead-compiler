@@ -58,14 +58,42 @@ allocate::result_type allocate::operator()(const procedure &n) {
     }
 }
 
+shared_ptr<const ctype::type_t> allocate::container_type(const ctype::type_t& t) {
+    if (detail::isinstance<ctype::sequence_t>(t)) {
+        const ctype::sequence_t& st = detail::up_get<const ctype::sequence_t&>(t);
+        return make_shared<const ctype::cuarray_t>(st.sub().ptr());
+    } else if (detail::isinstance<ctype::tuple_t>(t)) {
+        const ctype::tuple_t& tt = boost::get<const ctype::tuple_t&>(t);
+        vector<shared_ptr<const ctype::type_t> > subs;
+        bool containerize = false;
+        for(auto i = tt.begin(); i != tt.end(); i++) {
+            shared_ptr<const ctype::type_t> container_type_i =
+                container_type(*i);
+            subs.push_back(container_type_i);
+            containerize = containerize || (t.ptr() != container_type_i);
+        }
+        if (!containerize) {
+            return t.ptr();
+        }
+        return make_shared<const ctype::tuple_t>(
+            move(subs));
+    } else {
+        return t.ptr();
+    }
+}
+
 allocate::result_type allocate::operator()(const bind &n) {
     if (m_in_entry &&
-        detail::isinstance<ctype::sequence_t>(
-            n.lhs().ctype()) &&
         detail::isinstance<apply>(n.rhs())) {
 
+        shared_ptr<const ctype::type_t> containerized = container_type(n.lhs().ctype());
+        if (containerized == n.lhs().ctype().ptr()) {
+            return this->rewriter<allocate>::operator()(n);
+        }
+        
         bool lhs_is_name = detail::isinstance<name>(n.lhs());
         assert(lhs_is_name);
+
         const name& pre_lhs = boost::get<const name&>(n.lhs());
 
         //Construct cuarray for result
@@ -77,14 +105,13 @@ allocate::result_type allocate::operator()(const bind &n) {
         shared_ptr<const ctype::tuple_t> tuple_impl_seq_ct =
             make_shared<const ctype::tuple_t>(
                 make_vector<shared_ptr<const ctype::type_t> >(impl_seq_ct));
-        shared_ptr<const ctype::type_t> result_ct =
-            make_shared<const ctype::cuarray_t>(impl_seq_ct->sub().ptr());
+
         shared_ptr<const type_t> result_t =
             pre_lhs.type().ptr();
         shared_ptr<const name> result_name = make_shared<const name>(
             detail::wrap_array_id(pre_lhs.id()),
             result_t,
-            result_ct);
+            containerized);
 
         shared_ptr<const expression> new_rhs =
             static_pointer_cast<const expression>(
@@ -114,7 +141,7 @@ allocate::result_type allocate::operator()(const bind &n) {
             make_shared<const bind>(new_lhs, getter_call);
         return retriever;
     } else {
-        return this->rewriter::operator()(n);
+        return this->rewriter<allocate>::operator()(n);
     }
 }
 

@@ -54,6 +54,7 @@ private:
     const std::string& m_entry_point;
     bool m_in_entry;
     std::vector<std::shared_ptr<const statement> > m_allocations;
+    std::shared_ptr<const ctype::type_t> container_type(const ctype::type_t& t);
 public:
 
 /*!   

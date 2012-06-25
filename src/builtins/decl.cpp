@@ -80,6 +80,10 @@ vector<named_info> binary_scalar_operators =
     (named_info("op_or",     bin_op_info))
     (named_info("op_xor",    bin_op_info))
     (named_info("op_and",    bin_op_info))
+    //XXX Issue #3. Remove when fixed.
+    (named_info("op_band",   bin_op_info))
+    (named_info("op_bor",    bin_op_info))
+    //End XXX
     (named_info("cmp_eq",    bin_cmp_info))
     (named_info("cmp_ne",    bin_cmp_info))
     (named_info("cmp_lt",    bin_cmp_info))
