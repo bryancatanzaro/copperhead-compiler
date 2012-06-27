@@ -80,7 +80,8 @@ std::shared_ptr<const suite> compiler::operator()(const suite &n) {
         wrap(m_backend_tag, m_entry_point),
         containerize(m_entry_point),
         typedefify(),
-        find_includes(m_registry));
+        find_includes(m_registry),
+        prune());
 
     cpp_printer cp(m_backend_tag, m_entry_point, m_registry, std::cout);
     return apply(passes, n, cp);
