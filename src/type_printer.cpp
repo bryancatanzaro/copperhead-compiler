@@ -51,7 +51,7 @@ ctype_printer::ctype_printer(
 }
 void ctype_printer::operator()(const monotype_t &mt) {
     m_os << mt.name();
-    m_need_space.top() = false;
+    m_need_space.top() = (mt.name()[mt.name().size()-1] == '>');
 }
 void ctype_printer::operator()(const sequence_t &st) {
     m_os << st.name() << "<";

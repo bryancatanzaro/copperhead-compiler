@@ -59,7 +59,6 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
 
         const closure& close = boost::get<const closure&>(
             *init);
-        int arity = close.args().arity();
         stringstream ss;
         ss << "closure";
         string closure_t_name = ss.str();
@@ -106,13 +105,17 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
         for(auto i = close.args().begin();
             i != close.args().end();
             i++) {
-            tuple_sub_cts.push_back(i->ctype().ptr());
+            //Can only close over names
+            assert(detail::isinstance<name>(*i));
+            const name& arg_i_name = boost::get<const name&>(*i);
+            
+            tuple_sub_cts.push_back(
+                make_shared<const ctype::monotype_t>(
+                    detail::typify(arg_i_name.id())));
         }
         cts.push_back(
-            make_shared<const ctype::polytype_t>(
-                std::move(tuple_sub_cts),
-                make_shared<const ctype::monotype_t>(
-                    "thrust::tuple")));
+            make_shared<const ctype::tuple_t>(
+                std::move(tuple_sub_cts)));
         
         fn_t = make_shared<const ctype::polytype_t>(
             std::move(cts),
@@ -126,10 +129,9 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
             make_shared<const ctype::monotype_t>(
                 detail::typify(boost::get<const name&>(*i).id())));
     }
-    shared_ptr<const ctype::polytype_t> thrust_tupled =
-        make_shared<const ctype::polytype_t>(
-            std::move(arg_types),
-            make_shared<const ctype::monotype_t>("thrust::tuple"));
+    shared_ptr<const ctype::tuple_t> thrust_tupled =
+        make_shared<const ctype::tuple_t>(
+            std::move(arg_types));
     shared_ptr<const ctype::polytype_t> transform_t =
         make_shared<const ctype::polytype_t>(
             make_vector<shared_ptr<const ctype::type_t> >

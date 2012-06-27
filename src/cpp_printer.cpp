@@ -85,7 +85,10 @@ void cpp_printer::operator()(const closure &n) {
     for(auto i = n.args().begin();
         i != n.args().end();
         i++) {
-        boost::apply_visitor(tp, i->ctype());
+        //Can only close over names
+        assert(detail::isinstance<name>(*i));
+        const name& arg_i_name = boost::get<const name&>(*i);
+        m_os << detail::typify(arg_i_name.id());
         if (std::next(i) != n.args().end()) {
             m_os << ", ";
         }

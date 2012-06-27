@@ -43,7 +43,7 @@ template<typename E>
 struct vector_wrapper
     : public std::vector<E> {
     vector_wrapper<E>&& operator()(const E& input) {
-        push_back(input);
+        this->push_back(input);
         return std::move(*this);
     }
 };
@@ -90,7 +90,7 @@ template<typename K, typename V>
 struct map_wrapper
     : public std::map<K, V> {
     map_wrapper<K, V>&& operator()(const K& key, const V& val) {
-        insert(std::make_pair(key, val));
+        this->insert(std::make_pair(key, val));
         return std::move(*this);
     }
 };
@@ -138,7 +138,7 @@ template<typename V>
 struct set_wrapper
     : public std::set<V> {
     set_wrapper<V>&& operator()(const V& val) {
-        insert(val);
+        this->insert(val);
         return std::move(*this);
     }
 };

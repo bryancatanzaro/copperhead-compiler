@@ -69,8 +69,9 @@ shared_ptr<const ctype::type_t> allocate::container_type(const ctype::type_t& t)
         for(auto i = tt.begin(); i != tt.end(); i++) {
             shared_ptr<const ctype::type_t> container_type_i =
                 container_type(*i);
+
             subs.push_back(container_type_i);
-            containerize = containerize || (t.ptr() != container_type_i);
+            containerize = containerize || (i->ptr() != container_type_i);
         }
         if (!containerize) {
             return t.ptr();

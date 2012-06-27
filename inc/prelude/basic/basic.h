@@ -18,7 +18,7 @@
 #pragma once
 
 #include <prelude/basic/cast.h>
-#include <prelude/basic/closures.h>
+#include <prelude/basic/closure.h>
 #include <prelude/basic/functors.h>
 #include <prelude/basic/operators.h>
 #include <prelude/basic/limits.h>
