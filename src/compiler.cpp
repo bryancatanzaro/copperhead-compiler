@@ -71,6 +71,7 @@ std::shared_ptr<const suite> compiler::operator()(const suite &n) {
     //Passes will be processed sequentially, with outputs chained to inputs
     auto passes = std::make_tuple(
         tuple_break(),
+        iterize(),
         phase_analyze(m_entry_point, m_registry),
         type_convert(),
         functorize(m_entry_point, m_registry),

@@ -256,4 +256,18 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const name
     return n.ptr();
 }
 
+template<typename Derived>
+typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const while_block &n) {
+    auto n_pred = std::static_pointer_cast<const expression>(
+        boost::apply_visitor(get_sub(), n.pred()));
+    auto n_stmts = std::static_pointer_cast<const suite>(
+        (get_sub())(n.stmts()));
+    start_match();
+    update_match(n_pred, n.pred());
+    update_match(n_stmts, n.stmts());
+    if (is_match())
+        return n.ptr();
+    return result_type(new while_block(n_pred, n_stmts));
+}
+
 }

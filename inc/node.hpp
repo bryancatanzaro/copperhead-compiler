@@ -47,6 +47,7 @@ class templated_name;
 class include;
 class typedefn;
 class namespace_block;
+class while_block;
 
 class node;
 class statement;
@@ -75,7 +76,8 @@ typedef boost::variant<
     templated_name &,
     include &,
     typedefn &,
-    namespace_block &
+    namespace_block &,
+    while_block &
     > node_base;
 
 struct make_node_base_visitor

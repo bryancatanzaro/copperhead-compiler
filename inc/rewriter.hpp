@@ -132,7 +132,8 @@ public:
     result_type operator()(const typedefn &n);
 
     result_type operator()(const namespace_block &n);
-    
+
+    result_type operator()(const while_block &n);
 };
 /*! 
   @}

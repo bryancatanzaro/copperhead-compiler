@@ -109,6 +109,8 @@ public:
     void operator()(const typedefn &n);
 
     void operator()(const namespace_block &n);
+
+    void operator()(const while_block &n);
     
     void operator()(const std::string &s);
     

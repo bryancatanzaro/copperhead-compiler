@@ -280,6 +280,16 @@ void cpp_printer::operator()(const namespace_block& n) {
     boost::apply_visitor(*this, n.stmts());
     m_os << "}" << endl;
 }
+
+void cpp_printer::operator()(const while_block& n) {
+    m_os << "while(";
+    boost::apply_visitor(*this, n.pred());
+    m_os << ") {" << endl;
+    indent();
+    (*this)(n.stmts());
+    dedent();
+    m_os << "}" << endl;
+}
     
 void cpp_printer::operator()(const string &s) {
     m_os << s;

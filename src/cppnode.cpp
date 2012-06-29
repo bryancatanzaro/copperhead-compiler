@@ -104,5 +104,21 @@ shared_ptr<const namespace_block> namespace_block::ptr() const {
     return static_pointer_cast<const namespace_block>(this->shared_from_this());
 }
 
+while_block::while_block(const std::shared_ptr<const expression>& pred,
+                         const std::shared_ptr<const suite>& stmts)
+    : statement(*this), m_pred(pred), m_stmts(stmts) {}
+
+const expression& while_block::pred() const {
+    return *m_pred;
+}
+
+const suite& while_block::stmts() const {
+    return *m_stmts;
+}
+
+shared_ptr<const while_block> while_block::ptr() const {
+    return static_pointer_cast<const while_block>(this->shared_from_this());
+}
+
 
 }

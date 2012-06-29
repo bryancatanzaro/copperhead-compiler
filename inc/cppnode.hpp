@@ -197,6 +197,33 @@ public:
 
 };
 
+//! AST node representing a C++ while block
+/*! This node is only used internally by the compiler
+*/
+class while_block
+    : public statement
+{
+protected:
+    const std::shared_ptr<const expression> m_pred;
+    const std::shared_ptr<const suite> m_stmts;
+public:
+    //! Constructor
+/*! 
+  \param pred Predicate controlling while block
+  \param stmts The statements inside the while block
+  
+*/
+    while_block(const std::shared_ptr<const expression>& pred,
+                    const std::shared_ptr<const suite>& stmts);
+    //! Gets the predicate
+    const expression& pred() const;
+    //! Gets the statements in the while block
+    const suite& stmts() const;
+    /*! When we need to get at the pointer holding a namespace_block */
+    std::shared_ptr<const while_block> ptr() const;
+
+};
+
 /*! 
   @}
  */
