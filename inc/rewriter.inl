@@ -257,6 +257,11 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const name
 }
 
 template<typename Derived>
+typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const declare &n) {
+    return n.ptr();
+}
+
+template<typename Derived>
 typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const while_block &n) {
     auto n_pred = std::static_pointer_cast<const expression>(
         boost::apply_visitor(get_sub(), n.pred()));

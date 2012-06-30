@@ -111,6 +111,8 @@ public:
     void operator()(const namespace_block &n);
 
     void operator()(const while_block &n);
+
+    void operator()(const declare &n);
     
     void operator()(const std::string &s);
     

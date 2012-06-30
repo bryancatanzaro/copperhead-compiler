@@ -36,7 +36,7 @@
 #include "dereference.hpp"
 #include "containerize.hpp"
 #include "prune.hpp"
-#include "iterize.hpp"
+#include "iterizer.hpp"
 
 
 #include "prelude/runtime/tags.h"

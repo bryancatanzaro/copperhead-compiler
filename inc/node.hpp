@@ -48,6 +48,7 @@ class include;
 class typedefn;
 class namespace_block;
 class while_block;
+class declare;
 
 class node;
 class statement;
@@ -77,7 +78,8 @@ typedef boost::variant<
     include &,
     typedefn &,
     namespace_block &,
-    while_block &
+    while_block &,
+    declare &
     > node_base;
 
 struct make_node_base_visitor

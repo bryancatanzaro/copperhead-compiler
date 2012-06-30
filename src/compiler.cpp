@@ -4,7 +4,7 @@
 #include "compiler.hpp"
 #include <typeinfo>
 
-#define TRACE false
+#define TRACE true
 
 namespace backend {
 compiler::compiler(const std::string& entry_point,
@@ -71,7 +71,7 @@ std::shared_ptr<const suite> compiler::operator()(const suite &n) {
     //Passes will be processed sequentially, with outputs chained to inputs
     auto passes = std::make_tuple(
         tuple_break(),
-        iterize(),
+        iterizer(),
         phase_analyze(m_entry_point, m_registry),
         type_convert(),
         functorize(m_entry_point, m_registry),
@@ -85,7 +85,8 @@ std::shared_ptr<const suite> compiler::operator()(const suite &n) {
         prune());
 
     cpp_printer cp(m_backend_tag, m_entry_point, m_registry, std::cout);
-    return apply(passes, n, cp);
+    auto result = apply(passes, n, cp);
+    return result;
 }
 
 const std::string& compiler::entry_point() const {

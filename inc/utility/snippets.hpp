@@ -27,7 +27,8 @@ namespace detail {
   @{
 */
 
-
+//! Gets string for anonymous_return()
+const std::string anonymous_return();
 //! Gets string for make_sequence
 const std::string make_sequence();
 //! Gets string for wrap

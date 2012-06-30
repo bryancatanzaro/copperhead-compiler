@@ -273,6 +273,11 @@ void cpp_printer::operator()(const typedefn &n) {
     m_os << ";";
 }
 
+void cpp_printer::operator()(const declare &n) {
+    boost::apply_visitor(*this, n.id());
+    m_os << ";";
+}
+
 void cpp_printer::operator()(const namespace_block& n) {
     m_os << "namespace ";
     m_os << n.name();
@@ -288,7 +293,8 @@ void cpp_printer::operator()(const while_block& n) {
     indent();
     (*this)(n.stmts());
     dedent();
-    m_os << "}" << endl;
+    indentation();
+    m_os << "}";
 }
     
 void cpp_printer::operator()(const string &s) {

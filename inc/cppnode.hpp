@@ -224,6 +224,27 @@ public:
 
 };
 
+class declare
+    : public statement
+{
+protected:
+    const std::shared_ptr<const name> m_name;
+    const std::shared_ptr<const suite> m_stmts;
+public:
+    //! Constructor
+/*! 
+  \param n Name being declared
+  
+*/
+    declare(const std::shared_ptr<const name>& n);
+    //! Gets the predicate
+    const name& id() const;
+    /*! When we need to get at the pointer holding a namespace_block */
+    std::shared_ptr<const declare> ptr() const;
+
+};
+
+
 /*! 
   @}
  */

@@ -120,5 +120,14 @@ shared_ptr<const while_block> while_block::ptr() const {
     return static_pointer_cast<const while_block>(this->shared_from_this());
 }
 
+declare::declare(const std::shared_ptr<const name>& n) : statement(*this), m_name(n) {}
+
+const name& declare::id() const {
+    return *m_name;
+}
+
+shared_ptr<const declare> declare::ptr() const {
+    return static_pointer_cast<const declare>(this->shared_from_this());
+}
 
 }

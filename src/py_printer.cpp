@@ -115,6 +115,11 @@ void py_printer::operator()(const while_block &n) {
     assert(false);
 }
 
+void py_printer::operator()(const declare &n) {
+    //No declare statement in python
+    assert(false);
+}
+
 void py_printer::operator()(const std::string &s) {
     m_os << s;
 }

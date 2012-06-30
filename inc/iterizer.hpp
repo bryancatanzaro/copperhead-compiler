@@ -23,6 +23,7 @@
 #include "import/library.hpp"
 #include <set>
 #include <map>
+#include <stdexcept>
 
 namespace backend {
 
@@ -36,7 +37,7 @@ class iterizer
     : public rewriter<iterizer>
 {
 public:
-    using rewriter<find_includes>::operator();
+    using rewriter<iterizer>::operator();
     result_type operator()(const procedure& n);
 };
 

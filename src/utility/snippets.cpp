@@ -3,7 +3,9 @@
 namespace backend {
 namespace detail {
 
-
+const std::string anonymous_return() {
+    return "result";
+}
 
 const std::string make_sequence() {
     return "make_sequence";
