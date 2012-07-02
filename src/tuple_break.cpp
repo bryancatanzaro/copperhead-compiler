@@ -125,46 +125,9 @@ tuple_break::result_type tuple_break::operator()(const procedure& n) {
     for(auto i = n.args().begin();
         i != n.args().end();
         i++) {
-        if (detail::isinstance<name>(*i)) {
-            args.push_back(
-                i->ptr());
-        } else {
-            //We can only allow names and tuples as arguments of a function.
-            assert(detail::isinstance<backend::tuple>(*i));
-            const backend::tuple& tup =
-                boost::get<const backend::tuple&>(*i);
-            
-            shared_ptr<const name> new_name =
-                make_shared<const name>(
-                    m_supply.next(),
-                    tup.type().ptr(),
-                    tup.ctype().ptr());
-            args.push_back(new_name);
-            flattened_tuple ft;
-            flatten_tuple(tup, std::vector<int>(), ft);
-            for(auto j = ft.cbegin();
-                j != ft.cend();
-                j++) {
-
-                std::shared_ptr<const expression> gets = new_name;
-                const std::vector<int>& path = std::get<0>(*j);
-                for(auto k = path.cbegin();
-                    k != path.cend();
-                    k++) {
-                    gets = make_shared<const apply>(
-                        make_shared<const name>(
-                            detail::snippet_get(*k)),
-                        make_shared<const tuple>(
-                            make_vector<shared_ptr<const expression> >(
-                                gets)));
-                }
-                
-                stmts.push_back(
-                    make_shared<const bind>(
-                        std::get<1>(*j),
-                        gets));
-            }
-        }
+        //We can only allow names as arguments of a function
+        assert(detail::isinstance<name>(*i));
+        args.push_back(i->ptr());
     }
     if (stmts.size() == 0) {
         return this->rewriter::operator()(n);
