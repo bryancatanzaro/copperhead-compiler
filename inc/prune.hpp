@@ -46,6 +46,7 @@ public:
     result_type operator()(const suite& n);
     result_type operator()(const name& n);
     result_type operator()(const bind& n);
+    result_type operator()(const procedure&n);
 };
 
 }

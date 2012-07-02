@@ -11,7 +11,6 @@ using std::string;
 namespace backend {
 
 prune::result_type prune::operator()(const suite& n) {
-    m_used.begin_scope();
     deque<shared_ptr<const statement> > stmts;
     auto i = n.end();
     do {
@@ -23,7 +22,6 @@ prune::result_type prune::operator()(const suite& n) {
             stmts.push_front(rewritten);
         }
     } while (i != n.begin());
-    m_used.end_scope();
     return make_shared<const suite>(
         vector<shared_ptr<const statement> >(stmts.begin(), stmts.end()));
 }
@@ -44,6 +42,13 @@ prune::result_type prune::operator()(const bind& n) {
     } else {
         return prune::result_type();
     }
+}
+
+prune::result_type prune::operator()(const procedure &n) {
+    m_used.begin_scope();
+    auto rewritten = rewriter<prune>::operator()(n);
+    m_used.end_scope();
+    return rewritten;
 }
 
 }
