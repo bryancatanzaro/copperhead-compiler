@@ -58,6 +58,7 @@ private:
     result_type make_tuple_analyze(const bind& n);
     environment<std::string,
                 std::vector<std::shared_ptr<const literal> > > m_tuples;
+    result_type form_suite(const std::shared_ptr<const statement>&);
 public:
     using rewriter<phase_analyze>::operator();
     //! Constructor
@@ -67,7 +68,6 @@ public:
   \param reg The registry of functions the compiler knows about
 */
     phase_analyze(const std::string& entry_point, const registry& reg);
-    result_type operator()(const suite& n);
     result_type operator()(const procedure& n);
     result_type operator()(const apply& n);
     result_type operator()(const bind& n);

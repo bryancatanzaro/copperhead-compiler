@@ -16,43 +16,15 @@ namespace backend {
 allocate::allocate(const copperhead::system_variant& target,
                    const string& entry_point) : m_target(target),
                                                 m_entry_point(entry_point),
-                                                m_in_entry(false),
-                                                m_allocations()
+                                                m_in_entry(false)
         {}
 
 allocate::result_type allocate::operator()(const procedure &n) {
     if (n.id().id()  == m_entry_point) {
         m_in_entry = true;
-        vector<shared_ptr<const statement> > statements;
-        for(auto i = n.stmts().begin();
-            i != n.stmts().end();
-            i++) {
-            auto new_stmt = static_pointer_cast<const statement>(
-                boost::apply_visitor(*this, *i));
-            if (m_allocations.size() > 0) {
-                for(auto j = m_allocations.begin();
-                    j != m_allocations.end();
-                    j++) {
-                    statements.push_back(*j);
-                }
-                m_allocations.clear();
-            }
-            statements.push_back(new_stmt);
-        }
-        auto stmts = make_shared<const suite>(move(statements));
-        auto args =
-            static_pointer_cast<const tuple>(
-                boost::apply_visitor(*this, n.args()));
-        auto t = n.type().ptr();
-        auto ct = n.ctype().ptr();
-        auto id =
-            static_pointer_cast<const name>(
-                boost::apply_visitor(*this, n.id()));
-        result_type allocated = make_shared<const procedure>(
-            id, args, stmts, t, ct);
-
+        auto result = this->rewriter::operator()(n);
         m_in_entry = false;
-        return allocated;
+        return result;
     } else {
         return this->rewriter::operator()(n);
     }
@@ -120,7 +92,8 @@ allocate::result_type allocate::operator()(const bind &n) {
             
         shared_ptr<const bind> allocator = make_shared<const bind>(
             result_name, new_rhs);
-        m_allocations.push_back(allocator);
+        vector<shared_ptr<const statement> > stmts;
+        stmts.push_back(allocator);
             
 
         shared_ptr<const name> new_lhs = static_pointer_cast<const name>(
@@ -140,7 +113,10 @@ allocate::result_type allocate::operator()(const bind &n) {
             make_shared<const apply>(getter_name, getter_args);
         shared_ptr<const bind> retriever =
             make_shared<const bind>(new_lhs, getter_call);
-        return retriever;
+        stmts.push_back(retriever);
+
+        return make_shared<const suite>(move(stmts));
+        
     } else {
         return this->rewriter<allocate>::operator()(n);
     }

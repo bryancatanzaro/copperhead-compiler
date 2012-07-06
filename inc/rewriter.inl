@@ -206,9 +206,20 @@ typename rewriter<Derived>::result_type rewriter<Derived>::operator()(const suit
     start_match();
     std::vector<std::shared_ptr<const statement> > n_stmts;
     for(auto i = n.begin(); i != n.end(); i++) {
-        auto n_stmt = std::static_pointer_cast<const statement>(boost::apply_visitor(get_sub(), *i));
-        update_match(n_stmt, *i);
-        n_stmts.push_back(n_stmt);
+        auto rewritten = boost::apply_visitor(get_sub(), *i);
+        if (detail::isinstance<suite>(*rewritten)) {
+            m_matches.top() = false;
+            const suite& nested_suite = boost::get<const suite&>(*rewritten);
+            for(auto j = nested_suite.begin();
+                j != nested_suite.end();
+                j++) {
+                n_stmts.push_back(j->ptr());
+            }
+        } else {
+            std::shared_ptr<const statement> stmt = std::static_pointer_cast<const statement>(rewritten);
+            update_match(stmt, *i);
+            n_stmts.push_back(stmt);
+        }
     }
     if (is_match())
         return n.ptr();

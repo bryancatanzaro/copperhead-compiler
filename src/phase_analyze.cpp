@@ -27,20 +27,6 @@ phase_analyze::phase_analyze(const string& entry_point,
     }
 }
 
-phase_analyze::result_type phase_analyze::operator()(const suite& n) {
-    vector<shared_ptr<const statement> > stmts;
-    for(auto i = n.begin(); i != n.end(); i++) {
-        auto p = std::static_pointer_cast<const statement>(boost::apply_visitor(*this, *i));
-        if (m_additionals.size() > 0) {
-            stmts.insert(stmts.end(), m_additionals.begin(), m_additionals.end());
-            m_additionals.clear();
-        }
-        stmts.push_back(p);
-        
-    }
-    return make_shared<const suite>(move(stmts));
-}
-
 phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
     if (n.id().id() == m_entry_point) {
         m_in_entry = true;
@@ -259,6 +245,19 @@ phase_analyze::result_type phase_analyze::make_tuple_analyze(const bind& n) {
     return n.ptr();
 }
 
+phase_analyze::result_type phase_analyze::form_suite(
+    const shared_ptr<const statement>& stmt) {
+    if (m_additionals.empty()) {
+        return stmt;
+    }
+    vector<shared_ptr<const statement> > stmts(m_additionals.begin(),
+                                               m_additionals.end());
+    m_additionals.clear();
+    stmts.push_back(stmt);
+    return make_shared<const suite>(move(stmts));
+}
+    
+
 phase_analyze::result_type phase_analyze::operator()(const bind& n) {
     if (!m_in_entry) {
         return n.ptr();
@@ -281,6 +280,36 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
         }
     }
 
+    //If we're rebinding, ensure the source is as complete as the dest
+    //This happens, for example, in the body of a while loop
+    //The source can be incomplete, while the destination needs to be
+    //Complete.  In that case, trigger a phase boundary
+    if (detail::isinstance<name>(n.rhs())) {
+        const name& source_name = boost::get<const name&>(n.rhs());
+        shared_ptr<const name> rhs = source_name.ptr();
+        assert(detail::isinstance<name>(n.lhs()));
+        const name& dest_name = boost::get<const name&>(n.lhs());
+        if (m_completions.exists(source_name.id()) &&
+            m_completions.exists(dest_name.id())) {
+            completion source_completion =
+                m_completions.find(source_name.id())->second;
+            completion dest_completion =
+                m_completions.find(dest_name.id())->second;
+            if (source_completion < dest_completion) {
+                add_phase_boundary(source_name);
+                rhs = m_substitutions.find(source_name.id())->second;
+            }
+        }
+        
+        if (rhs == n.rhs().ptr()) {
+            return n.ptr();
+        } else {
+            return form_suite(make_shared<const bind>(
+                                  n.lhs().ptr(),
+                                  rhs));
+        }
+    }
+
     m_result_completion = completion::invariant;
     result_type rewritten = this->rewriter<phase_analyze>::operator()(n);
     //Update completion declarations
@@ -288,8 +317,8 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
         const name& lhs_name = detail::up_get<name>(n.lhs());
         m_completions.insert(make_pair(lhs_name.id(),
                                        m_result_completion));
-    }        
-    return rewritten;
+    }
+    return form_suite(static_pointer_cast<const statement>(rewritten));
 }
 
 phase_analyze::result_type phase_analyze::operator()(const ret& n) {
@@ -316,7 +345,7 @@ phase_analyze::result_type phase_analyze::operator()(const ret& n) {
             }
         }
     }
-    return make_shared<const ret>(new_result);
+    return form_suite(make_shared<const ret>(new_result));
 }
 
 

@@ -1,6 +1,8 @@
 #include "iterizer.hpp"
 #include "utility/initializers.hpp"
 #include "utility/snippets.hpp"
+#include "py_printer.hpp"
+
 
 using std::shared_ptr;
 using std::make_shared;
@@ -40,7 +42,7 @@ public:
                 return n.ptr();
             }
             if (m_nested) {
-                throw std::domain_error("Recursive function call found in non-tail position");
+                throw std::domain_error("Recursive function call found in non-tail position (nested conditionals)");
             }
             if (!detail::isinstance<name>(n.lhs())) {
                 return n.ptr();
@@ -64,7 +66,7 @@ public:
                     m_recursive = true;
                     m_sense = m_in_else_branch;
                 } else {
-                    throw std::domain_error("Recursive function call found in non-tail position");
+                    throw std::domain_error("Recursive function call found in non-tail position (return result)");
                 }
             }
         }
@@ -87,6 +89,8 @@ public:
         m_proc_name = p.id().id();
         recursion_result = shared_ptr<const name>();
         m_recursive = false;
+        m_nested = false;
+        m_pred = shared_ptr<const expression>();
         return rewriter<analyze_recursion>::operator()(p);
     }
 
@@ -105,30 +109,6 @@ private:
 public:
     normalize_sense(bool sense): m_sense(sense) {}
     using rewriter<normalize_sense>::operator();
-
-    result_type operator()(const suite& s) {
-        vector<shared_ptr<const statement> > stmts;
-        bool found_nested = false;
-        for(auto i = s.begin(); i != s.end(); i++) {
-            result_type rewritten = boost::apply_visitor(*this, *i);
-            if (detail::isinstance<suite>(*rewritten)) {
-                found_nested = true;
-                const suite& nested_suite = boost::get<const suite&>(*rewritten);
-                for(auto j = nested_suite.begin();
-                    j != nested_suite.end();
-                    j++) {
-                    stmts.push_back(j->ptr());
-                }
-            } else {
-                stmts.push_back(i->ptr());
-            }
-        }
-        if (!found_nested) {
-            return s.ptr();
-        } else {
-            return make_shared<const suite>(move(stmts));
-        }
-    }
 
     result_type operator()(const conditional& c) {
         if (!m_sense) {
@@ -184,31 +164,6 @@ public:
     make_loop(const procedure& enclosing) : m_enclosing(enclosing) {}
     using rewriter<make_loop>::operator();
     
-    result_type operator()(const suite& s) {
-        vector<shared_ptr<const statement> > stmts;
-        bool found_nested = false;
-        for(auto i = s.begin(); i != s.end(); i++) {
-            result_type rewritten = boost::apply_visitor(*this, *i);
-            if (detail::isinstance<suite>(*rewritten)) {
-                found_nested = true;
-                const suite& nested_suite = boost::get<const suite&>(*rewritten);
-                for(auto j = nested_suite.begin();
-                    j != nested_suite.end();
-                    j++) {
-                    stmts.push_back(j->ptr());
-                }
-            } else {
-                stmts.push_back(i->ptr());
-            }
-        }
-        if (!found_nested) {
-            return s.ptr();
-        } else {
-            return make_shared<const suite>(move(stmts));
-        }
-                
-    }
-
     result_type operator()(const bind& b) {
         m_pre.push_back(b.ptr());
         return b.ptr();
@@ -217,7 +172,6 @@ public:
     result_type operator()(const conditional& c) {
         vector<shared_ptr<const statement> > stmts;
         vector<shared_ptr<const statement> > while_stmts;
-        std::cout << "conditional" << std::endl;
         for(auto j = c.then().begin();
             j != c.then().end();
             j++) {

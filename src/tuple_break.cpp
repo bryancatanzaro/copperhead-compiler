@@ -151,28 +151,4 @@ tuple_break::result_type tuple_break::operator()(const procedure& n) {
     
 }
 
-tuple_break::result_type tuple_break::operator()(const suite& n) {
-    vector<shared_ptr<const statement> > stmts;
-    for(auto i = n.begin();
-        i != n.end();
-        i++) {
-        auto r = boost::apply_visitor(*this, *i);
-        //Turning one statement into a suite of statements requires
-        //Individually adding each statement to the enclosing suite
-        if (detail::isinstance<suite>(*r)) {
-            //Add the suite of statements one by one
-            const suite& s = boost::get<const suite&>(*r);
-            for(auto j = s.begin(); j != s.end(); j++) {
-                stmts.push_back(
-                    j->ptr());
-            }
-        } else {
-            //The rewritten statement was just one statement,
-            //Add it directly.
-            stmts.push_back(static_pointer_cast<const statement>(r));
-        }
-    }
-    return make_shared<suite>(move(stmts));
-}
-
 }

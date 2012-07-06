@@ -36,7 +36,10 @@ namespace backend {
 
 //! A rewrite pass that ensures the proper containers are constructed for returns
 /*! The entry point must return containers rather than views. These containers do not
- *  always exist, and so must be constructed to ensure they can be returned
+ *  always exist, and so must be constructed to ensure they can be
+ *  returned.
+ *  Additionally, in iterative loops, when views are reassigned,
+ *  containers must also be reassigned.
 */
 class containerize
     : public rewriter<containerize>
@@ -47,17 +50,16 @@ private:
     environment<std::string> m_decl_containers;
     std::shared_ptr<const ctype::type_t> container_type(const ctype::type_t&);
     std::shared_ptr<const expression> container_args(const expression&);
+    result_type reassign(const bind& n);
 public:
     //! Constructor
     //* @param entry_point Name of the entry point procedure
     containerize(const std::string& entry_point);
     
     using rewriter<containerize>::operator();
-    //! Rewrite rule for \p suite nodes
-    result_type operator()(const suite &p);
     //! Rewrite rule for \p procedure nodes
     result_type operator()(const procedure &p);
-    //! Rewrite rule for \p subscript nodes
+    //! Rewrite rule for \p bind nodes
     result_type operator()(const bind &n);
     //! Rewrite rule for \p name nodes
     result_type operator()(const name &n);

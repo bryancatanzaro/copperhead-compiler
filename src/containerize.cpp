@@ -37,31 +37,6 @@ containerize::result_type containerize::operator()(const name &n) {
     return n.ptr();
 }
 
-containerize::result_type containerize::operator()(const suite &n) {
-    vector<shared_ptr<const statement> > stmts;
-    bool match = true;
-    for(auto i = n.begin(); i != n.end(); i++) {
-        containerize::result_type rewritten = boost::apply_visitor(*this, *i);
-        match = match && (rewritten == i->ptr());
-        if (detail::isinstance<statement>(*rewritten)) {
-            stmts.push_back(static_pointer_cast<const statement>(rewritten));
-        } else {
-            assert(detail::isinstance<suite>(*rewritten));
-            const suite& sub_suite = boost::get<const suite&>(*rewritten);
-            for(auto j = sub_suite.begin(); j != sub_suite.end(); j++) {
-                stmts.push_back(j->ptr());
-            }
-        }
-    }
-    if (match) {
-        return n.ptr();
-    } else {
-        return result_type(
-            new suite(
-                move(stmts)));
-    }
-}
-
 containerize::result_type containerize::operator()(const procedure &s) {
     m_in_entry = (s.id().id() == m_entry_point);
     m_decl_containers.begin_scope();
@@ -121,6 +96,37 @@ shared_ptr<const expression> containerize::container_args(const expression& t) {
     return t.ptr();
 }
 
+containerize::result_type containerize::reassign(const bind &n) {
+    //LHS must be a name
+    assert(detail::isinstance<name>(n.lhs()));
+    const name& lhs = boost::get<const name&>(n.lhs());
+    //RHS must be a name
+    assert(detail::isinstance<name>(n.rhs()));
+    const name& rhs = boost::get<const name&>(n.rhs());
+    //Both containers must exist
+    if (!m_decl_containers.exists(detail::wrap_array_id(lhs.id())) ||
+        !m_decl_containers.exists(detail::wrap_array_id(rhs.id()))) {
+        return n.ptr();
+    }
+    shared_ptr<const name> lhs_cont =
+        make_shared<const name>(
+            detail::wrap_array_id(lhs.id()),
+            lhs.type().ptr(),
+            container_type(lhs.ctype()));
+    shared_ptr<const name> rhs_cont =
+        make_shared<const name>(
+            detail::wrap_array_id(rhs.id()),
+            rhs.type().ptr(),
+            container_type(rhs.ctype()));
+    vector<shared_ptr<const statement> > stmts;
+    stmts.push_back(
+        make_shared<const bind>(
+            lhs_cont, rhs_cont));
+    stmts.push_back(n.ptr());
+    return make_shared<const suite>(move(stmts));
+           
+}
+
 containerize::result_type containerize::operator()(const bind &n) {
     if (!m_in_entry) {
         return n.ptr();
@@ -130,6 +136,11 @@ containerize::result_type containerize::operator()(const bind &n) {
         boost::apply_visitor(*this, n.lhs());
         
         const expression& rhs = n.rhs();
+
+        if (detail::isinstance<name>(rhs)) {
+            return reassign(n);
+        }
+        
         if (!detail::isinstance<apply>(rhs)) {
             return n.ptr();
         }

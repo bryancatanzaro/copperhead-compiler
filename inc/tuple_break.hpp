@@ -92,7 +92,6 @@ public:
     using rewriter<tuple_break>::operator();
     result_type operator()(const bind& n);
     result_type operator()(const procedure& n);
-    result_type operator()(const suite& n);
 private:
     detail::name_supply m_supply;
     
