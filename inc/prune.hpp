@@ -41,6 +41,7 @@ class prune
 {
 private:
     environment<std::string> m_used;
+    environment<std::string> m_protected;
 public:
     using rewriter<prune>::operator();
     result_type operator()(const suite& n);

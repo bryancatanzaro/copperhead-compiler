@@ -51,10 +51,12 @@ private:
     std::map<std::string, std::shared_ptr<const phase_t> > m_fns;
     environment<std::string, completion> m_completions;
     environment<std::string, std::shared_ptr<const name> > m_substitutions;
-    std::vector<std::shared_ptr<const statement> > m_additionals;
+    std::vector<std::shared_ptr<const statement> > m_pre_boundaries;
+    std::shared_ptr<const statement> m_post_boundary;
+    std::set<std::string> m_returns;
     completion m_result_completion;
-    bool add_phase_boundary(const name& n);
-    bool add_phase_boundary_tuple(const name& n);
+    bool add_phase_boundary(const name& n, bool post=false);
+    bool add_phase_boundary_tuple(const name& n, bool post=false);
     result_type make_tuple_analyze(const bind& n);
     environment<std::string,
                 std::vector<std::shared_ptr<const literal> > > m_tuples;

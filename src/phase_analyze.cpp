@@ -14,6 +14,29 @@ using std::set;
 
 namespace backend {
 
+namespace detail {
+//Finds all identifiers which are returned in a procedure
+class return_finder
+    : public rewriter<return_finder> {
+private:
+    set<string> m_returns;
+public:
+    using rewriter<return_finder>::operator();
+
+    result_type operator()(const ret& r) {
+        if (detail::isinstance<name>(r.val())) {
+            const name& return_name = boost::get<const name&>(r.val());
+            m_returns.insert(return_name.id());
+        }
+        return r.ptr();
+    }
+    const set<string>& returns() const {
+        return m_returns;
+    }
+};
+}
+
+
 phase_analyze::phase_analyze(const string& entry_point,
                              const registry& reg)
     : m_entry_point(entry_point), m_in_entry(false) {
@@ -29,6 +52,11 @@ phase_analyze::phase_analyze(const string& entry_point,
 
 phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
     if (n.id().id() == m_entry_point) {
+
+        detail::return_finder rf;
+        boost::apply_visitor(rf, n);
+        m_returns = rf.returns();
+        
         m_in_entry = true;
         m_completions.begin_scope();
         //All inputs to the entry point must be totally or invariantly formed
@@ -68,7 +96,7 @@ phase_analyze::result_type phase_analyze::operator()(const procedure& n) {
     }
 }
 
-bool phase_analyze::add_phase_boundary_tuple(const name& n) {
+bool phase_analyze::add_phase_boundary_tuple(const name& n, bool post) {
     assert(m_tuples.exists(n.id()));
     bool need_boundary = false;
     const vector<shared_ptr<const literal> >& sources =
@@ -116,8 +144,11 @@ bool phase_analyze::add_phase_boundary_tuple(const name& n) {
 
     shared_ptr<const bind> result =
         make_shared<const bind>(p_result, pb_apply);
-    m_additionals.push_back(result);
-        
+    if (post) {
+        m_post_boundary = result;
+    } else {
+        m_pre_boundaries.push_back(result);
+    }
     //Register completion
     m_completions.insert(
         make_pair(p_result->id(), completion::total));
@@ -128,17 +159,20 @@ bool phase_analyze::add_phase_boundary_tuple(const name& n) {
     return true;
 }
 
-bool phase_analyze::add_phase_boundary(const name& n) {
+bool phase_analyze::add_phase_boundary(const name& n, bool post) {
     if (m_tuples.exists(n.id())) {
-        return add_phase_boundary_tuple(n);
+        return add_phase_boundary_tuple(n, post);
     }
 
-    
-    if (m_completions.exists(n.id())) {
-        completion c = m_completions.find(n.id())->second;
-        if ((c == completion::invariant) ||
-            (c == completion::total))
-            return false;
+    if (!post) {
+        //Post completions can happen multiple times due to iteration
+        //Pre completions may happen only once
+        if (m_completions.exists(n.id())) {
+            completion c = m_completions.find(n.id())->second;
+            if ((c == completion::invariant) ||
+                (c == completion::total))
+                return false;
+        }
     }
     shared_ptr<const name> p_result =
         make_shared<const name>(
@@ -154,8 +188,11 @@ bool phase_analyze::add_phase_boundary(const name& n) {
         make_shared<const apply>(pb_name, pb_args);
     shared_ptr<const bind> result =
         make_shared<const bind>(p_result, pb_apply);
-    m_additionals.push_back(result);
-        
+    if (post) {
+        m_post_boundary = result;
+    } else {
+        m_pre_boundaries.push_back(result);
+    }
     //Register completion
     m_completions.insert(
         make_pair(p_result->id(), completion::total));
@@ -247,13 +284,18 @@ phase_analyze::result_type phase_analyze::make_tuple_analyze(const bind& n) {
 
 phase_analyze::result_type phase_analyze::form_suite(
     const shared_ptr<const statement>& stmt) {
-    if (m_additionals.empty()) {
+    if (m_pre_boundaries.empty() &&
+        m_post_boundary == shared_ptr<const statement>()) {
         return stmt;
     }
-    vector<shared_ptr<const statement> > stmts(m_additionals.begin(),
-                                               m_additionals.end());
-    m_additionals.clear();
+    vector<shared_ptr<const statement> > stmts(m_pre_boundaries.begin(),
+                                               m_pre_boundaries.end());
+    m_pre_boundaries.clear();
     stmts.push_back(stmt);
+    if (m_post_boundary != shared_ptr<const statement>()) {
+        stmts.push_back(m_post_boundary);
+        m_post_boundary = shared_ptr<const statement>();
+    }
     return make_shared<const suite>(move(stmts));
 }
     
@@ -287,6 +329,14 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
     if (detail::isinstance<name>(n.rhs())) {
         const name& source_name = boost::get<const name&>(n.rhs());
         shared_ptr<const name> rhs = source_name.ptr();
+        //Check to see if we have a completed version of the RHS
+        //If so, return a binding which grabs from the completed version
+        auto subst = m_substitutions.find(source_name.id());
+        if (subst != m_substitutions.end()) {
+            return make_shared<bind>(n.lhs().ptr(), subst->second);
+        }
+        
+        //We don't have a completed version, so we'll need to use it
         assert(detail::isinstance<name>(n.lhs()));
         const name& dest_name = boost::get<const name&>(n.lhs());
         if (m_completions.exists(source_name.id()) &&
@@ -312,6 +362,17 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
 
     m_result_completion = completion::invariant;
     result_type rewritten = this->rewriter<phase_analyze>::operator()(n);
+    //If the result is going to be returned at some point, it must be
+    //completed
+    if (detail::isinstance<name>(n.lhs())) {
+        const name& lhs_name = boost::get<const name&>(n.lhs());
+        if (m_returns.find(lhs_name.id()) != m_returns.end()) {
+            //Add a phase boundary, POST call
+            add_phase_boundary(lhs_name, true);
+            m_result_completion = completion::total;
+            
+        }
+    }    
     //Update completion declarations
     if (detail::isinstance<name>(n.lhs())) {
         const name& lhs_name = detail::up_get<name>(n.lhs());
@@ -322,31 +383,15 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
 }
 
 phase_analyze::result_type phase_analyze::operator()(const ret& n) {
-    if (!m_in_entry) {
-        return n.ptr();
-    }
-
-    //Returns can only be names
-    assert(detail::isinstance<name>(n.val()));
-    shared_ptr<const expression> new_result =
-        n.val().ptr();
-    const name& return_name = detail::up_get<name>(n.val());
-    if (m_substitutions.exists(return_name.id())) {
-        //Phase boundary already happened, use complete version
-        new_result = m_substitutions.find(return_name.id())->second;
-    } else {
-        if (m_completions.exists(return_name.id())) {
-            completion result_completion =
-                m_completions.find(return_name.id())->second;
-            //Results must be totally complete!!
-            if (result_completion < completion::total) {
-                add_phase_boundary(return_name);
-                new_result = m_substitutions.find(return_name.id())->second;
-            }
+    if (detail::isinstance<name>(n.val())) {
+        const name& ret_val = boost::get<const name&>(n.val());
+        auto subst = m_substitutions.find(ret_val.id());
+        if (subst != m_substitutions.end()) {
+            return make_shared<const ret>(subst->second);
         }
     }
-    return form_suite(make_shared<const ret>(new_result));
+    return n.ptr();
 }
-
+    
 
 }
