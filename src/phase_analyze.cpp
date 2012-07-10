@@ -366,7 +366,8 @@ phase_analyze::result_type phase_analyze::operator()(const bind& n) {
     //completed
     if (detail::isinstance<name>(n.lhs())) {
         const name& lhs_name = boost::get<const name&>(n.lhs());
-        if (m_returns.find(lhs_name.id()) != m_returns.end()) {
+        if ((m_returns.find(lhs_name.id()) != m_returns.end()) &&
+            m_result_completion < completion::total) {
             //Add a phase boundary, POST call
             add_phase_boundary(lhs_name, true);
             m_result_completion = completion::total;
