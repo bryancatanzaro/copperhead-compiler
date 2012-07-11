@@ -290,6 +290,17 @@ phase_analyze::result_type phase_analyze::make_tuple_analyze(const bind& n) {
     m_completions.insert(make_pair(lhs.id(), glb));
     m_tuples.insert(make_pair(lhs.id(),
                               move(sources)));
+
+    //If the result is going to be returned at some point, it must be
+    //completed
+    if ((m_returns.find(lhs.id()) != m_returns.end()) &&
+        glb < completion::total) {
+        //Add a phase boundary, POST call
+        add_phase_boundary_tuple(lhs, true);
+        m_result_completion = completion::total;
+        return form_suite(n.ptr());
+    }    
+
     return n.ptr();
 }
 
