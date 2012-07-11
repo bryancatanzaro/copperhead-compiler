@@ -74,6 +74,7 @@ public:
     result_type operator()(const apply& n);
     result_type operator()(const bind& n);
     result_type operator()(const ret& n);
+    result_type operator()(const closure& n);
     
 };
 

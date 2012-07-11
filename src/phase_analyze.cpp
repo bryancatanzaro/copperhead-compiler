@@ -221,12 +221,13 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
     assert(fn_phase->size() == n.args().arity());
 
     vector<shared_ptr<const expression> > new_args;
-    
+    bool changed = false;
     for(auto i = n.args().begin();
         i != n.args().end();
         i++, j++) {
         shared_ptr<const expression> new_arg = i->ptr();
-        //If we have something other than a name, assume it's invariant
+        //If we have something other than a name or closure,
+        //assume it's invariant
         if (detail::isinstance<name>(*i)) {
             const name& id = detail::up_get<name>(*i);
             if (m_substitutions.exists(id.id())) {
@@ -246,11 +247,21 @@ phase_analyze::result_type phase_analyze::operator()(const apply& n) {
                     }
                 }
             } 
+        } else if (detail::isinstance<closure>(*i)) {
+            new_arg = static_pointer_cast<const expression>(
+                boost::apply_visitor(*this, *i));
         }
+        changed = changed || (new_arg != i->ptr());
         new_args.push_back(new_arg);
     }
     m_result_completion = fn_phase->result();
-    return n.ptr();
+    if (!changed) {
+        return n.ptr();
+    }
+    return make_shared<const apply>(
+        n.fn().ptr(),
+        make_shared<const tuple>(
+            move(new_args)));
 }
 
 
@@ -393,6 +404,46 @@ phase_analyze::result_type phase_analyze::operator()(const ret& n) {
     }
     return n.ptr();
 }
-    
+
+phase_analyze::result_type phase_analyze::operator()(const closure &n) {
+    const tuple& args = n.args();
+    vector<shared_ptr<const expression> > new_args;
+    bool changed = false;
+    for(auto i = args.begin();
+        i != args.end();
+        i++) {
+        bool boundaried = false;
+        if (detail::isinstance<name>(*i)) {
+            const name& arg = boost::get<const name&>(*i);
+            if (m_completions.exists(arg.id())) {
+                completion arg_completion =
+                    m_completions.find(arg.id())->second;
+                if (arg_completion < completion::total) {
+                    add_phase_boundary(arg);
+                    new_args.push_back(
+                        m_substitutions.find(arg.id())->second);
+                    boundaried = true;
+                }
+            }
+        }
+        changed = changed | boundaried;
+        if (!boundaried) {
+            new_args.push_back(i->ptr());
+        }
+    }
+    if (!changed) {
+        return n.ptr();
+    }
+    auto result = make_shared<const closure>(
+        make_shared<const tuple>(
+            move(new_args),
+            args.type().ptr(),
+            args.ctype().ptr()),
+        n.body().ptr(),
+        n.type().ptr(),
+        n.ctype().ptr());
+    return result;
+        
+}
 
 }
