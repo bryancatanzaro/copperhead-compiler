@@ -1,4 +1,7 @@
 This directory distributes some patches to Thrust 1.6.0.
+
 Currently, we are patching Thrust issue #186:
-https://github.com/thrust/thrust/issues/186
+https://github.com/thrust/thrust/issues/186,
+which was resolved with this commit:
+https://github.com/thrust/thrust/commit/1a0defd430fcd661917108dcbdcc198866f8861d
 
