@@ -31,7 +31,19 @@
 #endif
 
 #ifdef TBB_SUPPORT
+#ifdef __CUDACC__
+//Including the tag without the memory.h
+//Will define the type, but won't activate the
+//overloads provided by ADL. In this case,
+//it's what we want, since NVCC can't understand
+//TBB headers
+//Functionally, if a program compiled by nvcc were
+//to attempt to use tbb, it would silently fall back
+//to the sequential thrust backend.
+#include <thrust/system/tbb/detail/tag.h>
+#else
 #include <thrust/system/tbb/memory.h>
+#endif
 #endif
 
 #ifdef CUDA_SUPPORT
