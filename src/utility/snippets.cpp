@@ -33,7 +33,9 @@ const std::string phase_boundary() {
 
 const std::string snippet_get(int x) {
     std::ostringstream os;
-    os << "thrust::get<" << x << ">";
+    os << "thrust::get";
+    if (x >= 0)
+        os << "<" << x << ">";
     return os.str();
 }
 

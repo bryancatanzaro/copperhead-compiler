@@ -42,7 +42,7 @@ const std::string boost_python_def();
 //! Gets string for phase_boundary
 const std::string phase_boundary();
 //! Gets string for thrust::get<x>
-const std::string snippet_get(int x);
+const std::string snippet_get(int x=-1);
 //! Gets string for thrust::make_tuple
 const std::string snippet_make_tuple();
 /*!

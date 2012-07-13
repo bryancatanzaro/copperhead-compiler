@@ -87,9 +87,36 @@ allocate::result_type allocate::operator()(const bind &n) {
             containerized);
 
         shared_ptr<const expression> new_rhs =
-            static_pointer_cast<const expression>(
-                boost::apply_visitor(*this, n.rhs()));
-            
+                static_pointer_cast<const expression>(
+                    boost::apply_visitor(*this, n.rhs()));
+
+        //At this point, we know the lhs of this bind must be containerized.
+        //If the rhs is a tuple get operation, we're getting from a
+        //container tuple, and so it needs to be containerized as well
+        //This logic checks this special case
+        if (detail::isinstance<apply>(n.rhs())) {
+            const apply& rhs = boost::get<const apply&>(n.rhs());
+            if (detail::isinstance<name>(rhs.fn())) {
+                const name& rhs_fn_name = boost::get<const name&>(rhs.fn());
+                if (rhs_fn_name.id().find(detail::snippet_get())
+                    != string::npos) {
+                    //tuple get operates only on names
+                    const tuple& get_args = rhs.args();
+                    assert(detail::isinstance<name>(*get_args.begin()));
+                    const name& view_tuple_name =
+                        boost::get<const name&>(*get_args.begin());
+                    
+                    shared_ptr<const name> cont_tuple_name =
+                        make_shared<const name>(
+                            detail::wrap_array_id(view_tuple_name.id()));
+                    new_rhs = make_shared<const apply>(
+                        rhs.fn().ptr(),
+                        make_shared<const tuple>(
+                            make_vector<shared_ptr<const expression> >(
+                                cont_tuple_name)));
+                }
+            }
+        } 
         shared_ptr<const bind> allocator = make_shared<const bind>(
             result_name, new_rhs);
         vector<shared_ptr<const statement> > stmts;

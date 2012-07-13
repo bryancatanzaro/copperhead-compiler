@@ -89,36 +89,6 @@ tuple_break::result_type tuple_break::operator()(const bind& n) {
     }
 }
 
-void tuple_break::flatten_tuple(const tuple& t,
-                                const std::vector<int> path,
-                                flattened_tuple& ft) {
-    int j = 0;
-    for(auto i = t.begin();
-        i != t.end();
-        i++, j++) {
-        if (detail::isinstance<tuple>(*i)) {
-            std::vector<int> this_path = path;
-            this_path.push_back(j);
-            flatten_tuple(boost::get<const tuple&>(*i),
-                          this_path,
-                          ft);
-        } else {
-            assert(detail::isinstance<name>(*i));
-            const name& n = boost::get<const name&>(*i);
-            //Copy path
-            std::vector<int> this_path = path;
-            //Add path id
-            this_path.push_back(j);
-            //Record
-            ft.push_back(
-                std::make_tuple(std::move(this_path),
-                                n.ptr()));
-                    
-        }
-    }
-}
-
-
 tuple_break::result_type tuple_break::operator()(const procedure& n) {
     vector<shared_ptr<const expression> > args;
     vector<shared_ptr<const statement> > stmts;
