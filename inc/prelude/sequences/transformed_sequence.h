@@ -57,7 +57,7 @@ struct transformed_sequence {
                          S seqs)
         : m_fn(detail::map_adapter<F>(fn)), m_seq(seqs) {}
     __host__ __device__
-    ref_type& operator[](int index) {
+    ref_type operator[](int index) {
         return m_fn(m_seq[index]);
     }
     iterator_type begin() const {

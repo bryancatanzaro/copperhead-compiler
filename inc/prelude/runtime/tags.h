@@ -27,15 +27,15 @@
 #include <thrust/system/cpp/memory.h>
 
 #ifdef OMP_SUPPORT
-#include <thrust/system/omp/detail/tag.h>
+#include <thrust/system/omp/memory.h>
 #endif
 
 #ifdef TBB_SUPPORT
-#include <thrust/system/tbb/detail/tag.h>
+#include <thrust/system/tbb/memory.h>
 #endif
 
 #ifdef CUDA_SUPPORT
-#include <thrust/system/cuda/detail/tag.h>
+#include <thrust/system/cuda/memory.h>
 #endif
 
 namespace copperhead {
