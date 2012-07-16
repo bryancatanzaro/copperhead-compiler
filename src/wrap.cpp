@@ -3,6 +3,8 @@
 #include "cpp_printer.hpp"
 #include "type_printer.hpp"
 #include "utility/up_get.hpp"
+#include "utility/container_type.hpp"
+
 using std::string;
 using std::vector;
 using std::shared_ptr;
@@ -31,23 +33,11 @@ wrap::result_type wrap::operator()(const procedure &n) {
             i != n.args().end();
             i++) {
             const expression& arg = *i;
-            //If they're sequences, wrap them, construct extractors
-            if (detail::isinstance<ctype::sequence_t, ctype::type_t>(
-                    i->ctype())) {
-
-                //-------------Derive Wrapper type--------------
-                
-                //Get ctype of argument
-                const ctype::sequence_t& arg_ct =
-                    detail::up_get<const ctype::sequence_t&>(i->ctype());
-                
-                //Since argument is a sequence, get its c subtype
-                const ctype::type_t& arg_sub_ct = arg_ct.sub();
-
-                //Construct a wrapper type with the subtype
-                shared_ptr<const ctype::type_t> wrapped_arg_p_ct =
-                    make_shared<const ctype::cuarray_t>(
-                        arg_sub_ct.ptr());
+            //If they need containers, wrap them, construct extractors
+            shared_ptr<const ctype::type_t> arg_container_type =
+                detail::container_type(i->ctype());
+            bool needs_container = arg_container_type != i->ctype().ptr();
+            if (needs_container) {
 
                 //-------------Build Wrapped argument--------------
                 
@@ -60,7 +50,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 
                 shared_ptr<const name> p_wrapped_name(
                     new name(detail::wrap_array_id(arg_name.id()),
-                             arg.type().ptr(), wrapped_arg_p_ct));
+                             arg.type().ptr(), arg_container_type));
                 new_args.push_back(p_wrapped_name);
 
                 //-------------Build Extractor-------------------
@@ -170,26 +160,12 @@ wrap::result_type wrap::operator()(const procedure &n) {
     }
 }
 
-bool wrap::ret_container(const type_t& t) {
-    if (detail::isinstance<sequence_t>(t)) {
-        return true;
-    } else if (detail::isinstance<tuple_t>(t)) {
-        bool result = false;
-        const tuple_t& tup = boost::get<const tuple_t&>(t);
-        for(auto i = tup.begin(); i != tup.end(); i++) {
-            result = result || ret_container(*i);
-        }
-        return result;
-    } else {
-        return false;
-    }
-}
-
 wrap::result_type wrap::operator()(const ret& n) {
     if (m_wrapping && detail::isinstance<name, node>(n.val())) {
         const name& val =
             boost::get<const name&>(n.val());
-        if (ret_container(val.type())) {
+        bool needs_container = detail::container_type(val.ctype()) != val.ctype().ptr();
+        if (needs_container) {
             shared_ptr<const name> array_wrapped =
                 make_shared<const name>(
                     detail::wrap_array_id(val.id()),

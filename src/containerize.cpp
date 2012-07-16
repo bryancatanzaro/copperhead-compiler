@@ -16,6 +16,7 @@
  */
 #include "containerize.hpp"
 #include "utility/initializers.hpp"
+#include "utility/container_type.hpp"
 
 using std::string;
 using std::shared_ptr;
@@ -45,31 +46,9 @@ containerize::result_type containerize::operator()(const procedure &s) {
     return r;
 }
 
-shared_ptr<const ctype::type_t> containerize::container_type(const ctype::type_t& t) {
-    if (detail::isinstance<ctype::sequence_t>(t)) {
-        const ctype::sequence_t seq = boost::get<const ctype::sequence_t&>(t);
-        return make_shared<const ctype::cuarray_t>(
-            seq.sub().ptr());
-    } else if (!detail::isinstance<ctype::tuple_t>(t)) {
-        return t.ptr();
-    }
-    bool match = true;
-    const ctype::tuple_t& t_tuple = boost::get<const ctype::tuple_t&>(t);
-    vector<shared_ptr<const ctype::type_t> > sub_types;
-    for(auto i = t_tuple.begin(); i != t_tuple.end(); i++) {
-        shared_ptr<const ctype::type_t> sub_container = container_type(*i);
-        match = match && (sub_container == i->ptr());
-        sub_types.push_back(container_type(*i));
-    }
-    if (match) {
-        return t.ptr();
-    }
-    return make_shared<const ctype::tuple_t>(move(sub_types));
-}
-
 shared_ptr<const expression> containerize::container_args(const expression& t) {
     if (detail::isinstance<name>(t)) {
-        if (container_type(t.ctype()) != t.ctype().ptr()) {
+        if (detail::container_type(t.ctype()) != t.ctype().ptr()) {
             const name& n = boost::get<const name&>(t);
             return make_shared<const name>(
                 detail::wrap_array_id(n.id()),
@@ -112,12 +91,12 @@ containerize::result_type containerize::reassign(const bind &n) {
         make_shared<const name>(
             detail::wrap_array_id(lhs.id()),
             lhs.type().ptr(),
-            container_type(lhs.ctype()));
+            detail::container_type(lhs.ctype()));
     shared_ptr<const name> rhs_cont =
         make_shared<const name>(
             detail::wrap_array_id(rhs.id()),
             rhs.type().ptr(),
-            container_type(rhs.ctype()));
+            detail::container_type(rhs.ctype()));
     vector<shared_ptr<const statement> > stmts;
     stmts.push_back(
         make_shared<const bind>(
@@ -160,7 +139,7 @@ containerize::result_type containerize::operator()(const bind &n) {
         }
             
             
-        shared_ptr<const ctype::type_t> cont_type = container_type(
+        shared_ptr<const ctype::type_t> cont_type = detail::container_type(
             *make_shared<const ctype::tuple_t>(move(arg_c_types)));
         //If the container is the same as the ctype, no - because this
         //means that no containers were necessary for the original

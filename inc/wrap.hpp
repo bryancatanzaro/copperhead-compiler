@@ -48,7 +48,7 @@ private:
     const copperhead::system_variant& m_target;
     const std::string& m_entry_point;
     bool m_wrapping;
-    bool ret_container(const type_t&);
+    bool needs_container(const type_t&);
 public:
     //! Constructor
 /*! 

@@ -48,7 +48,6 @@ private:
     const std::string& m_entry_point;
     bool m_in_entry;
     environment<std::string> m_decl_containers;
-    std::shared_ptr<const ctype::type_t> container_type(const ctype::type_t&);
     std::shared_ptr<const expression> container_args(const expression&);
     result_type reassign(const bind& n);
 public:
