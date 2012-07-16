@@ -44,7 +44,6 @@ wrap::result_type wrap::operator()(const procedure &n) {
                 //Argument to procedure must be a name
                 bool is_name = detail::isinstance<name>(arg);
                 assert(is_name);
-
                 const name& arg_name =
                     boost::get<const name&>(arg);
                 
@@ -111,6 +110,7 @@ wrap::result_type wrap::operator()(const procedure &n) {
             i++) {
             new_arg_p_cts.push_back((*i)->ctype().ptr());
         }
+        
         const ctype::fn_t& previous_ct =
             boost::get<const ctype::fn_t&>(n.ctype());
         const ctype::type_t& previous_c_res_t =

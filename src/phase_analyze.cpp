@@ -23,6 +23,27 @@ private:
 public:
     using rewriter<return_finder>::operator();
 
+    // result_type operator()(const suite& s) {
+    //     auto i = s.end();
+    //     do {
+    //         i--;
+    //         boost::apply_visitor(*this, *i);
+    //     } while (i != s.begin());
+    //     return s.ptr();
+    // }
+
+    // result_type operator()(const bind& b) {
+    //     if (detail::isinstance<name>(b.lhs()) &&
+    //         detail::isinstance<name>(b.rhs())) {
+    //         const name& lhs = boost::get<const name&>(b.lhs());
+    //         const name& rhs = boost::get<const name&>(b.rhs());
+    //         if (m_returns.find(lhs.id()) != m_returns.end()) {
+    //             m_returns.insert(rhs.id());
+    //         }
+    //     }
+    //     return b.ptr();
+    // }
+    
     result_type operator()(const ret& r) {
         if (detail::isinstance<name>(r.val())) {
             const name& return_name = boost::get<const name&>(r.val());
