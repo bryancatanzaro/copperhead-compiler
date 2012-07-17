@@ -16,12 +16,13 @@
  */
 #pragma once
 #include <prelude/sequences/shifted_sequence.h>
-
+#include <prelude/basic/detail/signed_index_type.h>
 namespace copperhead {
 
 template<typename Seq>
 shifted_sequence<Seq> shift(const Seq& src,
-                            const typename Seq::index_type& amount,
+                            const typename detail::signed_index_type<
+                            typename Seq::index_type >::type& amount,
                             const typename Seq::value_type& boundary) {
     return shifted_sequence<Seq>(src, amount, boundary);
 }

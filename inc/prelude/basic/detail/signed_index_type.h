@@ -36,5 +36,6 @@ template<>
 struct signed_index_type<unsigned long long> {
     typedef long long type;
 };
+
 }
 }
