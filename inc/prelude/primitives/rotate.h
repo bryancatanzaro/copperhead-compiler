@@ -16,12 +16,14 @@
  */
 #pragma once
 #include <prelude/sequences/rotated_sequence.h>
+#include <prelude/basic/detail/signed_index_type.h>
 
 namespace copperhead {
 
 template<typename Seq>
 rotated_sequence<Seq> rotate(const Seq& src,
-                             const typename Seq::index_type& amount) {
+                             const typename detail::signed_index_type<
+                                 typename Seq::index_type >::type& amount) {
     return rotated_sequence<Seq>(src, amount);
 }
 
