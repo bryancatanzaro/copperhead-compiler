@@ -328,53 +328,6 @@ thrust_rewriter::result_type thrust_rewriter::zip_rewrite(const bind& n) {
     return result;
 }
 
-thrust_rewriter::result_type thrust_rewriter::gather_rewrite(const bind& n) {
-    //The rhs must be an apply
-    assert(detail::isinstance<apply>(n.rhs()));
-    
-    const apply& rhs = boost::get<const apply&>(n.rhs());
-    //The rhs must apply "gather"
-    assert(rhs.fn().id() == string("gather"));
-
-    const name& lhs = boost::get<const name&>(n.lhs());
-
-    //Construct a transformed_sequence type
-    //First construct the gather_functor type
-    vector<shared_ptr<const ctype::type_t> > arg_types;
-    for(auto i = rhs.args().begin(), e = rhs.args().end(); i != e; i++) {
-        arg_types.push_back(
-            make_shared<const ctype::monotype_t>(
-                detail::typify(boost::get<const name&>(*i).id())));
-    }
-
-    shared_ptr<const ctype::polytype_t> gather_functor_t =
-        make_shared<const ctype::polytype_t>(
-            move(arg_types),
-            make_shared<const ctype::monotype_t>("detail::gather_functor"));
-
-    //Then construct the transformed_sequence type
-    //Grab second argument (Indices)
-    auto j = rhs.args().begin() + 1;
-    shared_ptr<const ctype::tuple_t> tupled_indices =
-        make_shared<const ctype::tuple_t>(
-            make_vector<shared_ptr<const ctype::type_t> >(
-                make_shared<const ctype::monotype_t>(
-                    detail::typify(boost::get<const name&>(*j).id()))));
-    
-    shared_ptr<const ctype::polytype_t> gather_t =
-        make_shared<const ctype::polytype_t>(
-            make_vector<shared_ptr<const ctype::type_t> >
-            (gather_functor_t)(tupled_indices),
-            make_shared<const ctype::monotype_t>("transformed_sequence"));
-            
-    shared_ptr<const name> n_lhs =
-        make_shared<const name>(lhs.id(),
-                                lhs.type().ptr(),
-                                gather_t);
-    auto result = make_shared<const bind>(n_lhs, rhs.ptr());
-    return result;
-}
-
 thrust_rewriter::result_type thrust_rewriter::make_tuple_rewrite(const bind& n) {
     //The rhs must be an apply
     assert(detail::isinstance<apply>(n.rhs()));
@@ -422,8 +375,6 @@ thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
         return map_rewrite(n);
     } else if(fn_id.substr(0, 3) == "zip") {
         return zip_rewrite(n);
-    } else if (fn_id == "gather") {
-        return gather_rewrite(n);
     } else if (fn_id == "indices") {
         return indices_rewrite(n);
     } else if (fn_id == "replicate") {
