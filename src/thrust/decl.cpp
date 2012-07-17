@@ -267,7 +267,27 @@ void declare_scans(map<ident, fn_info>& fns,
                    fn_info(scan_t, scan_phase_t)));
     fn_includes.insert(make_pair("scan", "prelude/primitives/scan.h"));
     fn_includes.insert(make_pair("rscan", "prelude/primitives/scan.h"));
-        
+
+    shared_ptr<const polytype_t> exscan_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(bin_fn_t)(t_a)(seq_t_a)),
+                seq_t_a));
+    shared_ptr<const phase_t> exscan_phase_t =
+        make_shared<const phase_t>(
+            make_vector<completion>(completion::invariant)(completion::invariant)(completion::local),
+            completion::total);
+    fns.insert(make_pair(
+                   make_pair("exclusive_scan", iteration_structure::independent),
+                   fn_info(exscan_t, exscan_phase_t)));
+    fns.insert(make_pair(
+                   make_pair("exclusive_rscan", iteration_structure::independent),
+                   fn_info(exscan_t, exscan_phase_t)));
+    fn_includes.insert(make_pair("exclusive_scan", "prelude/primitives/scan.h"));
+    fn_includes.insert(make_pair("exclusive_rscan", "prelude/primitives/scan.h"));
+
 }
 
 void declare_permutes(map<ident, fn_info>& fns,

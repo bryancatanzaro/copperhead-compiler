@@ -65,31 +65,43 @@ rscan(const F& fn, Seq& x) {
     return result_ary;
 }
 
-// template<typename F, typename T>
-// sp_cuarray_var exscan(F& fn,
-//                       stored_sequence<T>& x) {
-//     sp_cuarray_var result_ary = make_remote<T>(x.size());
-//     stored_sequence<T> result = get_remote_w<T>(result_ary);
-//     thrust::exclusive_scan(extract_device_begin(x),
-//                            extract_device_end(x),
-//                            extract_device_begin(result),
-//                            fn);
-//     return result_ary;
-// }
+template<typename F, typename Seq>
+sp_cuarray
+exclusive_scan(const F& fn, const typename Seq::value_type& p, Seq& x) {
+    typedef typename F::result_type T;
+    typedef typename Seq::tag Tag;
+    typedef typename detail::stored_sequence<Tag, T>::type sequence_type;
+    boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
+    sequence_type result =
+        make_sequence<sequence_type>(result_ary,
+                                     Tag(),
+                                     true);
+   
+    thrust::exclusive_scan(x.begin(),
+                           x.end(),
+                           result.begin(),
+                           p,
+                           fn);
+    return result_ary;
+}
 
-
-// template<typename F, typename T>
-// sp_cuarray_var exrscan(F& fn,
-//                      stored_sequence<T>& x) {
-//     typename thrust::device_vector<T>::reverse_iterator drbegin(
-//         extract_device_end(x));
-//     typename thrust::device_vector<T>::reverse_iterator drend(
-//         extract_device_begin(x));
-//     sp_cuarray_var result_ary = make_remote<T>(x.size());
-//     stored_sequence<T> result = get_remote_w<T>(result_ary);
-//     typename thrust::device_vector<T>::reverse_iterator orbegin(
-//         extract_device_end(result));
-//     thrust::exclusive_scan(drbegin, drend, orbegin, fn);
-// }
+template<typename F, typename Seq>
+sp_cuarray
+exclusive_rscan(const F& fn, const typename Seq::value_type& p, Seq& x) {
+    typedef typename F::result_type T;
+    typedef typename Seq::tag Tag;
+    typedef typename thrust::reverse_iterator<typename Seq::iterator_type> iterator_type;
+    iterator_type drbegin(x.end());
+    iterator_type drend(x.begin());
+    typedef typename detail::stored_sequence<Tag, T>::type sequence_type;
+    boost::shared_ptr<cuarray> result_ary = make_cuarray<T>(x.size());
+    sequence_type result =
+        make_sequence<sequence_type>(result_ary,
+                                     Tag(),
+                                     true);
+    thrust::reverse_iterator<thrust::pointer<T, Tag> > orbegin(result.end());
+    thrust::exclusive_scan(drbegin, drend, orbegin, p, fn);
+    return result_ary;
+}
 
 }
