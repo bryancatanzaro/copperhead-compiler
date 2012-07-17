@@ -497,6 +497,34 @@ void declare_sorts(map<ident, fn_info>& fns,
     fn_includes.insert(make_pair("sort", "prelude/primitives/sort.h"));
 }
 
+void declare_filter(map<ident, fn_info>& fns,
+                    map<string, string>& fn_includes) {
+    shared_ptr<const monotype_t> t_a = make_shared<const monotype_t>("a");
+    shared_ptr<const polytype_t> cmp_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(t_a)),
+                bool_mt));
+    shared_ptr<const monotype_t> seq_t_a = make_shared<const sequence_t>(t_a);
+    shared_ptr<const polytype_t> filter_t =
+        make_shared<const polytype_t>(
+            make_vector<shared_ptr<const monotype_t> >(t_a),
+            make_shared<const fn_t>(
+                make_shared<const tuple_t>(
+                    make_vector<shared_ptr<const type_t> >(cmp_t)(seq_t_a)),
+                seq_t_a));
+    shared_ptr<const phase_t> filter_phase_t =
+        make_shared<const phase_t>(
+            make_vector<completion>(completion::invariant)(completion::local),
+            completion::total);
+    fns.insert(make_pair(
+                   make_pair("filter", iteration_structure::independent),
+                   fn_info(filter_t, filter_phase_t)));
+    fn_includes.insert(make_pair("filter", "prelude/primitives/filter.h"));
+}
+
 }
 
 }
@@ -515,7 +543,7 @@ shared_ptr<library> get_thrust() {
     thrust::detail::declare_sorts(exported_fns, fn_includes);
     thrust::detail::declare_zips(max_arity, exported_fns, fn_includes);
     thrust::detail::declare_unzips(max_arity, exported_fns, fn_includes);
-
+    thrust::detail::declare_filter(exported_fns, fn_includes);
     //XXX HACK.  NEED boost::filesystem path manipulation
     string library_path(string(detail::get_path(PRELUDE_PATH)) +
                              "/../thrust");
