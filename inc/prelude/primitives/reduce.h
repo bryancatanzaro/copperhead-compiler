@@ -29,11 +29,4 @@ reduce(const F& fn, Seq& x, const typename F::result_type& p) {
                           fn);
 }
 
-template<typename Seq>
-typename Seq::value_type
-sum(Seq& x) {
-    return thrust::reduce(x.begin(),
-                          x.end());
-}
-
 }

@@ -72,6 +72,7 @@ std::shared_ptr<const suite> compiler::operator()(const suite &n) {
     //Defines the compiler pipeline
     //Passes will be processed sequentially, with outputs chained to inputs
     auto passes = std::make_tuple(
+        backend_translate(),
         tuple_break(),
         iterizer(),
         phase_analyze(m_entry_point, m_registry),
