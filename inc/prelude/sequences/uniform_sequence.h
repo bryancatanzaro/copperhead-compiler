@@ -51,7 +51,9 @@ struct uniform_sequence {
 
     __host__ __device__
     uniform_sequence<Tag, T, D-1> operator[](size_t i) {
-        return slice(m_d, i * m_s);
+        uniform_sequence<Tag, T, D-1> sub = m_d;
+        sub.advance(i * m_s);
+        return sub;
     }
 
     __host__ __device__
@@ -66,7 +68,7 @@ struct uniform_sequence {
 
     __host__ __device__
     uniform_sequence<Tag, T, D-1> next() {
-        uniform_sequence<Tag, T, D-1> x = operator[](0);
+        uniform_sequence<Tag, T, D-1> x = m_d;
         advance(m_s);
         m_l--;
         return x;
@@ -136,16 +138,18 @@ struct uniform_sequence<Tag, T, 0>
 
 template<typename Tag, typename T, int D>
 __host__ __device__
-uniform_sequence<Tag, T, D> slice(uniform_sequence<Tag, T, D> seq, int m_o)
+uniform_sequence<Tag, T, D> slice(uniform_sequence<Tag, T, D> seq, size_t base, size_t len=1)
 {
-    return uniform_sequence<Tag, T, D>(seq.m_l, seq.m_s, slice(seq.m_d, m_o));
+    uniform_sequence<Tag, T, D-1>& sub = seq.m_d;
+    sub.advance(base * seq.m_s);
+    return uniform_sequence<Tag, T, D>(len, seq.m_s, sub);
 }
 
 template<typename Tag, typename T>
 __host__ __device__
-uniform_sequence<Tag, T, 0> slice(uniform_sequence<Tag, T, 0> seq, int m_o)
+uniform_sequence<Tag, T, 0> slice(uniform_sequence<Tag, T, 0> seq, size_t base, size_t len=1)
 {
-    return uniform_sequence<Tag, T, 0>(seq.m_l, seq.m_s, seq.m_d, seq.m_o + m_o);
+    return uniform_sequence<Tag, T, 0>(len, seq.m_s, seq.m_d, seq.m_o + base*seq.m_s);
 }
 
 }
