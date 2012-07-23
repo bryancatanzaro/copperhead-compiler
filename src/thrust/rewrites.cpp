@@ -235,64 +235,6 @@ thrust_rewriter::result_type thrust_rewriter::replicate_rewrite(const bind& n) {
     return result;
 }
 
-thrust_rewriter::result_type thrust_rewriter::shift_rewrite(const bind& n) {
-    //The rhs must be an apply
-    assert(detail::isinstance<apply>(n.rhs()));
-    const apply& rhs = boost::get<const apply&>(n.rhs());
-    //The rhs must apply "shift"
-    assert(rhs.fn().id() == string("shift"));
-    const tuple& ap_args = rhs.args();
-    //replicate must have three arguments
-    assert(ap_args.end() - ap_args.begin() == 3);
-
-    shared_ptr<const ctype::type_t> val_t =
-        ap_args.begin()->ctype().ptr();
-    
-    shared_ptr<const ctype::polytype_t> shifted_t =
-        make_shared<const ctype::polytype_t>(
-            make_vector<shared_ptr<const ctype::type_t> >(val_t),
-            make_shared<const ctype::monotype_t>("shifted_sequence"));
-    //Can only handle names on the LHS
-    assert(detail::isinstance<name>(n.lhs()));
-    const name& lhs = boost::get<const name&>(n.lhs());
-    shared_ptr<const name> n_lhs =
-        make_shared<const name>(lhs.id(),
-                                lhs.type().ptr(),
-                                shifted_t);
-    auto result = make_shared<const bind>(n_lhs, rhs.ptr());
-    return result;
-}
-
-thrust_rewriter::result_type thrust_rewriter::rotate_rewrite(const bind& n) {
-    //The rhs must be an apply
-    assert(detail::isinstance<apply>(n.rhs()));
-    const apply& rhs = boost::get<const apply&>(n.rhs());
-    //The rhs must apply "rotate"
-    assert(rhs.fn().id() == string("rotate"));
-    const tuple& ap_args = rhs.args();
-    //replicate must have three arguments
-    assert(ap_args.end() - ap_args.begin() == 2);
-
-    shared_ptr<const ctype::type_t> val_t =
-        ap_args.begin()->ctype().ptr();
-    
-    
-    
-    shared_ptr<const ctype::polytype_t> rotated_t =
-        make_shared<const ctype::polytype_t>(
-            make_vector<shared_ptr<const ctype::type_t> >(val_t),
-            make_shared<const ctype::monotype_t>("rotated_sequence"));
-    //Can only handle names on the LHS
-    assert(detail::isinstance<name>(n.lhs()));
-    const name& lhs = boost::get<const name&>(n.lhs());
-    shared_ptr<const name> n_lhs =
-        make_shared<const name>(lhs.id(),
-                                lhs.type().ptr(),
-                                rotated_t);
-    auto result = make_shared<const bind>(n_lhs, rhs.ptr());
-    return result;
-}
-
 thrust_rewriter::result_type thrust_rewriter::zip_rewrite(const bind& n) {
     //The rhs must be an apply
     assert(detail::isinstance<apply>(n.rhs()));
@@ -379,10 +321,6 @@ thrust_rewriter::result_type thrust_rewriter::operator()(const bind& n) {
         return indices_rewrite(n);
     } else if (fn_id == "replicate") {
         return replicate_rewrite(n);
-    } else if (fn_id == "rotate") {
-        return rotate_rewrite(n);
-    } else if (fn_id == "shift") {
-        return shift_rewrite(n);
     } else if (fn_id == detail::snippet_make_tuple()) {
         return make_tuple_rewrite(n);
     } else {

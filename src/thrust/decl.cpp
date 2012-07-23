@@ -366,38 +366,7 @@ void declare_special_sequences(map<ident, fn_info>& fns,
                    make_pair("replicate", iteration_structure::independent),
                    fn_info(replicate_t, replicate_phase_t)));
     fn_includes.insert(make_pair("replicate", "prelude/primitives/replicate.h"));
-
-    shared_ptr<const polytype_t> shift_t =
-        make_shared<const polytype_t>(
-            make_vector<shared_ptr<const monotype_t> >(t_a),
-            make_shared<const fn_t>(
-                make_shared<const tuple_t>(
-                    make_vector<shared_ptr<const type_t> >(seq_t_a)(int64_mt)(t_a)),
-                seq_t_a));
-    shared_ptr<const phase_t> shift_phase_t =
-        make_shared<const phase_t>(
-            make_vector<completion>(completion::total)(completion::local)(completion::local),
-            completion::local);
-    fns.insert(make_pair(
-                   make_pair("shift", iteration_structure::independent),
-                   fn_info(shift_t, shift_phase_t)));
-    fn_includes.insert(make_pair("shift", "prelude/primitives/shift.h"));
-               
-    shared_ptr<const polytype_t> rotate_t =
-        make_shared<const polytype_t>(
-            make_vector<shared_ptr<const monotype_t> >(t_a),
-            make_shared<const fn_t>(
-                make_shared<const tuple_t>(
-                    make_vector<shared_ptr<const type_t> >(seq_t_a)(int64_mt)),
-                seq_t_a));
-    shared_ptr<const phase_t> rotate_phase_t =
-        make_shared<const phase_t>(
-            make_vector<completion>(completion::total)(completion::local),
-            completion::local);
-    fns.insert(make_pair(
-                   make_pair("rotate", iteration_structure::independent),
-                   fn_info(rotate_t, rotate_phase_t)));
-    fn_includes.insert(make_pair("rotate", "prelude/primitives/rotate.h"));                
+           
 }
 
 void declare_transforms(map<ident, fn_info>& fns,
