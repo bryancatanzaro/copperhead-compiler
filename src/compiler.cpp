@@ -5,7 +5,7 @@
 #include <typeinfo>
 
 #ifndef TRACE
-#define TRACE false
+#define TRACE true
 #endif
 
 namespace backend {

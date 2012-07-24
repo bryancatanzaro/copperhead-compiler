@@ -1,4 +1,5 @@
 #include "thrust/rewrites.hpp"
+#include "utility/up_get.hpp"
 
 using std::string;
 using std::stringstream;
@@ -78,19 +79,16 @@ thrust_rewriter::result_type thrust_rewriter::map_rewrite(
             os << tn.id() << "<";
             const ctype::tuple_t& template_types =
                 tn.template_types();
+            ctype::ctype_printer ctp(m_target, os);
             for(auto i = template_types.begin();
                 i != template_types.end();
                 i++) {
-                //Template types contain ctype::monotype_t
-                assert(detail::isinstance<ctype::monotype_t>(*i));
-                const ctype::monotype_t& tmt =
-                    boost::get<const ctype::monotype_t&>(*i);
-                os << tmt.name();
+                boost::apply_visitor(ctp, *i);
                 if (std::next(i) != template_types.end()) {
                     os << ", ";
                 }
             }
-            os << "> ";
+            os << " > ";
         } else {
             assert(detail::isinstance<name>(inst_fctor.fn()));
             const name& fnn =
