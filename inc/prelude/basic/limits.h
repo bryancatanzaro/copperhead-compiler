@@ -99,4 +99,30 @@ struct fn_max_bound {
     }
 };
 
+template<typename S>
+__host__ __device__ typename S::value_type min_bound_el(const S&) {
+    return detail::numeric_limits<typename S::value_type>::min();
+}
+
+template<typename S>
+struct fn_min_bound_el {
+    typedef typename S::value_type result_type;
+    __host__ __device__ result_type operator()(const S& s) {
+        return min_bound_el(s);
+    }
+};
+
+template<typename S>
+__host__ __device__ typename S::value_type max_bound_el(const S&) {
+    return detail::numeric_limits<typename S::value_type>::max();
+}
+
+template<typename S>
+struct fn_max_bound_el {
+    typedef typename S::value_type result_type;
+    __host__ __device__ result_type operator()(const S& s) {
+        return max_bound_el(s);
+    }
+};
+
 }
