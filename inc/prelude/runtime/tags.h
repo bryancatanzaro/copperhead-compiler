@@ -40,7 +40,12 @@
 //Functionally, if a program compiled by nvcc were
 //to attempt to use tbb, it would silently fall back
 //to the sequential thrust backend.
+#if THRUST_VERSION < 107000
 #include <thrust/system/tbb/detail/tag.h>
+#else
+#include <thrust/system/tbb/detail/execution_policy.h>
+#endif
+
 #else
 #include <thrust/system/tbb/memory.h>
 #endif
@@ -52,18 +57,18 @@
 
 namespace copperhead {
 
-struct cpp_tag : thrust::system::cpp::tag{};
+struct cpp_tag : thrust::system::cpp::detail::execution_policy<cpp_tag>{};
 
 #ifdef OMP_SUPPORT
-struct omp_tag : thrust::system::omp::tag{};
+struct omp_tag : thrust::system::omp::detail::execution_policy<omp_tag>{};
 #endif
 
 #ifdef TBB_SUPPORT
-struct tbb_tag : thrust::system::tbb::tag{};
+struct tbb_tag : thrust::system::tbb::detail::execution_policy<tbb_tag>{};
 #endif
 
 #ifdef CUDA_SUPPORT
-struct cuda_tag : thrust::system::cuda::tag{};
+struct cuda_tag : thrust::system::cuda::detail::execution_policy<cuda_tag>{};
 #endif
 
 

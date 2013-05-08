@@ -15,11 +15,38 @@
  * 
  */
 
+#pragma once
+
+
+#include <thrust/version.h>
+
+#if THRUST_VERSION >= 100700
+
+#include <thrust/detail/malloc_and_free.h>
+//When support for Thrust 1.6 is discontinued, we can
+//remove these forwarding functions, which are only here
+//to avoid namespace collisions
+//XXX Rework to use thrust::malloc more idiomatically
+namespace thrust {
+namespace detail {
+template<typename Tag>
+void* tag_malloc(const Tag& t, size_t cnt) {
+    return thrust::malloc(t, cnt).get();
+}
+
+template<typename Tag>
+void tag_free(const Tag& t, void* p) {
+    thrust::free(t, p);
+}
+
+}
+}
+
+#else
+
 //This minor addition to Thrust allows us to use Thrust tags for
 //malloc and free. In a future version of Thrust where some similar
 //interface is provided, this file can be deleted.
-
-#pragma once
 
 #include <thrust/detail/malloc_and_free_adl_helper.h>
 #include <thrust/system/detail/generic/select_system.h>
@@ -38,7 +65,9 @@ template<typename Tag>
 void tag_free(Tag, void* p) {
     using thrust::system::detail::generic::select_system;
     using thrust::system::detail::generic::free;
-    return free(select_system(Tag()), p);
+    free(select_system(Tag()), p);
 }
 }
 }
+
+#endif

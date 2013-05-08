@@ -15,6 +15,9 @@
  */
 
 #pragma once
+#include <thrust/version.h>
+
+#if THRUST_VERSION < 106000
 
 #include <thrust/detail/config.h>
 #include <thrust/detail/type_traits.h>
@@ -138,3 +141,4 @@ template<typename Tag, typename BaseIterator, typename OtherTag>
 
 } // end thrust
 
+#endif
