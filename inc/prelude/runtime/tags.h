@@ -40,7 +40,8 @@
 //Functionally, if a program compiled by nvcc were
 //to attempt to use tbb, it would silently fall back
 //to the sequential thrust backend.
-#if THRUST_VERSION < 107000
+#include <thrust/version.h>
+#if THRUST_VERSION < 100700
 #include <thrust/system/tbb/detail/tag.h>
 #else
 #include <thrust/system/tbb/detail/execution_policy.h>
