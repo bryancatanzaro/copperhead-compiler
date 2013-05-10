@@ -58,6 +58,8 @@
 
 namespace copperhead {
 
+#if THRUST_VERSION >= 100700
+    
 struct cpp_tag : thrust::system::cpp::detail::execution_policy<cpp_tag>{};
 
 #ifdef OMP_SUPPORT
@@ -72,7 +74,23 @@ struct tbb_tag : thrust::system::tbb::detail::execution_policy<tbb_tag>{};
 struct cuda_tag : thrust::system::cuda::detail::execution_policy<cuda_tag>{};
 #endif
 
+#else
 
+struct cpp_tag : thrust::system::cpp::detail::tag{};
+
+#ifdef OMP_SUPPORT
+struct omp_tag : thrust::system::omp::detail::tag{};
+#endif
+
+#ifdef TBB_SUPPORT
+struct tbb_tag : thrust::system::tbb::detail::tag{};
+#endif
+
+#ifdef CUDA_SUPPORT
+struct cuda_tag : thrust::system::cuda::detail::tag{};
+#endif
+
+#endif
 
 typedef boost::variant<cpp_tag
 #ifdef OMP_SUPPORT
